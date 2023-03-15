@@ -34,11 +34,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             let mut li = SpectrumRGB::same(0.0);
             for _ in 0..spp {
                 let ray = camera.sample_ray_differentials(
-                    &CameraSample {
-                        xy: Default::default(),
-                        lens: Default::default(),
-                        time: 0.0,
-                    }, ndc,
+                    &CameraSample { xy: sampler.next_2d(), lens: Vector2::zeros(), time: 0.0 }, ndc,
                 );
                 li += integrator.li(&ray, &scene, sampler.clone());
             }
