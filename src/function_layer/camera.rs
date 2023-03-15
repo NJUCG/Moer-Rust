@@ -1,10 +1,9 @@
+use std::cell::RefCell;
 use std::f32::consts::PI;
 use std::rc::Rc;
-use std::sync::Arc;
-use image::imageops::tile;
 use nalgebra::{Matrix4, Point3, Vector2, Vector3};
 use serde_json::Value;
-use crate::core_layer::transform::{Transform, Transformable};
+use crate::core_layer::transform::{Transform};
 use crate::function_layer::film::Film;
 use crate::function_layer::ray::{Ray, RayDifferential};
 
@@ -13,9 +12,10 @@ type V2f = Vector2<f32>;
 pub trait CameraT {
     fn sample_ray(&self, sample: &CameraSample, ndc: V2f) -> Ray;
     fn sample_ray_differentials(&self, sample: &CameraSample, ndc: V2f) -> Ray;
+    fn film(&self) -> Option<Rc<RefCell<Film>>>;
 }
 
-struct CameraSample {
+pub struct CameraSample {
     pub xy: V2f,
     pub lens: V2f,
     pub time: f32,
@@ -26,7 +26,7 @@ pub struct Camera {
     pub t_max: f32,
     pub time_start: f32,
     pub time_end: f32,
-    pub film: Option<Rc<Film>>,
+    pub film: Option<Rc<RefCell<Film>>>,
 
     pub transform: Transform,
 }
@@ -37,7 +37,7 @@ impl Camera {
         let t_max = json["tFar"].as_f64().unwrap_or(1e10) as f32;
         let time_start = json["timeStart"].as_f64().unwrap_or(0.0) as f32;
         let time_end = json["timeEnd"].as_f64().unwrap_or(0.0) as f32;
-        let film = Some(Rc::new(Film::from_json(&json["film"])));
+        let film = Some(Rc::new(RefCell::new(Film::from_json(&json["film"]))));
         let transform = Transform::identity();
         Self {
             t_min,
@@ -64,8 +64,8 @@ impl PerspectiveCamera {
         let up = fetch_point(&json["transform"], "up");
         let up = Vector3::from_data(up.coords.data);
         let vertical_fov = json["verticalFov"].as_f64().unwrap() as f32 / 180.0 * PI;
-        let aspect_ratio = c.film.as_ref().unwrap().size[0] as f32 /
-            c.film.as_ref().unwrap().size[1] as f32;
+        let aspect_ratio = c.film.as_ref().unwrap().borrow().size[0] as f32 /
+            c.film.as_ref().unwrap().borrow().size[1] as f32;
         let forward = (look_at - position).normalize();
         let right = (forward.cross(&up)).normalize();
         let up = (right.cross(&forward)).normalize();
@@ -108,9 +108,6 @@ impl PinholeCamera {
         Self { c: PerspectiveCamera::from_json(json) }
     }
 
-    pub fn film(&self) -> &Option<Rc<Film>> {
-        &self.c.c.film
-    }
     pub fn transform(&self) -> &Transform {
         &self.c.c.transform
     }
@@ -118,7 +115,8 @@ impl PinholeCamera {
 
 impl CameraT for PinholeCamera {
     fn sample_ray(&self, sample: &CameraSample, ndc: V2f) -> Ray {
-        let film = self.film().as_ref().unwrap();
+        let binding = self.film().unwrap();
+        let film = binding.borrow();
         let x = (ndc[0] - 0.5) * film.size[0] as f32 + sample.xy[0];
         let y = (0.5 - ndc[1]) * film.size[1] as f32 + sample.xy[1];
         let tan_half_fov = (self.c.vertical_fov * 0.5).tan();
@@ -135,7 +133,8 @@ impl CameraT for PinholeCamera {
     }
 
     fn sample_ray_differentials(&self, sample: &CameraSample, ndc: V2f) -> Ray {
-        let film = self.film().as_ref().unwrap();
+        let binding = self.film().unwrap();
+        let film = binding.borrow();
         let x = (ndc[0] - 0.5) * film.size[0] as f32 + sample.xy[0];
         let y = (0.5 - ndc[1]) * film.size[1] as f32 + sample.xy[1];
         let tan_half_fov = (self.c.vertical_fov * 0.5).tan();
@@ -157,6 +156,13 @@ impl CameraT for PinholeCamera {
             direction_y,
         });
         ray
+    }
+
+    fn film(&self) -> Option<Rc<RefCell<Film>>> {
+        match &self.c.c.film {
+            None => None,
+            Some(f) => Some(f.clone())
+        }
     }
 }
 

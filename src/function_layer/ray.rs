@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 
-use std::ops::Add;
 use nalgebra::{Point3, Vector3};
 
 type V3f = Vector3<f32>;
@@ -46,13 +45,10 @@ impl Ray {
     pub fn at(&self, t: f32) -> Point3<f32> {
         let delta = t * self.direction;
         let o = self.origin;
-        Point3::from([o[0] + delta[0], o[1] + delta[1], o[2] + delta[2]])
+        o + delta
     }
 
     pub fn change_dir(&mut self, dir: V3f) {
-        // self.direction_inv.x = 1.0 / dir.x;
-        // self.direction_inv.y = 1.0 / dir.y;
-        // self.direction_inv.z = 1.0 / dir.z;
         self.direction = dir;
     }
 }

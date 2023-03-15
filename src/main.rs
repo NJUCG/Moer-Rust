@@ -5,10 +5,14 @@ use std::env::{args, current_dir, set_current_dir};
 use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
-use std::marker::PhantomData;
-use std::rc::Rc;
+use nalgebra::Vector2;
 use serde_json::Value;
-use crate::function_layer::camera::{construct_camera, PinholeCamera};
+use function_layer::integrator::integrator::construct_integrator;
+use function_layer::scene::Scene;
+use function_layer::sampler::sampler::construct_sampler;
+use function_layer::camera::{CameraT, CameraSample, construct_camera};
+
+use core_layer::colorspace::SpectrumRGB;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let scene_dir = args().nth(1).expect("No input scene!");
@@ -17,8 +21,30 @@ fn main() -> Result<(), Box<dyn Error>> {
     let scene_path = "scene.json";
     let scene = BufReader::new(File::open(scene_path).unwrap());
     let json: Value = serde_json::from_reader(scene)?;
-    let a = &json["camera"]["tg"];
     let camera = construct_camera(&json["camera"]);
-
+    let scene = Scene::from_json(&json["scene"]);
+    let integrator = construct_integrator(&json["integrator"]);
+    let sampler = construct_sampler(&json["sampler"]);
+    let spp = sampler.xsp() * sampler.ysp();
+    let film = camera.film().unwrap();
+    let [width, height] = film.borrow().size;
+    for y in 0..height {
+        for x in 0..width {
+            let ndc = Vector2::new(x as f32 / width as f32, y as f32 / height as f32);
+            let mut li = SpectrumRGB::same(0.0);
+            for _ in 0..spp {
+                let ray = camera.sample_ray_differentials(
+                    &CameraSample {
+                        xy: Default::default(),
+                        lens: Default::default(),
+                        time: 0.0,
+                    }, ndc,
+                );
+                li += integrator.li(&ray, &scene, sampler.clone());
+            }
+            film.borrow_mut().deposit(Vector2::new(x, y), &(li / spp as f32));
+        }
+    }
+    film.borrow().save_hdr(json["output"]["filename"].as_str().unwrap());
     Ok(())
 }
