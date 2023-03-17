@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use std::ops::{AddAssign, Div};
+use std::ops::{AddAssign, Div, Mul};
 use nalgebra::Vector3;
 
 #[derive(Copy, Clone, PartialEq)]
@@ -10,7 +10,7 @@ pub struct SpectrumRGB {
 
 impl AddAssign<SpectrumRGB> for SpectrumRGB {
     fn add_assign(&mut self, rhs: SpectrumRGB) {
-        todo!()
+        self.rgb += rhs.rgb;
     }
 }
 
@@ -28,6 +28,13 @@ impl Default for SpectrumRGB {
     }
 }
 
+impl Mul<f32> for SpectrumRGB {
+    type Output = SpectrumRGB;
+
+    fn mul(self, rhs: f32) -> Self::Output {
+        SpectrumRGB::from_rgb(self.rgb * rhs)
+    }
+}
 impl SpectrumRGB {
     pub fn same(f: f32) -> Self {
         Self { rgb: Vector3::from([f; 3]) }
@@ -39,6 +46,10 @@ impl SpectrumRGB {
 
     pub fn from_rgb(rgb: Vector3<f32>) -> Self {
         Self { rgb }
+    }
+
+    pub fn to_slice(&self) -> [f32; 3] {
+        self.rgb.as_ref().clone()
     }
 }
 /*

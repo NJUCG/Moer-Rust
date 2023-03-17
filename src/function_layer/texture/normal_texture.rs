@@ -1,9 +1,8 @@
 use std::rc::Rc;
-use image::{DynamicImage, GenericImageView, Rgb32FImage};
 use nalgebra::{clamp, Vector2, Vector3};
 use serde_json::Value;
+use crate::function_layer::Image;
 use crate::function_layer::shape::intersection::Intersection;
-use super::Image;
 use super::texture::{Texture, TextureCoord, TextureMapping, UVMapping};
 
 pub struct NormalTexture {

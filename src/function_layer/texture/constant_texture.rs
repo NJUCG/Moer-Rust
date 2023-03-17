@@ -1,5 +1,4 @@
 use std::rc::Rc;
-use std::thread::sleep;
 use nalgebra::Vector2;
 use crate::function_layer::shape::intersection::Intersection;
 use crate::function_layer::texture::texture::{TextureCoord, TextureMapping};
