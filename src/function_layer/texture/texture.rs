@@ -14,7 +14,7 @@ pub trait TextureMapping {
     fn map(&self, intersection: &Intersection) -> TextureCoord;
 }
 
-struct UVMapping;
+pub struct UVMapping;
 
 impl TextureMapping for UVMapping {
     fn map(&self, intersection: &Intersection) -> TextureCoord {
@@ -27,7 +27,7 @@ impl TextureMapping for UVMapping {
 }
 
 pub trait Texture<TReturn> {
-    fn size(&self) -> Vector2<i64>;
+    fn size(&self) -> Vector2<usize>;
     fn mapping(&self) -> Rc<dyn TextureMapping>;
     fn evaluate(&self, intersection: &Intersection) -> TReturn;
     fn evaluate_coord(&self, tex_coord: &TextureCoord) -> TReturn;
