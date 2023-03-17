@@ -20,7 +20,7 @@ impl MipMap {
         let n_levels = 1 + size.0.max(size.1).ilog2();
         let mut pyramid = Vec::with_capacity(n_levels as usize);
         pyramid.push(origin.clone());
-        for i in 1..n_levels {
+        for _ in 1..n_levels {
             let previous = pyramid.last().unwrap();
             let p_size = previous.dimensions();
             let current: Image = image::imageops::resize(previous.as_ref(),
