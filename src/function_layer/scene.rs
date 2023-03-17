@@ -32,7 +32,7 @@ impl Scene {
         let lights = json["lights"].as_array().unwrap().to_vec();
         let mut light_v = vec![];
         for light in lights {
-            let mut light = construct_light(&light);
+            let light = construct_light(&light);
             if light.borrow().light_type() == LightType::EnvironmentLight {
                 let light = EnvironmentLight::copy_constr(light.borrow().as_any().downcast_ref::<EnvironmentLight>().unwrap());
                 infinite_lights = Some(Rc::new(light));

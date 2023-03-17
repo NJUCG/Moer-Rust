@@ -25,8 +25,8 @@ impl Film {
         self.image.as_ref().unwrap().borrow_mut().put_pixel(xy.x as u32, xy.y as u32, Rgb(spectrum.to_slice()));
     }
 
-    pub fn save_hdr(&self, filename: &str) {
+    pub fn save(&self, filename: &str, fmt: ImageFormat) {
         self.image.as_ref().unwrap().borrow().
-            save_with_format(filename, ImageFormat::Hdr).expect("saving error");
+            save_with_format(filename, fmt).expect("saving error");
     }
 }

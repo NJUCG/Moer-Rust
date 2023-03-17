@@ -5,6 +5,7 @@ use std::env::{args, current_dir, set_current_dir};
 use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
+use image::ImageFormat;
 use nalgebra::Vector2;
 use serde_json::Value;
 use function_layer::integrator::integrator::construct_integrator;
@@ -41,6 +42,6 @@ fn main() -> Result<(), Box<dyn Error>> {
             film.borrow_mut().deposit(Vector2::new(x, y), &(li / spp as f32));
         }
     }
-    film.borrow().save_hdr(json["output"]["filename"].as_str().unwrap());
+    film.borrow().save(json["output"]["filename"].as_str().unwrap(), ImageFormat::Hdr);
     Ok(())
 }
