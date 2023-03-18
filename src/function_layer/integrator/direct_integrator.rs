@@ -5,7 +5,7 @@ use crate::function_layer::light::light::{InfiniteLight, Light};
 use crate::function_layer::ray::Ray;
 use crate::function_layer::sampler::sampler::Sampler;
 use crate::function_layer::scene::Scene;
-use crate::function_layer::shape::intersection::{compute_ray_differentials, Intersection};
+use crate::function_layer::shape::intersection::compute_ray_differentials;
 
 pub struct DirectIntegratorSampleLight;
 

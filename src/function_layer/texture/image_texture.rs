@@ -3,7 +3,7 @@ use nalgebra::Vector2;
 use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::shape::intersection::Intersection;
-use crate::function_layer::texture::texture::{Texture, TextureCoord, UVMapping};
+use super::texture::{Texture, TextureCoord, UVMapping};
 use super::mipmap::MipMap;
 use super::texture::TextureMapping;
 
@@ -16,7 +16,8 @@ pub struct ImageTexture {
 impl ImageTexture {
     pub fn from_json(json: &Value) -> Self {
         let file_path = json["file"].as_str().unwrap();
-        let img = image::open(file_path).unwrap().to_rgb32f();
+        let img = image::io::Reader::open(file_path).expect("Open image error!")
+            .decode().expect("Decode error!").to_rgb32f();
         let img = Rc::new(img);
         let size = img.dimensions();
         let size = Vector2::new(size.0 as usize, size.1 as usize);

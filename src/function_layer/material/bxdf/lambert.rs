@@ -1,8 +1,8 @@
 use nalgebra::{Vector2, Vector3};
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::core_layer::constants::INV_PI;
-use crate::function_layer::material::bxdf::bsdf::{BSDF, BSDFSampleResult};
-use crate::function_layer::material::bxdf::warp::{square_to_cosine_hemisphere, square_to_cosine_hemisphere_pdf};
+use super::bsdf::{BSDF, BSDFSampleResult};
+use super::warp::{square_to_cosine_hemisphere, square_to_cosine_hemisphere_pdf};
 
 type V3f = Vector3<f32>;
 
@@ -11,6 +11,12 @@ pub struct LambertReflection {
     pub normal: V3f,
     pub tangent: V3f,
     pub bitangent: V3f,
+}
+
+impl LambertReflection {
+    pub fn new(albedo: SpectrumRGB, normal: V3f, tangent: V3f, bitangent: V3f) -> Self {
+        Self { albedo, normal, tangent, bitangent }
+    }
 }
 
 impl BSDF for LambertReflection {

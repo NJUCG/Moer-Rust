@@ -1,6 +1,6 @@
 use nalgebra::{Vector2, Vector3};
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::material::bxdf::bsdf::BSDFSampleResult;
+use super::bsdf::BSDFSampleResult;
 use super::bsdf::BSDF;
 
 type V3f = Vector3<f32>;

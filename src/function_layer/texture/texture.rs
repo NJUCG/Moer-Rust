@@ -1,6 +1,9 @@
 use std::rc::Rc;
 use nalgebra::Vector2;
+use serde_json::Value;
+use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::shape::intersection::Intersection;
+use super::image_texture::ImageTexture;
 
 
 #[derive(Default)]
@@ -31,4 +34,11 @@ pub trait Texture<TReturn> {
     fn mapping(&self) -> Rc<dyn TextureMapping>;
     fn evaluate(&self, intersection: &Intersection) -> TReturn;
     fn evaluate_coord(&self, tex_coord: &TextureCoord) -> TReturn;
+}
+
+pub fn construct_texture<TReturn>(json: &Value) -> Rc<dyn Texture<SpectrumRGB>> {
+    match json["type"].as_str().expect("No spectrum type given!") {
+        "imageTex" => Rc::new(ImageTexture::from_json(json)),
+        _ => panic!("Invalid spectrum type!")
+    }
 }
