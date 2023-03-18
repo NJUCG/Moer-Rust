@@ -35,6 +35,14 @@ impl Mul<f32> for SpectrumRGB {
         SpectrumRGB::from_rgb(self.rgb * rhs)
     }
 }
+impl Mul<SpectrumRGB> for SpectrumRGB {
+    type Output = SpectrumRGB;
+
+    fn mul(self, rhs: SpectrumRGB) -> Self::Output {
+        SpectrumRGB::from_rgb(self.rgb.component_mul(&rhs.rgb))
+    }
+}
+
 impl SpectrumRGB {
     pub fn same(f: f32) -> Self {
         Self { rgb: Vector3::from([f; 3]) }

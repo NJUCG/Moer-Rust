@@ -40,7 +40,7 @@ impl Scene {
             }
             if light.borrow().light_type() == LightType::AreaLight {
                 let mut l = light.borrow_mut();
-                let mut al = l.as_any_mut().downcast_mut::<AreaLight>().unwrap();
+                let al = l.as_any_mut().downcast_mut::<AreaLight>().unwrap();
                 let mut shape = al.shape.as_mut().unwrap().borrow_mut();
                 shape.set_light(light.clone());
                 drop(shape);

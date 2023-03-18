@@ -8,7 +8,8 @@ use crate::function_layer::material::Material;
 
 pub trait Shape: Transformable {
     fn set_light(&mut self, l: Rc<RefCell<dyn Light>>);
-    fn material(&mut self) -> Rc<dyn Material>;
+    fn get_light(&self) -> Option<Rc< RefCell<dyn Light>>>;
+    fn material(&self) -> Rc<dyn Material>;
     fn get_bounds(&self) -> Bounds3;
     fn geometry_id(&self) -> i64;
 }

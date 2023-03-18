@@ -78,7 +78,7 @@ impl Light for EnvironmentLight {
 }
 
 impl InfiniteLight for EnvironmentLight {
-    fn evaluate_emission(&self, ray: &Ray) -> SpectrumRGB {
+    fn evaluate_emission_ray(&self, ray: &Ray) -> SpectrumRGB {
         let uv = direction2uv(ray.direction);
         self.environment_map.evaluate_coord(&TextureCoord {
             coord: uv,

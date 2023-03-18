@@ -37,7 +37,7 @@ pub struct LightSampleResult {
 }
 
 pub trait InfiniteLight: Light {
-    fn evaluate_emission(&self, ray: &Ray) -> SpectrumRGB;
+    fn evaluate_emission_ray(&self, ray: &Ray) -> SpectrumRGB;
 }
 
 pub fn construct_light(json: &Value) -> Rc<RefCell<dyn Light>> {
