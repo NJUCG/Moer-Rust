@@ -2,7 +2,7 @@
 
 use std::cell::RefCell;
 use std::rc::Rc;
-use nalgebra::{Matrix4, Vector3};
+use nalgebra::{Matrix4, Vector2, Vector3};
 use serde_json::Value;
 use crate::core_layer::transform::{Transform, Transformable};
 use crate::function_layer::{Bounds3, Light, Material, Ray};
@@ -20,6 +20,7 @@ pub trait Shape: Transformable {
     fn set_geometry_id(&mut self, id: u64);
     fn ray_intersect_shape(&self, ray: &Ray) -> (bool, [f32; 4]);
     fn fill_intersection(&self, distance: f32, prim_id: u64, u: f32, v: f32, intersection: &mut Intersection);
+    fn uniform_sample_on_surface(&self, sample: Vector2<f32>) -> (Intersection, f32);
 }
 
 #[derive(Clone)]

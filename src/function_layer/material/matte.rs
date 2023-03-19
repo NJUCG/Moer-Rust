@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 
-use std::process::exit;
 use std::rc::Rc;
 use nalgebra::Vector3;
 use serde_json::Value;
@@ -43,8 +42,7 @@ impl MatteMaterial {
             let s = SpectrumRGB::from_rgb(Vector3::new(arr[0], arr[1], arr[2]));
             Rc::new(ConstantTexture::new(&s))
         } else {
-            eprintln!("Error in albedo format!");
-            exit(1);
+            panic!("Error in albedo format!");
         };
         Self {
             normal_map,

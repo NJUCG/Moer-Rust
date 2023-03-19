@@ -8,7 +8,7 @@ use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
 use image::ImageFormat;
-use nalgebra::{Vector2, Vector3};
+use nalgebra::Vector2;
 use serde_json::Value;
 use function_layer::{Camera, Scene, construct_integrator, construct_sampler, construct_camera};
 use function_layer::camera::CameraSample;

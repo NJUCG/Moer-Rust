@@ -1,10 +1,11 @@
 use std::any::Any;
 use std::cell::RefCell;
 use std::rc::Rc;
-use nalgebra::{Vector2, Vector3};
+use nalgebra::Vector2;
 use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{Intersection, Ray};
+use crate::function_layer::{Intersection, Ray, V3f};
+use super::{area_light::AreaLight, environment_light::EnvironmentLight, spot_light::SpotLight};
 
 pub trait Light {
     fn evaluate_emission(&self, intersection: &Intersection, wo: &V3f) -> SpectrumRGB;
@@ -20,10 +21,9 @@ impl PartialEq for dyn Light + '_ {
         self.do_equal(other)
     }
 }
-#[derive(Eq, PartialEq)]
-pub enum LightType { SpotLight, AreaLight, EnvironmentLight }
 
-type V3f = Vector3<f32>;
+#[derive(Copy, Clone, PartialEq)]
+pub enum LightType { SpotLight, AreaLight, EnvironmentLight }
 
 pub struct LightSampleResult {
     pub energy: SpectrumRGB,
@@ -40,11 +40,10 @@ pub trait InfiniteLight: Light {
 }
 
 pub fn construct_light(json: &Value) -> Rc<RefCell<dyn Light>> {
-    match json["type"].as_str().unwrap() {
-        "environmentLight" => {}
-        "spotLight" => {}
-        "areaLight" => {}
-        _ => {}
+    match json["type"].as_str().expect("No light type given") {
+        "environmentLight" => Rc::new(RefCell::new(EnvironmentLight::from_json(json))),
+        "spotLight" => Rc::new(RefCell::new(SpotLight::from_json(json))),
+        "areaLight" => Rc::new(RefCell::new(AreaLight::from_json(json))),
+        _ => panic!("Invalid light type")
     }
-    todo!()
 }

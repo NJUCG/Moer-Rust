@@ -1,6 +1,5 @@
 use std::cell::RefCell;
 // use std::collections::HashMap;
-use std::process::exit;
 use std::rc::Rc;
 use nalgebra::{Point3, Vector2, Vector3};
 use serde_json::Value;
@@ -36,8 +35,7 @@ impl TriangleMesh {
         let (models, _) = tobj::load_obj(file_path, &config).
             expect("Error in parsing obj file");
         if models.len() != 1 {
-            eprintln!("目前只支持每个.obj文件中包含一个Mesh");
-            exit(1);
+            panic!("目前只支持每个.obj文件中包含一个Mesh");
         }
         let mesh = &models[0].mesh;
         let face_count = mesh.indices.len() / 3;
@@ -147,7 +145,7 @@ impl Shape for Triangle {
 
     fn fill_intersection(&self, distance: f32, prim_id: u64, u: f32, v: f32, intersection: &mut Intersection) {
         intersection.distance = distance;
-        intersection.shape = Rc::new(self.clone());
+        intersection.shape = Some(Rc::new(self.clone()));
         let face_info = &self.mesh.face_buffer[prim_id as usize];
         let w = 1.0 - u - v;
 
@@ -171,5 +169,10 @@ impl Shape for Triangle {
         tangent = intersection.normal.cross(&bitangent).normalize();
         intersection.tangent = tangent;
         intersection.bitangent = bitangent;
+    }
+
+    fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (Intersection, f32) {
+        // TODO finish this
+        (Intersection::default(), 0.0)
     }
 }

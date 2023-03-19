@@ -5,12 +5,10 @@ use std::rc::Rc;
 use serde_json::Value;
 use crate::core_layer::distribution::Distribution;
 use crate::function_layer::acceleration::BVHAccel;
-use crate::function_layer::light::area_light::AreaLight;
-use crate::function_layer::light::environment_light::EnvironmentLight;
-use crate::function_layer::light::light::{construct_light, Light, LightType};
-use crate::function_layer::ray::Ray;
-use crate::function_layer::shape::intersection::Intersection;
-use crate::function_layer::shape::shape::construct_shape;
+use crate::function_layer::light::{light::{construct_light, LightType},
+                                   environment_light::EnvironmentLight,
+                                   area_light::AreaLight};
+use crate::function_layer::{Ray, Light, construct_shape, Intersection};
 use super::acceleration::Acceleration;
 
 pub struct Scene {
@@ -33,22 +31,25 @@ impl Scene {
         let mut light_v = vec![];
         for light in lights {
             let light = construct_light(&light);
-            if light.borrow().light_type() == LightType::EnvironmentLight {
-                let light = EnvironmentLight::copy_constr(light.borrow().as_any().downcast_ref::<EnvironmentLight>().unwrap());
-                infinite_lights = Some(Rc::new(light));
-                continue;
-            }
-            if light.borrow().light_type() == LightType::AreaLight {
-                let mut l = light.borrow_mut();
-                let al = l.as_any_mut().downcast_mut::<AreaLight>().unwrap();
-                let mut shape = al.shape.as_mut().unwrap().borrow_mut();
-                shape.set_light(light.clone());
-                drop(shape);
-                acceleration.attach_shape(al.shape.as_ref().unwrap().clone());
+            match light.borrow().light_type() {
+                LightType::EnvironmentLight => {
+                    let light = EnvironmentLight::copy_constr(light.borrow().as_any().downcast_ref::<EnvironmentLight>().unwrap());
+                    infinite_lights = Some(Rc::new(light));
+                    continue;
+                }
+                LightType::AreaLight => {
+                    let mut l = light.borrow_mut();
+                    let al = l.as_any_mut().downcast_mut::<AreaLight>().unwrap();
+                    let mut shape = al.shape.as_mut().unwrap().borrow_mut();
+                    shape.set_light(light.clone());
+                    drop(shape);
+                    acceleration.attach_shape(al.shape.as_ref().unwrap().clone());
+                }
+                LightType::SpotLight => ()
             }
             light_v.push(light);
         }
-        let light_distribution = Distribution::new(&light_v,
+        let light_distribution = Distribution::new(light_v,
                                                    |_light| 1.0);
         acceleration.build();
         Self {

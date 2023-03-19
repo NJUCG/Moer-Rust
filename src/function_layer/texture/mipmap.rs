@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 
-use std::process::exit;
 use std::rc::Rc;
 use image::imageops::FilterType;
 use nalgebra::{clamp, Vector2, Vector3};
@@ -14,8 +13,7 @@ impl MipMap {
     pub fn new(origin: Rc<Image>) -> Self {
         let size = origin.dimensions();
         if !size.0.is_power_of_two() {
-            eprintln!("目前只支持对长宽为2的次幂的图片做mipmap");
-            exit(1);
+            panic!("目前只支持对长宽为2的次幂的图片做mipmap");
         }
         let n_levels = 1 + size.0.max(size.1).ilog2();
         let mut pyramid = Vec::with_capacity(n_levels as usize);

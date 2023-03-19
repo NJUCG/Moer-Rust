@@ -22,7 +22,8 @@ impl Integrator for DirectIntegratorSampleLight {
         }
         let mut intersection = intersection_opt.unwrap();
         compute_ray_differentials(&mut intersection, ray);
-        if let Some(light) = intersection.shape.get_light() {
+        let shape = intersection.shape.as_ref().unwrap();
+        if let Some(light) = shape.get_light() {
             spectrum += light.borrow().evaluate_emission(&intersection, &(-ray.direction));
         }
         if scene.infinite_lights.is_some() {
@@ -31,7 +32,7 @@ impl Integrator for DirectIntegratorSampleLight {
             shadow_ray.t_max = res.distance;
             let occlude = scene.ray_intersect(&shadow_ray);
             if occlude.is_none() {
-                let material = intersection.shape.material();
+                let material = shape.material();
                 let bsdf = material.compute_bsdf(&intersection);
                 let f = bsdf.f(&-ray.direction, &shadow_ray.direction);
                 let pdf = convert_pdf(&res, &intersection);
@@ -46,7 +47,7 @@ impl Integrator for DirectIntegratorSampleLight {
         shadow_ray.t_max = light_sample_result.distance;
         let occlude = scene.ray_intersect(&shadow_ray);
         if occlude.is_none() {
-            let material = intersection.shape.material();
+            let material = shape.material();
             let bsdf = material.compute_bsdf(&intersection);
             let f = bsdf.f(&-ray.direction, &shadow_ray.direction);
             light_sample_result.pdf *= pdf_light;
@@ -68,10 +69,11 @@ impl Integrator for DirectIntegratorSampleBSDF {
             return scene.infinite_lights.as_ref().unwrap().evaluate_emission_ray(ray);
         }
         let intersection = intersection_opt.unwrap();
-        if let Some(light) = intersection.shape.get_light() {
+        let shape = intersection.shape.as_ref().unwrap();
+        if let Some(light) = shape.get_light() {
             spectrum += light.borrow().evaluate_emission(&intersection, &-ray.direction);
         }
-        let material = intersection.shape.material();
+        let material = shape.material();
         let bsdf = material.compute_bsdf(&intersection);
         let bsdf_sample_result = bsdf.sample(&-ray.direction, &sampler.next_2d());
         let shadow_ray = Ray::new(intersection.position, bsdf_sample_result.wi);
@@ -82,7 +84,7 @@ impl Integrator for DirectIntegratorSampleBSDF {
                 spectrum += bsdf_sample_result.weight * env_s;
             }
             Some(fl) => {
-                let shape = fl.shape.clone();
+                let shape = fl.shape.as_ref().unwrap();
                 if let Some(light) = shape.get_light() {
                     spectrum += bsdf_sample_result.weight *
                         light.borrow().evaluate_emission(&fl, &-shadow_ray.direction);

@@ -7,6 +7,7 @@ use crate::function_layer::shape::shape::Shape;
 
 type V3f = Vector3<f32>;
 
+#[derive(Default)]
 pub struct Intersection {
     pub distance: f32,
     pub position: Point3<f32>,
@@ -14,7 +15,7 @@ pub struct Intersection {
     pub tangent: V3f,
     pub bitangent: V3f,
     pub tex_coord: Vector2<f32>,
-    pub shape: Rc<dyn Shape>,
+    pub shape: Option<Rc<dyn Shape>>,
 
     pub dp_du: V3f,
     pub dp_dv: V3f,

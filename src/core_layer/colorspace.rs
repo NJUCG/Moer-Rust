@@ -2,10 +2,15 @@
 
 use std::ops::{AddAssign, Div, Mul};
 use nalgebra::Vector3;
+use crate::function_layer::V3f;
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct SpectrumRGB {
-    rgb: Vector3<f32>,
+    rgb: V3f,
+}
+
+impl SpectrumRGB {
+    pub fn rgb(&self) -> V3f { self.rgb }
 }
 
 impl AddAssign<SpectrumRGB> for SpectrumRGB {
@@ -35,6 +40,7 @@ impl Mul<f32> for SpectrumRGB {
         SpectrumRGB::from_rgb(self.rgb * rhs)
     }
 }
+
 impl Mul<SpectrumRGB> for SpectrumRGB {
     type Output = SpectrumRGB;
 
@@ -52,7 +58,7 @@ impl SpectrumRGB {
         Self { rgb: Vector3::new(r, g, b) }
     }
 
-    pub fn from_rgb(rgb: Vector3<f32>) -> Self {
+    pub fn from_rgb(rgb: V3f) -> Self {
         Self { rgb }
     }
 
