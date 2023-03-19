@@ -1,9 +1,9 @@
 #![allow(dead_code)]
 
-use nalgebra::{Matrix4, Point3, Vector3, Vector4};
+use nalgebra::{Matrix4, Point3, Vector4};
+use crate::function_layer::V3f;
 
 type M4f = Matrix4<f32>;
-type V3f = Vector3<f32>;
 
 #[derive(Clone)]
 pub struct Transform {

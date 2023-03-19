@@ -5,10 +5,8 @@ use std::rc::Rc;
 use nalgebra::{Matrix4, Vector2, Vector3};
 use serde_json::Value;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Bounds3, Light, Material, Ray};
-use crate::function_layer::material::material::construct_material;
+use crate::function_layer::{Bounds3, Light, Material, Ray, construct_material, Intersection};
 use crate::function_layer::material::matte::MatteMaterial;
-use super::intersection::Intersection;
 use super::triangle::Triangle;
 
 pub trait Shape: Transformable {

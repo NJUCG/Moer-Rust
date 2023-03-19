@@ -1,10 +1,9 @@
-use nalgebra::{Vector2, Vector3};
-use crate::core_layer::colorspace::SpectrumRGB;
-use crate::core_layer::constants::INV_PI;
+use nalgebra::Vector2;
+use crate::core_layer::{colorspace::SpectrumRGB, constants::INV_PI};
+use crate::function_layer::V3f;
 use super::bsdf::{BSDF, BSDFSampleResult};
 use super::warp::{square_to_cosine_hemisphere, square_to_cosine_hemisphere_pdf};
 
-type V3f = Vector3<f32>;
 
 pub struct LambertReflection {
     albedo: SpectrumRGB,

@@ -1,9 +1,7 @@
 #![allow(dead_code)]
 use std::mem::swap;
-use nalgebra::Vector3;
+use crate::function_layer::V3f;
 use super::ray::Ray;
-
-type V3f = Vector3<f32>;
 
 
 #[derive(Clone, Debug)]

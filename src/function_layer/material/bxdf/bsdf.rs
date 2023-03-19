@@ -1,8 +1,6 @@
-use nalgebra::{Vector2, Vector3};
+use nalgebra::Vector2;
 use crate::core_layer::colorspace::SpectrumRGB;
-
-
-type V3f = Vector3<f32>;
+use crate::function_layer::V3f;
 
 pub struct BSDFSampleResult {
     pub weight: SpectrumRGB,

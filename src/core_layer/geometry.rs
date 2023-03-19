@@ -1,12 +1,10 @@
 #![allow(dead_code)]
 use std::fmt::{Display, Formatter};
 use std::ops::{Add, AddAssign, Index, Sub, SubAssign};
-use nalgebra::Vector3;
-
-type V3f = Vector3<f32>;
+use crate::function_layer::V3f;
 
 struct Point3f {
-    pub xyz: Vector3<f32>,
+    pub xyz: V3f,
 }
 
 impl Display for Point3f {

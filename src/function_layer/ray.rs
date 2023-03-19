@@ -1,15 +1,14 @@
 #![allow(dead_code)]
 
-use nalgebra::{Point3, Vector3};
-
-type V3f = Vector3<f32>;
+use nalgebra::Point3;
+use crate::function_layer::V3f;
 
 #[derive(Debug, Clone)]
 pub struct RayDifferential {
     pub origin_x: Point3<f32>,
     pub origin_y: Point3<f32>,
-    pub direction_x: Vector3<f32>,
-    pub direction_y: Vector3<f32>,
+    pub direction_x: V3f,
+    pub direction_y: V3f,
 }
 
 #[derive(Debug, Clone)]
