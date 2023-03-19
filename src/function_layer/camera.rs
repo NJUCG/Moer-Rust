@@ -1,11 +1,10 @@
 use std::cell::RefCell;
 use std::f32::consts::PI;
 use std::rc::Rc;
-use nalgebra::{Matrix4, Point3, Vector2, Vector3};
+use nalgebra::{Matrix4, Point3, Vector2};
 use serde_json::Value;
-use crate::core_layer::transform::{Transform};
-use crate::function_layer::film::Film;
-use crate::function_layer::ray::{Ray, RayDifferential};
+use crate::core_layer::transform::Transform;
+use crate::function_layer::{V3f, Ray, Film, ray::RayDifferential};
 
 type V2f = Vector2<f32>;
 
@@ -62,7 +61,7 @@ impl PerspectiveCamera {
         let position = fetch_point(&json["transform"], &"position");
         let look_at = fetch_point(&json["transform"], "lookAt");
         let up = fetch_point(&json["transform"], "up");
-        let up = Vector3::from_data(up.coords.data);
+        let up = V3f::from_data(up.coords.data);
         let vertical_fov = json["verticalFov"].as_f64().unwrap() as f32 / 180.0 * PI;
         let aspect_ratio = c.film.as_ref().unwrap().borrow().size[0] as f32 /
             c.film.as_ref().unwrap().borrow().size[1] as f32;
@@ -70,7 +69,7 @@ impl PerspectiveCamera {
         let right = (forward.cross(&up)).normalize();
         let up = (right.cross(&forward)).normalize();
 
-        let translation = Transform::translation(&Vector3::from_data(position.coords.data));
+        let translation = Transform::translation(&V3f::from_data(position.coords.data));
         let mut rotation = Matrix4::identity();
         rotation[(0, 0)] = right[0];
         rotation[(1, 0)] = right[1];
@@ -120,7 +119,7 @@ impl Camera for PinholeCamera {
         let y = (0.5 - ndc[1]) * film.size[1] as f32 + sample.xy[1];
         let tan_half_fov = (self.c.vertical_fov * 0.5).tan();
         let z = film.size[1] as f32 * -0.5 / tan_half_fov;
-        let direction = Vector3::new(x, y, z);
+        let direction = V3f::new(x, y, z);
         let direction = self.transform().to_world_vec(&direction);
         let origin = self.transform().to_world_point(&Point3::origin());
         let mut ray = Ray::new(origin, direction);
@@ -138,9 +137,9 @@ impl Camera for PinholeCamera {
         let y = (0.5 - ndc[1]) * film.size[1] as f32 + sample.xy[1];
         let tan_half_fov = (self.c.vertical_fov * 0.5).tan();
         let z = film.size[1] as f32 * -0.5 / tan_half_fov;
-        let direction = self.transform().to_world_vec(&Vector3::new(x, y, z));
-        let direction_x = self.transform().to_world_vec(&Vector3::new(x + 1.0, y, z));
-        let direction_y = self.transform().to_world_vec(&Vector3::new(x, y + 1.0, z));
+        let direction = self.transform().to_world_vec(&V3f::new(x, y, z));
+        let direction_x = self.transform().to_world_vec(&V3f::new(x + 1.0, y, z));
+        let direction_y = self.transform().to_world_vec(&V3f::new(x, y + 1.0, z));
         let origin = self.transform().to_world_point(&Point3::origin());
 
         let mut ray = Ray::new(origin, direction);

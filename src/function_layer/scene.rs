@@ -5,11 +5,10 @@ use std::rc::Rc;
 use serde_json::Value;
 use crate::core_layer::distribution::Distribution;
 use crate::function_layer::acceleration::BVHAccel;
-use crate::function_layer::light::{light::{construct_light, LightType},
+use crate::function_layer::light::{light::LightType,
                                    environment_light::EnvironmentLight,
                                    area_light::AreaLight};
-use crate::function_layer::{Ray, Light, construct_shape, Intersection};
-use super::acceleration::Acceleration;
+use crate::function_layer::{Ray, Light, Intersection, Acceleration, construct_shape, construct_light};
 
 pub struct Scene {
     pub infinite_lights: Option<Rc<EnvironmentLight>>,

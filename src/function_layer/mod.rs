@@ -18,7 +18,7 @@ pub mod integrator;
 pub mod sampler;
 
 pub use ray::Ray;
-pub use light::Light;
+pub use light::{Light, light::construct_light};
 pub use bounds3::Bounds3;
 pub use shape::{Shape, Intersection, shape::construct_shape};
 pub use texture::{Texture, texture::construct_texture};
@@ -27,3 +27,5 @@ pub use integrator::{Integrator, integrator::construct_integrator};
 pub use sampler::{Sampler, sampler::construct_sampler};
 pub use camera::{Camera, construct_camera};
 pub use scene::Scene;
+pub use acceleration::Acceleration;
+pub use film::Film;
