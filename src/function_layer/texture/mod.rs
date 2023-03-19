@@ -5,4 +5,4 @@ pub mod mipmap;
 pub mod constant_texture;
 mod image_texture;
 
-pub use texture::Texture;
+pub use texture::{Texture, TextureCoord};

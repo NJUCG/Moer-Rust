@@ -3,14 +3,10 @@ use std::f32::consts::PI;
 use std::rc::Rc;
 use nalgebra::{Vector2, Vector3};
 use serde_json::Value;
-use crate::core_layer::colorspace::SpectrumRGB;
-use crate::core_layer::constants::INV_PI;
-use crate::core_layer::distribution::Distribution;
-use crate::function_layer::{construct_texture, V3f};
+use crate::core_layer::{colorspace::SpectrumRGB, constants::INV_PI, distribution::Distribution};
 use super::light::{InfiniteLight, Light, LightSampleResult, LightType};
-use crate::function_layer::ray::Ray;
-use crate::function_layer::shape::intersection::Intersection;
-use crate::function_layer::texture::texture::{Texture, TextureCoord};
+use crate::function_layer::{Intersection, Texture, Ray, construct_texture, V3f};
+use crate::function_layer::texture::TextureCoord;
 
 pub struct EnvironmentLight {
     environment_map: Rc<dyn Texture<SpectrumRGB>>,

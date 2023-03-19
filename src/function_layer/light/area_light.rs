@@ -1,14 +1,11 @@
 use std::any::Any;
 use std::cell::RefCell;
 use std::rc::Rc;
-use nalgebra::{Vector2, Vector3};
+use nalgebra::Vector2;
 use serde_json::Value;
-use crate::core_layer::colorspace::SpectrumRGB;
-use crate::core_layer::constants::EPSILON;
-use crate::function_layer::construct_shape;
-use crate::function_layer::light::light::{Light, LightSampleResult, LightType};
-use crate::function_layer::shape::intersection::Intersection;
-use crate::function_layer::shape::shape::Shape;
+use crate::core_layer::{colorspace::SpectrumRGB, constants::EPSILON};
+use crate::function_layer::{construct_shape, Intersection, Shape, V3f};
+use super::light::{Light, LightSampleResult, LightType};
 
 pub struct AreaLight {
     pub shape: Option<Rc<RefCell<dyn Shape>>>,
@@ -28,7 +25,7 @@ impl AreaLight {
 }
 
 impl Light for AreaLight {
-    fn evaluate_emission(&self, _intersection: &Intersection, _wo: &Vector3<f32>) -> SpectrumRGB {
+    fn evaluate_emission(&self, _intersection: &Intersection, _wo: &V3f) -> SpectrumRGB {
         self.energy
     }
 
