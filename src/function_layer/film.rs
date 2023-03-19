@@ -13,10 +13,8 @@ pub struct Film {
 
 impl Film {
     pub fn from_json(json: &Value) -> Self {
-        let size = json["size"].as_array().unwrap();
-        let x = size[0].as_u64().unwrap();
-        let y = size[1].as_u64().unwrap();
-        let size = [x as usize, y as usize];
+        let size: Vec<usize> = serde_json::from_value(json.clone()).unwrap();
+        let size = [size[0], size[1]];
         let image = Some(Rc::new(RefCell::new(Image::new(size[0] as u32, size[1] as u32))));
         Self { size, image }
     }

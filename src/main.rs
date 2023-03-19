@@ -8,13 +8,10 @@ use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
 use image::ImageFormat;
-use nalgebra::Vector2;
+use nalgebra::{Vector2, Vector3};
 use serde_json::Value;
-use function_layer::integrator::integrator::construct_integrator;
-use function_layer::scene::Scene;
-use function_layer::sampler::sampler::construct_sampler;
-use function_layer::camera::{CameraT, CameraSample, construct_camera};
-
+use function_layer::{Camera, Scene, construct_integrator, construct_sampler, construct_camera};
+use function_layer::camera::CameraSample;
 use core_layer::colorspace::SpectrumRGB;
 
 fn main() -> Result<(), Box<dyn Error>> {

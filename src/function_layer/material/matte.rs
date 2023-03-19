@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::process::exit;
 use std::rc::Rc;
 use nalgebra::Vector3;
@@ -6,11 +8,12 @@ use crate::core_layer::colorspace::SpectrumRGB;
 use super::bxdf::BSDF;
 use super::bxdf::lambert::LambertReflection;
 use crate::function_layer::{
-    shape::intersection::Intersection,
+    Intersection,
+    Texture,
     texture::{
         constant_texture::ConstantTexture,
         normal_texture::NormalTexture,
-        texture::{construct_texture, Texture},
+        texture::construct_texture,
     },
 };
 
@@ -22,6 +25,11 @@ pub struct MatteMaterial {
 }
 
 impl MatteMaterial {
+    pub fn new() -> Self {
+        let albedo = Rc::new(ConstantTexture::new(&SpectrumRGB::same(0.5)));
+        Self { normal_map: None, albedo }
+    }
+
     pub fn from_json(json: &Value) -> Self {
         let normal_map = if json["normalmap"].is_null() {
             None
@@ -31,8 +39,7 @@ impl MatteMaterial {
         let albedo = if json["albedo"].is_object() {
             construct_texture::<SpectrumRGB>(json)
         } else if json["albedo"].is_array() {
-            let arr: Vec<f32> = json["albedo"].as_array().unwrap().iter().
-                map(|e: &Value| e.as_f64().unwrap() as f32).collect();
+            let arr: Vec<f32> = serde_json::from_value(json["albedo"].clone()).unwrap();
             let s = SpectrumRGB::from_rgb(Vector3::new(arr[0], arr[1], arr[2]));
             Rc::new(ConstantTexture::new(&s))
         } else {

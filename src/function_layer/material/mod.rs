@@ -1,5 +1,5 @@
 mod bxdf;
 pub mod material;
-mod matte;
+pub mod matte;
 
 pub use material::Material;

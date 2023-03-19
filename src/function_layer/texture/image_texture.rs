@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::rc::Rc;
 use nalgebra::Vector2;
 use serde_json::Value;

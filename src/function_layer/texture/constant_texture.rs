@@ -1,6 +1,7 @@
+#![allow(dead_code)]
 use std::rc::Rc;
 use nalgebra::Vector2;
-use crate::function_layer::shape::intersection::Intersection;
+use crate::function_layer::Intersection;
 use super::texture::{TextureCoord, TextureMapping, UVMapping};
 use super::Texture;
 

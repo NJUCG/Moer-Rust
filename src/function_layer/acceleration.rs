@@ -1,9 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
-use crate::function_layer::shape::shape::Shape;
-use super::ray::Ray;
-use super::shape::intersection::Intersection;
-use super::bounds3::Bounds3;
+use crate::function_layer::{Shape, Intersection, Ray, Bounds3};
 
 pub trait Acceleration {
     fn ray_intersect(&self, ray: &Ray) -> Option<Intersection>;
@@ -45,6 +42,7 @@ impl Default for SplitMethod {
 #[derive(Default)]
 pub struct BVHAccel {
     pub root: Option<Rc<BVHBuildNode>>,
+    pub shapes: Vec<Rc<RefCell<dyn Shape>>>,
     pub max_prims_in_node: i32,
     pub split_method: SplitMethod,
 }
@@ -59,6 +57,8 @@ impl Acceleration for BVHAccel {
     }
 
     fn attach_shape(&mut self, shape: Rc<RefCell<dyn Shape>>) {
-        todo!()
+        let id = self.shapes.len();
+        shape.borrow_mut().set_geometry_id(id as u64);
+        self.shapes.push(shape);
     }
 }

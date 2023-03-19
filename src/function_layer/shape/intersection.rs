@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+
 use std::rc::Rc;
 use nalgebra::{Point3, Vector2, Vector3};
 use crate::function_layer::ray::Ray;

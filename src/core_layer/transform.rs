@@ -5,6 +5,7 @@ use nalgebra::{Matrix4, Point3, Vector3, Vector4};
 type M4f = Matrix4<f32>;
 type V3f = Vector3<f32>;
 
+#[derive(Clone)]
 pub struct Transform {
     pub translate: M4f,
     pub inv_translate: M4f,
@@ -91,4 +92,6 @@ impl Transform {
     }
 }
 
-pub trait Transformable {}
+pub trait Transformable {
+    fn transform(&self) -> &Transform;
+}

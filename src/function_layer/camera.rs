@@ -9,7 +9,7 @@ use crate::function_layer::ray::{Ray, RayDifferential};
 
 type V2f = Vector2<f32>;
 
-pub trait CameraT {
+pub trait Camera {
     fn sample_ray(&self, sample: &CameraSample, ndc: V2f) -> Ray;
     fn sample_ray_differentials(&self, sample: &CameraSample, ndc: V2f) -> Ray;
     fn film(&self) -> Option<Rc<RefCell<Film>>>;
@@ -21,7 +21,7 @@ pub struct CameraSample {
     pub time: f32,
 }
 
-pub struct Camera {
+pub struct CameraBase {
     pub t_min: f32,
     pub t_max: f32,
     pub time_start: f32,
@@ -31,7 +31,7 @@ pub struct Camera {
     pub transform: Transform,
 }
 
-impl Camera {
+impl CameraBase {
     pub fn from_json(json: &Value) -> Self {
         let t_min = json["tNear"].as_f64().unwrap_or(1e-4) as f32;
         let t_max = json["tFar"].as_f64().unwrap_or(1e10) as f32;
@@ -51,14 +51,14 @@ impl Camera {
 }
 
 pub struct PerspectiveCamera {
-    pub c: Camera,
+    pub c: CameraBase,
     pub vertical_fov: f32,
     pub aspect_ratio: f32,
 }
 
 impl PerspectiveCamera {
     pub fn from_json(json: &Value) -> Self {
-        let mut c = Camera::from_json(json);
+        let mut c = CameraBase::from_json(json);
         let position = fetch_point(&json["transform"], &"position");
         let look_at = fetch_point(&json["transform"], "lookAt");
         let up = fetch_point(&json["transform"], "up");
@@ -93,8 +93,7 @@ impl PerspectiveCamera {
 }
 
 fn fetch_point(json: &Value, field: &str) -> Point3<f32> {
-    let arr: Vec<_> = json[field].as_array().unwrap()
-        .iter().map(|e| e.as_f64().unwrap() as f32).collect();
+    let arr: Vec<f32> = serde_json::from_value(json[field].clone()).unwrap();
     let res = Point3::from_slice(&arr);
     res
 }
@@ -113,7 +112,7 @@ impl PinholeCamera {
     }
 }
 
-impl CameraT for PinholeCamera {
+impl Camera for PinholeCamera {
     fn sample_ray(&self, sample: &CameraSample, ndc: V2f) -> Ray {
         let binding = self.film().unwrap();
         let film = binding.borrow();
@@ -166,7 +165,7 @@ impl CameraT for PinholeCamera {
     }
 }
 
-pub fn construct_camera(json: &Value) -> impl CameraT {
+pub fn construct_camera(json: &Value) -> impl Camera {
     if json["type"].as_str().expect("no camera type field") == "pinhole" {
         PinholeCamera::from_json(json)
     } else {

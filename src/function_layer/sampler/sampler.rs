@@ -10,5 +10,7 @@ pub trait Sampler {
 }
 
 pub fn construct_sampler(json: &Value) -> Rc<dyn Sampler> {
-    todo!()
+    match json["type"].as_str().expect("No sampler type give!") {
+        _ => panic!("Invalid sampler type"),
+    }
 }

@@ -4,8 +4,7 @@ use std::rc::Rc;
 use nalgebra::{Vector2, Vector3};
 use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::ray::Ray;
-use crate::function_layer::shape::intersection::Intersection;
+use crate::function_layer::{Intersection, Ray};
 
 pub trait Light {
     fn evaluate_emission(&self, intersection: &Intersection, wo: &V3f) -> SpectrumRGB;
