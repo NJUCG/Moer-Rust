@@ -1,12 +1,12 @@
 #![allow(dead_code)]
+
 use std::rc::Rc;
 use serde_json::Value;
 use crate::core_layer::distribution::Distribution;
 use crate::function_layer::light::{light::LightType,
                                    environment_light::EnvironmentLight,
                                    area_light::AreaLight};
-use crate::function_layer::{Ray, Light, Intersection, Acceleration, construct_shape, construct_light, RR};
-use crate::function_layer::acceleration::acceleration::construct_acceleration;
+use crate::function_layer::{Ray, Light, Intersection, Acceleration, construct_shape, construct_light, RR, create_acceleration, set_acc_type};
 
 pub struct Scene {
     pub infinite_lights: Option<Rc<EnvironmentLight>>,
@@ -16,7 +16,8 @@ pub struct Scene {
 
 impl Scene {
     pub fn from_json(json: &Value) -> Self {
-        let mut acceleration = construct_acceleration(json);
+        set_acc_type(json["acceleration"].as_str().unwrap_or("bvh"));
+        let acceleration = create_acceleration();
         let shapes = json["shapes"].as_array().unwrap();
         for shape in shapes {
             let shape = construct_shape(shape);

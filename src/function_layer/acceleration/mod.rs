@@ -1,4 +1,4 @@
 pub mod acceleration;
 mod bvh;
 
-pub use acceleration::Acceleration;
+pub use acceleration::{Acceleration};

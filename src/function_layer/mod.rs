@@ -30,5 +30,5 @@ pub use integrator::{Integrator, integrator::construct_integrator};
 pub use sampler::{Sampler, sampler::construct_sampler};
 pub use camera::{Camera, construct_camera};
 pub use scene::Scene;
-pub use acceleration::{Acceleration, acceleration::construct_acceleration};
+pub use acceleration::{Acceleration, acceleration::{create_acceleration, set_acc_type}};
 pub use film::Film;

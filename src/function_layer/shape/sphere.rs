@@ -34,5 +34,4 @@ impl Shape for Sphere {
         todo!()
     }
 
-    fn init_internal_acceleration(&mut self) {}
 }

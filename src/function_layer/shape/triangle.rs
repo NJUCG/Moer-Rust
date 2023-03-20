@@ -1,11 +1,11 @@
 #![allow(dead_code)]
 
-// use std::collections::HashMap;
+use std::cell::RefCell;
 use std::rc::Rc;
 use nalgebra::{Point3, Vector2, Vector3};
 use serde_json::Value;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Acceleration, Intersection, Ray};
+use crate::function_layer::{Acceleration, create_acceleration, Intersection, Ray, RR};
 use crate::resource_layer::MeshData;
 use super::shape::{ShapeBase, Shape};
 
@@ -14,7 +14,7 @@ use super::shape::{ShapeBase, Shape};
 pub struct TriangleMesh {
     shape: ShapeBase,
     mesh: Rc<MeshData>,
-    acc: Option<Rc<dyn Acceleration>>,
+    acc: Option<RR<dyn Acceleration>>,
 }
 
 impl TriangleMesh {
@@ -46,7 +46,7 @@ impl Shape for TriangleMesh {
         match &self.acc {
             None => None,
             Some(acc) => {
-                let opt_its = acc.ray_intersect(ray);
+                let opt_its = acc.borrow().ray_intersect(ray);
                 match opt_its {
                     None => None,
                     Some((_, p, u, v)) => Some((p, u, v))
@@ -88,5 +88,70 @@ impl Shape for TriangleMesh {
         (Intersection::default(), 0.0)
     }
 
-    fn init_internal_acceleration(&mut self) {}
+    fn init_internal_acceleration(&mut self) {
+        // 当不使用embree时，TriangleMesh需要实现内部加速结构，调用该方法
+        self.acc = Some(create_acceleration());
+
+        let prim_count = self.mesh.face_count;
+        for prime_id in 0..prim_count {
+            let v_indices: Vec<usize> = (0..3).map(|i: usize|
+                self.mesh.face_buffer[prime_id][i].vertex_index).collect();
+            let triangle = Rc::new(RefCell::new(
+                Triangle::new(prime_id, v_indices[0], v_indices[1], v_indices[2], Some(Rc::new(self.clone())))));
+            self.acc.as_ref().unwrap().borrow_mut().attach_shape(triangle);
+        }
+        self.acc.as_ref().unwrap().borrow_mut().build();
+        self.shape.set_bounds(self.acc.as_ref().unwrap().borrow().bound3());
+    }
+}
+
+struct Triangle {
+    pub prim_id: usize,
+    pub v0idx: usize,
+    pub v1idx: usize,
+    pub v2idx: usize,
+    pub mesh: Option<Rc<TriangleMesh>>,
+    shape: ShapeBase,
+}
+
+impl Triangle {
+    pub fn new(prim_id: usize, v0idx: usize, v1idx: usize, v2idx: usize, mesh: Option<Rc<TriangleMesh>>) -> Self {
+        let shape = mesh.as_ref().unwrap().as_ref().shape.clone();
+        Self {
+            prim_id,
+            v0idx,
+            v1idx,
+            v2idx,
+            mesh,
+            shape,
+        }
+    }
+}
+
+impl Transformable for Triangle {
+    fn transform(&self) -> &Transform {
+        self.shape.transform()
+    }
+}
+
+impl Shape for Triangle {
+    fn shape(&self) -> &ShapeBase {
+        &self.shape
+    }
+
+    fn shape_mut(&mut self) -> &mut ShapeBase {
+        &mut self.shape
+    }
+
+    fn ray_intersect_shape(&self, ray: &Ray) -> Option<(u64, f32, f32)> {
+        todo!()
+    }
+
+    fn fill_intersection(&self, distance: f32, prim_id: u64, u: f32, v: f32, intersection: &mut Intersection) {
+        todo!()
+    }
+
+    fn uniform_sample_on_surface(&self, sample: Vector2<f32>) -> (Intersection, f32) {
+        todo!()
+    }
 }

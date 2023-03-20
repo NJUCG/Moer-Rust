@@ -33,7 +33,7 @@ pub trait Shape: Transformable {
     fn ray_intersect_shape(&self, ray: &Ray) -> Option<(u64, f32, f32)>;
     fn fill_intersection(&self, distance: f32, prim_id: u64, u: f32, v: f32, intersection: &mut Intersection);
     fn uniform_sample_on_surface(&self, sample: Vector2<f32>) -> (Intersection, f32);
-    fn init_internal_acceleration(&mut self);
+    fn init_internal_acceleration(&mut self) {}
 }
 
 #[derive(Clone)]
@@ -54,6 +54,7 @@ fn fetch_v3f(json: &Value, field: &str, dft: Vector3<f32>) -> Vector3<f32> {
 
 impl ShapeBase {
     pub fn bounds(&self) -> Bounds3 { self.bounds3.clone() }
+    pub fn set_bounds(&mut self, b: Bounds3) { self.bounds3 = b;}
     pub fn from_json(json: &Value) -> Self {
         let material: Rc<dyn Material> = match json.get("material") {
             None => Rc::new(MatteMaterial::new()),

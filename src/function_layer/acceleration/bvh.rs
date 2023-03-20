@@ -1,5 +1,7 @@
+#![allow(dead_code)]
+
 use std::rc::Rc;
-use crate::function_layer::{Acceleration, Bounds3, Intersection, Ray, RR, Shape, V3f};
+use crate::function_layer::{Acceleration, Bounds3, Intersection, Ray, Shape, V3f};
 use super::acceleration::{AccelerationBase, AccelerationType};
 
 pub struct BVHBuildNode {
@@ -22,25 +24,11 @@ impl Default for BVHBuildNode {
     }
 }
 
-#[allow(dead_code)]
-#[derive(Clone, Copy, PartialEq)]
-pub enum SplitMethod {
-    Naive,
-    SAH, // SAH is not implemented
-}
-
-impl Default for SplitMethod {
-    fn default() -> Self {
-        SplitMethod::Naive
-    }
-}
+const MAX_PRIMS_IN_NODE: u64 = 64;
 
 #[derive(Default)]
 pub struct BVHAccel {
     pub root: Option<Rc<BVHBuildNode>>,
-    pub shapes: Vec<RR<dyn Shape>>,
-    pub max_prims_in_node: i32,
-    pub split_method: SplitMethod,
     pub acc: AccelerationBase,
 }
 
@@ -54,6 +42,11 @@ impl Acceleration for BVHAccel {
     }
 
     fn ray_intersect(&self, ray: &Ray) -> Option<(u64, u64, f32, f32)> {
+        let root = self.root.clone();
+        if root.is_none() { return None; }
+        let its = BVHAccel::get_intersection(root.unwrap(), ray);
+        let shape = its.shape.as_ref().unwrap().shape();
+        shape.geometry_id;
         todo!()
     }
 
@@ -61,15 +54,11 @@ impl Acceleration for BVHAccel {
         todo!()
     }
 
-    fn attach_shape(&mut self, shape: RR<dyn Shape>) {
-        let id = self.shapes.len();
-        shape.borrow_mut().set_geometry_id(id as u64);
-        self.shapes.push(shape);
-    }
-
     fn atp(&self) -> AccelerationType {
         AccelerationType::BVH
     }
+
+    fn bound3(&self) -> Bounds3 { self.acc.bounds.clone() }
 }
 
 impl BVHAccel {

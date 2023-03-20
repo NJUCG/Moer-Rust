@@ -1,14 +1,18 @@
 #![allow(dead_code)]
 
-use serde_json::Value;
+use std::cell::RefCell;
 use crate::function_layer::{Shape, Intersection, Ray, Bounds3, RR};
+use super::bvh::BVHAccel;
 
+#[derive(Copy, Clone)]
 pub enum AccelerationType {
     Embree,
     Linear,
     Octree,
     BVH,
 }
+
+static mut ACC_TYPE: AccelerationType = AccelerationType::BVH;
 
 pub trait Acceleration {
     fn acceleration(&self) -> &AccelerationBase;
@@ -28,6 +32,7 @@ pub trait Acceleration {
         self.acceleration_mut().shapes.push(shape)
     }
     fn atp(&self) -> AccelerationType;
+    fn bound3(&self) -> Bounds3;
 }
 
 #[derive(Default)]
@@ -36,10 +41,21 @@ pub struct AccelerationBase {
     shapes: Vec<RR<dyn Shape>>,
 }
 
-pub fn construct_acceleration(json: &Value) -> RR<dyn Acceleration> {
-    match json["acceleration"].as_str().unwrap() {
-        "bvh" => {}
-        _ => ()
+pub fn set_acc_type(tp: &str) {
+    unsafe {
+        ACC_TYPE = match tp {
+            "embree" => AccelerationType::Embree,
+            "linear" => AccelerationType::Linear,
+            "octree" => AccelerationType::Octree,
+            "bvh" => AccelerationType::BVH,
+            _ => panic!("Unknown acc type!"),
+        }
     }
-    todo!()
+}
+
+pub fn create_acceleration() -> RR<dyn Acceleration> {
+    match unsafe { ACC_TYPE } {
+        AccelerationType::BVH => { RR::new(RefCell::new(BVHAccel::default())) }
+        _ => panic!("Not implemented yet!")
+    }
 }
