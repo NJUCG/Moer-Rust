@@ -4,14 +4,14 @@ use std::rc::Rc;
 use nalgebra::{Matrix4, Point3, Vector2};
 use serde_json::Value;
 use crate::core_layer::transform::Transform;
-use crate::function_layer::{V3f, Ray, Film, ray::RayDifferential};
+use crate::function_layer::{V3f, Ray, Film, ray::RayDifferential, RR};
 
 type V2f = Vector2<f32>;
 
 pub trait Camera {
     fn sample_ray(&self, sample: &CameraSample, ndc: V2f) -> Ray;
     fn sample_ray_differentials(&self, sample: &CameraSample, ndc: V2f) -> Ray;
-    fn film(&self) -> Option<Rc<RefCell<Film>>>;
+    fn film(&self) -> Option<RR<Film>>;
 }
 
 pub struct CameraSample {
@@ -25,7 +25,7 @@ pub struct CameraBase {
     pub t_max: f32,
     pub time_start: f32,
     pub time_end: f32,
-    pub film: Option<Rc<RefCell<Film>>>,
+    pub film: Option<RR<Film>>,
 
     pub transform: Transform,
 }
@@ -156,7 +156,7 @@ impl Camera for PinholeCamera {
         ray
     }
 
-    fn film(&self) -> Option<Rc<RefCell<Film>>> {
+    fn film(&self) -> Option<RR<Film>> {
         match &self.c.c.film {
             None => None,
             Some(f) => Some(f.clone())

@@ -1,28 +1,26 @@
 #![allow(dead_code)]
-
-use std::cell::RefCell;
 use std::rc::Rc;
 use serde_json::Value;
 use crate::core_layer::distribution::Distribution;
-use crate::function_layer::acceleration::BVHAccel;
 use crate::function_layer::light::{light::LightType,
                                    environment_light::EnvironmentLight,
                                    area_light::AreaLight};
-use crate::function_layer::{Ray, Light, Intersection, Acceleration, construct_shape, construct_light};
+use crate::function_layer::{Ray, Light, Intersection, Acceleration, construct_shape, construct_light, RR};
+use crate::function_layer::acceleration::acceleration::construct_acceleration;
 
 pub struct Scene {
     pub infinite_lights: Option<Rc<EnvironmentLight>>,
-    acceleration: Rc<dyn Acceleration>,
-    light_distribution: Distribution<Rc<RefCell<dyn Light>>>,
+    acceleration: RR<dyn Acceleration>,
+    light_distribution: Distribution<RR<dyn Light>>,
 }
 
 impl Scene {
     pub fn from_json(json: &Value) -> Self {
-        let mut acceleration = BVHAccel::default();
+        let mut acceleration = construct_acceleration(json);
         let shapes = json["shapes"].as_array().unwrap();
         for shape in shapes {
             let shape = construct_shape(shape);
-            acceleration.attach_shape(shape);
+            acceleration.borrow_mut().attach_shape(shape);
         }
         let mut infinite_lights: Option<Rc<EnvironmentLight>> = None;
 
@@ -42,7 +40,7 @@ impl Scene {
                     let mut shape = al.shape.as_mut().unwrap().borrow_mut();
                     shape.set_light(light.clone());
                     drop(shape);
-                    acceleration.attach_shape(al.shape.as_ref().unwrap().clone());
+                    acceleration.borrow_mut().attach_shape(al.shape.as_ref().unwrap().clone());
                 }
                 LightType::SpotLight => ()
             }
@@ -50,19 +48,19 @@ impl Scene {
         }
         let light_distribution = Distribution::new(light_v,
                                                    |_light| 1.0);
-        acceleration.build();
+        acceleration.borrow_mut().build();
         Self {
             infinite_lights,
-            acceleration: Rc::new(acceleration),
+            acceleration,
             light_distribution,
         }
     }
 
     pub fn ray_intersect(&self, ray: &Ray) -> Option<Intersection> {
-        self.acceleration.ray_intersect(ray)
+        self.acceleration.borrow().get_intersect(ray)
     }
 
-    pub fn sample_light(&self, sample: f32, pdf: &mut f32) -> Rc<RefCell<dyn Light>> {
+    pub fn sample_light(&self, sample: f32, pdf: &mut f32) -> RR<dyn Light> {
         self.light_distribution.sample(sample, pdf)
     }
 }

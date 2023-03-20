@@ -5,26 +5,41 @@ use std::rc::Rc;
 use nalgebra::{Matrix4, Vector2, Vector3};
 use serde_json::Value;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Bounds3, Light, Material, Ray, construct_material, Intersection};
+use crate::function_layer::{Bounds3, Light, Material, Ray, construct_material, Intersection, RR};
 use crate::function_layer::material::matte::MatteMaterial;
-use super::triangle::Triangle;
+use super::triangle::TriangleMesh;
 
 pub trait Shape: Transformable {
-    fn set_light(&mut self, l: Rc<RefCell<dyn Light>>);
-    fn get_light(&self) -> Option<Rc<RefCell<dyn Light>>>;
-    fn material(&self) -> Rc<dyn Material>;
-    fn get_bounds(&self) -> Bounds3;
-    fn geometry_id(&self) -> u64;
-    fn set_geometry_id(&mut self, id: u64);
-    fn ray_intersect_shape(&self, ray: &Ray) -> (bool, [f32; 4]);
+    fn shape(&self) -> &ShapeBase;
+    fn shape_mut(&mut self) -> &mut ShapeBase;
+    fn set_light(&mut self, l: RR<dyn Light>) {
+        self.shape_mut().light = Some(l);
+    }
+    fn get_light(&self) -> Option<RR<dyn Light>> {
+        self.shape().light.clone()
+    }
+    fn material(&self) -> Rc<dyn Material> {
+        self.shape().material.clone()
+    }
+    fn get_bounds(&self) -> Bounds3 {
+        self.shape().bounds3.clone()
+    }
+    fn geometry_id(&self) -> u64 {
+        self.shape().geometry_id
+    }
+    fn set_geometry_id(&mut self, id: u64) {
+        self.shape_mut().geometry_id = id;
+    }
+    fn ray_intersect_shape(&self, ray: &Ray) -> Option<(u64, f32, f32)>;
     fn fill_intersection(&self, distance: f32, prim_id: u64, u: f32, v: f32, intersection: &mut Intersection);
     fn uniform_sample_on_surface(&self, sample: Vector2<f32>) -> (Intersection, f32);
+    fn init_internal_acceleration(&mut self);
 }
 
 #[derive(Clone)]
 pub struct ShapeBase {
     pub geometry_id: u64,
-    pub light: Option<Rc<RefCell<dyn Light>>>,
+    pub light: Option<RR<dyn Light>>,
     pub material: Rc<dyn Material>,
     transform: Transform,
     bounds3: Bounds3,
@@ -76,9 +91,10 @@ impl ShapeBase {
     }
 }
 
-pub fn construct_shape(json: &Value) -> Rc<RefCell<dyn Shape>> {
+pub fn construct_shape(json: &Value) -> RR<dyn Shape> {
     match json["type"].as_str().unwrap() {
-        "triangle" => Rc::new(RefCell::new(Triangle::from_json(json))),
+        "triangle" => Rc::new(RefCell::new(TriangleMesh::from_json(json))),
+        // "sphere" => Rc::new(RefCell::new())
         _ => panic!("Invalid shape type")
     }
 }

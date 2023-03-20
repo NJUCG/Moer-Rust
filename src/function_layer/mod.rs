@@ -1,14 +1,17 @@
+use std::cell::RefCell;
+use std::rc::Rc;
 use image::Rgb32FImage;
 use nalgebra::Vector3;
 
 pub type Image = Rgb32FImage;
 pub type V3f = Vector3<f32>;
+pub type RR<T> = Rc<RefCell<T>>;
 
 pub mod camera;
 pub mod film;
 mod ray;
 pub mod scene;
-mod acceleration;
+pub mod acceleration;
 pub mod light;
 mod bounds3;
 mod shape;
@@ -27,5 +30,5 @@ pub use integrator::{Integrator, integrator::construct_integrator};
 pub use sampler::{Sampler, sampler::construct_sampler};
 pub use camera::{Camera, construct_camera};
 pub use scene::Scene;
-pub use acceleration::Acceleration;
+pub use acceleration::{Acceleration, acceleration::construct_acceleration};
 pub use film::Film;

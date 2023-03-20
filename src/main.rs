@@ -2,6 +2,7 @@ extern crate core;
 
 mod function_layer;
 mod core_layer;
+mod resource_layer;
 
 use std::env::{args, current_dir, set_current_dir};
 use std::error::Error;

@@ -4,7 +4,7 @@ use std::rc::Rc;
 use nalgebra::Vector2;
 use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{Intersection, Ray, V3f};
+use crate::function_layer::{Intersection, Ray, RR, V3f};
 use super::{area_light::AreaLight, environment_light::EnvironmentLight, spot_light::SpotLight};
 
 pub trait Light {
@@ -39,7 +39,7 @@ pub trait InfiniteLight: Light {
     fn evaluate_emission_ray(&self, ray: &Ray) -> SpectrumRGB;
 }
 
-pub fn construct_light(json: &Value) -> Rc<RefCell<dyn Light>> {
+pub fn construct_light(json: &Value) -> RR<dyn Light> {
     match json["type"].as_str().expect("No light type given") {
         "environmentLight" => Rc::new(RefCell::new(EnvironmentLight::from_json(json))),
         "spotLight" => Rc::new(RefCell::new(SpotLight::from_json(json))),

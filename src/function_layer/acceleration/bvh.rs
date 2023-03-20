@@ -1,14 +1,6 @@
-#![allow(dead_code)]
-
-use std::cell::RefCell;
 use std::rc::Rc;
-use crate::function_layer::{Shape, Intersection, Ray, Bounds3, V3f};
-
-pub trait Acceleration {
-    fn ray_intersect(&self, ray: &Ray) -> Option<Intersection>;
-    fn build(&mut self);
-    fn attach_shape(&mut self, shape: Rc<RefCell<dyn Shape>>);
-}
+use crate::function_layer::{Acceleration, Bounds3, Intersection, Ray, RR, Shape, V3f};
+use super::acceleration::{AccelerationBase, AccelerationType};
 
 pub struct BVHBuildNode {
     bounds: Bounds3,
@@ -46,27 +38,37 @@ impl Default for SplitMethod {
 #[derive(Default)]
 pub struct BVHAccel {
     pub root: Option<Rc<BVHBuildNode>>,
-    pub shapes: Vec<Rc<RefCell<dyn Shape>>>,
+    pub shapes: Vec<RR<dyn Shape>>,
     pub max_prims_in_node: i32,
     pub split_method: SplitMethod,
+    pub acc: AccelerationBase,
 }
 
 impl Acceleration for BVHAccel {
-    fn ray_intersect(&self, ray: &Ray) -> Option<Intersection> {
-        match &self.root {
-            None => None,
-            Some(r) => Some(BVHAccel::get_intersection(r.clone(), ray)),
-        }
+    fn acceleration(&self) -> &AccelerationBase {
+        &self.acc
+    }
+
+    fn acceleration_mut(&mut self) -> &mut AccelerationBase {
+        &mut self.acc
+    }
+
+    fn ray_intersect(&self, ray: &Ray) -> Option<(u64, u64, f32, f32)> {
+        todo!()
     }
 
     fn build(&mut self) {
         todo!()
     }
 
-    fn attach_shape(&mut self, shape: Rc<RefCell<dyn Shape>>) {
+    fn attach_shape(&mut self, shape: RR<dyn Shape>) {
         let id = self.shapes.len();
         shape.borrow_mut().set_geometry_id(id as u64);
         self.shapes.push(shape);
+    }
+
+    fn atp(&self) -> AccelerationType {
+        AccelerationType::BVH
     }
 }
 

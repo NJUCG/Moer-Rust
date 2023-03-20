@@ -4,11 +4,11 @@ use image::{ImageFormat, Rgb};
 use nalgebra::Vector2;
 use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::Image;
+use crate::function_layer::{Image, RR};
 
 pub struct Film {
     pub size: [usize; 2],
-    pub image: Option<Rc<RefCell<Image>>>,
+    pub image: Option<RR<Image>>,
 }
 
 impl Film {
