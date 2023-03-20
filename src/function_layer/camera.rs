@@ -37,7 +37,7 @@ impl CameraBase {
         let time_start = json["timeStart"].as_f64().unwrap_or(0.0) as f32;
         let time_end = json["timeEnd"].as_f64().unwrap_or(0.0) as f32;
         let film = Some(Rc::new(RefCell::new(Film::from_json(&json["film"]))));
-        let transform = Transform::identity();
+        let transform = Transform::default();
         Self {
             t_min,
             t_max,

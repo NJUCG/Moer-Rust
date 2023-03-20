@@ -5,7 +5,7 @@ use crate::function_layer::V3f;
 
 type M4f = Matrix4<f32>;
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Transform {
     pub translate: M4f,
     pub inv_translate: M4f,
@@ -16,17 +16,6 @@ pub struct Transform {
 }
 
 impl Transform {
-    pub fn identity() -> Self {
-        Transform {
-            translate: M4f::identity(),
-            inv_translate: M4f::identity(),
-            rotate: M4f::identity(),
-            inv_rotate: M4f::identity(),
-            scale: M4f::identity(),
-            inv_scale: M4f::identity(),
-        }
-    }
-
     pub fn new(translate: M4f, rotate: M4f, scale: M4f) -> Self {
         let inv_rotate = rotate.transpose();
         let mut inv_translate = M4f::identity();

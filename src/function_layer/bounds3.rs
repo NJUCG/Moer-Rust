@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+
 use std::mem::swap;
 use crate::function_layer::V3f;
 use super::ray::Ray;
@@ -34,6 +35,10 @@ impl Bounds3 {
         2.0 * (d.x * d.y + d.y * d.z + d.z * d.x) as f64
     }
     pub fn centroid(&self) -> V3f { 0.5 * &self.p_min + 0.5 * &self.p_max }
+    pub fn expand(&mut self, p: &V3f) {
+        self.p_min = self.p_min.inf(p);
+        self.p_max = self.p_max.sup(p);
+    }
     #[allow(dead_code)]
     pub fn intersect(&self, b: &Bounds3) -> Bounds3 {
         Bounds3 {

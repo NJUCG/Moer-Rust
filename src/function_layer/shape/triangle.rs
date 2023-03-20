@@ -41,7 +41,7 @@ impl Shape for TriangleMesh {
         &mut self.shape
     }
 
-    fn ray_intersect_shape(&self, ray: &Ray) -> Option<(u64, f32, f32)> {
+    fn ray_intersect_shape(&self, ray: &mut Ray) -> Option<(u64, f32, f32)> {
         // 当使用embree加速时，该方法不会被调用
         match &self.acc {
             None => None,
@@ -93,11 +93,12 @@ impl Shape for TriangleMesh {
         self.acc = Some(create_acceleration());
 
         let prim_count = self.mesh.face_count;
+        let mesh = Rc::new(self.clone());
         for prime_id in 0..prim_count {
             let v_indices: Vec<usize> = (0..3).map(|i: usize|
                 self.mesh.face_buffer[prime_id][i].vertex_index).collect();
             let triangle = Rc::new(RefCell::new(
-                Triangle::new(prime_id, v_indices[0], v_indices[1], v_indices[2], Some(Rc::new(self.clone())))));
+                Triangle::new(prime_id, v_indices[0], v_indices[1], v_indices[2], Some(mesh.clone()))));
             self.acc.as_ref().unwrap().borrow_mut().attach_shape(triangle);
         }
         self.acc.as_ref().unwrap().borrow_mut().build();
@@ -116,7 +117,16 @@ struct Triangle {
 
 impl Triangle {
     pub fn new(prim_id: usize, v0idx: usize, v1idx: usize, v2idx: usize, mesh: Option<Rc<TriangleMesh>>) -> Self {
-        let shape = mesh.as_ref().unwrap().as_ref().shape.clone();
+        let mut shape = ShapeBase::default();
+        shape.geometry_id = mesh.as_ref().unwrap().geometry_id();
+        let m = mesh.as_ref().unwrap();
+        let v0 = m.transform().to_world_point(&m.mesh.vertex_buffer[v0idx]);
+        let v1 = m.transform().to_world_point(&m.mesh.vertex_buffer[v1idx]);
+        let v2 = m.transform().to_world_point(&m.mesh.vertex_buffer[v2idx]);
+        shape.bounds3.expand(&v0.coords);
+        shape.bounds3.expand(&v1.coords);
+        shape.bounds3.expand(&v2.coords);
+
         Self {
             prim_id,
             v0idx,
@@ -143,15 +153,43 @@ impl Shape for Triangle {
         &mut self.shape
     }
 
-    fn ray_intersect_shape(&self, ray: &Ray) -> Option<(u64, f32, f32)> {
-        todo!()
+    fn ray_intersect_shape(&self, ray: &mut Ray) -> Option<(u64, f32, f32)> {
+        let origin = &ray.origin;
+        let dir = &ray.direction;
+        let m = self.mesh.as_ref().unwrap();
+        let v0 = m.transform().to_world_point(&m.mesh.vertex_buffer[self.v0idx]);
+        let v1 = m.transform().to_world_point(&m.mesh.vertex_buffer[self.v1idx]);
+        let v2 = m.transform().to_world_point(&m.mesh.vertex_buffer[self.v2idx]);
+        let edge0 = v1 - v0;
+        let edge1 = v2 - v0;
+        let normal = edge0.cross(&edge1).normalize();
+        let d = -normal.dot(&v0.coords);
+        let a = normal.dot(&origin.coords) + d;
+        let b = normal.dot(dir);
+        if b == 0.0 { return None; }
+        let t = -a / b;
+        if t < ray.t_max || t > ray.t_max { return None; }
+        let hit = origin + t * dir;
+        let v1 = (hit - v0).cross(&edge1);
+        let v2 = edge0.cross(&edge1);
+        let mut u = v1.norm() / v2.norm();
+        if v1.dot(&v2) < 0.0 { u *= -1.0; }
+        let v1 = (hit - v0).cross(&edge0);
+        let v2 = -v2; //cross(edge1, edge0)
+        let mut v = v1.norm() / v2.norm();
+        if v1.dot(&v2) < 0.0 { v *= -1.0; }
+
+        if u >= 0.0 && v >= 0.0 && (u + v) <= 1.0 {
+            ray.t_max = t;
+            Some((self.prim_id as u64, u, v))
+        } else { None }
     }
 
-    fn fill_intersection(&self, distance: f32, prim_id: u64, u: f32, v: f32, intersection: &mut Intersection) {
-        todo!()
+    fn fill_intersection(&self, _distance: f32, _prim_id: u64, _u: f32, _v: f32, _intersection: &mut Intersection) {
+        // 该函数实际上不会被调用
     }
 
-    fn uniform_sample_on_surface(&self, sample: Vector2<f32>) -> (Intersection, f32) {
+    fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (Intersection, f32) {
         todo!()
     }
 }

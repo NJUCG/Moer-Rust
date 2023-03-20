@@ -33,7 +33,7 @@ impl Integrator for DirectIntegratorSampleLight {
             let occlude = scene.ray_intersect(&shadow_ray);
             if occlude.is_none() {
                 let material = shape.material();
-                let bsdf = material.compute_bsdf(&intersection);
+                let bsdf = material.unwrap().compute_bsdf(&intersection);
                 let f = bsdf.f(&-ray.direction, &shadow_ray.direction);
                 let pdf = convert_pdf(&res, &intersection);
                 spectrum += res.energy * f / pdf;
@@ -48,7 +48,7 @@ impl Integrator for DirectIntegratorSampleLight {
         let occlude = scene.ray_intersect(&shadow_ray);
         if occlude.is_none() {
             let material = shape.material();
-            let bsdf = material.compute_bsdf(&intersection);
+            let bsdf = material.unwrap().compute_bsdf(&intersection);
             let f = bsdf.f(&-ray.direction, &shadow_ray.direction);
             light_sample_result.pdf *= pdf_light;
             let pdf = convert_pdf(&light_sample_result, &intersection);
@@ -74,7 +74,7 @@ impl Integrator for DirectIntegratorSampleBSDF {
             spectrum += light.borrow().evaluate_emission(&intersection, &-ray.direction);
         }
         let material = shape.material();
-        let bsdf = material.compute_bsdf(&intersection);
+        let bsdf = material.unwrap().compute_bsdf(&intersection);
         let bsdf_sample_result = bsdf.sample(&-ray.direction, &sampler.next_2d());
         let shadow_ray = Ray::new(intersection.position, bsdf_sample_result.wi);
         let find_light = scene.ray_intersect(&shadow_ray);

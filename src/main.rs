@@ -29,19 +29,28 @@ fn main() -> Result<(), Box<dyn Error>> {
     let spp = sampler.xsp() * sampler.ysp();
     let film = camera.film().unwrap();
     let [width, height] = film.borrow().size;
-    for y in 0..height {
-        for x in 0..width {
-            let ndc = Vector2::new(x as f32 / width as f32, y as f32 / height as f32);
-            let mut li = SpectrumRGB::same(0.0);
-            for _ in 0..spp {
-                let ray = camera.sample_ray_differentials(
-                    &CameraSample { xy: sampler.next_2d(), lens: Vector2::zeros(), time: 0.0 }, ndc,
-                );
-                li += integrator.li(&ray, &scene, sampler.clone());
-            }
-            film.borrow_mut().deposit(Vector2::new(x, y), &(li / spp as f32));
-        }
-    }
-    film.borrow().save(json["output"]["filename"].as_str().unwrap(), ImageFormat::Hdr);
+    // for y in 0..height {
+    //     for x in 0..width {
+    //         let ndc = Vector2::new(x as f32 / width as f32, y as f32 / height as f32);
+    //         let mut li = SpectrumRGB::same(0.0);
+    //         for _ in 0..spp {
+    //             let ray = camera.sample_ray_differentials(
+    //                 &CameraSample { xy: sampler.next_2d(), lens: Vector2::zeros(), time: 0.0 }, ndc,
+    //             );
+    //             li += integrator.li(&ray, &scene, sampler.clone());
+    //         }
+    //         film.borrow_mut().deposit(Vector2::new(x, y), &(li / spp as f32));
+    //     }
+    // }
+    let out_name = json["output"]["filename"].as_str().unwrap();
+    let format = if out_name.ends_with(".png")  {
+        ImageFormat::Png
+    } else if out_name.ends_with(".hdr") {
+        ImageFormat::Hdr
+    } else {
+        eprintln!("Unknown image format. The default is png");
+        ImageFormat::Png
+    };
+    film.borrow().save(out_name, format);
     Ok(())
 }
