@@ -1,9 +1,9 @@
 use std::cell::RefCell;
 use std::rc::Rc;
-use image::Rgb32FImage;
+use image::RgbImage;
 use nalgebra::Vector3;
 
-pub type Image = Rgb32FImage;
+pub type Image = RgbImage;
 pub type V3f = Vector3<f32>;
 pub type RR<T> = Rc<RefCell<T>>;
 

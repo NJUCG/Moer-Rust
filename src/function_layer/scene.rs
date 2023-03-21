@@ -16,7 +16,8 @@ pub struct Scene {
 
 impl Scene {
     pub fn from_json(json: &Value) -> Self {
-        set_acc_type(json["acceleration"].as_str().unwrap_or("bvh"));
+        let acc = json["acceleration"].as_str().unwrap_or("bvh");
+        set_acc_type(acc);
         let acceleration = create_acceleration();
         let shapes = json["shapes"].as_array().unwrap();
         for shape in shapes {
@@ -57,7 +58,7 @@ impl Scene {
         }
     }
 
-    pub fn ray_intersect(&self, ray: &Ray) -> Option<Intersection> {
+    pub fn ray_intersect(&self, ray: &mut Ray) -> Option<Intersection> {
         self.acceleration.borrow().get_intersect(ray)
     }
 

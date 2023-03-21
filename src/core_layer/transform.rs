@@ -5,7 +5,7 @@ use crate::function_layer::V3f;
 
 type M4f = Matrix4<f32>;
 
-#[derive(Clone, Default)]
+#[derive(Clone, Debug)]
 pub struct Transform {
     pub translate: M4f,
     pub inv_translate: M4f,
@@ -15,7 +15,22 @@ pub struct Transform {
     pub inv_scale: M4f,
 }
 
+impl Default for Transform {
+    fn default() -> Self {
+        Transform::identity()
+    }
+}
 impl Transform {
+    pub fn identity() ->Self {
+        Self {
+            translate: M4f::identity(),
+            inv_translate: M4f::identity(),
+            rotate: M4f::identity(),
+            inv_rotate: M4f::identity(),
+            scale: M4f::identity(),
+            inv_scale: M4f::identity(),
+        }
+    }
     pub fn new(translate: M4f, rotate: M4f, scale: M4f) -> Self {
         let inv_rotate = rotate.transpose();
         let mut inv_translate = M4f::identity();
@@ -70,13 +85,10 @@ impl Transform {
     }
 
     pub fn to_world_point(&self, v: &Point3<f32>) -> Point3<f32> {
-        let v4 = Vector4::new(v[0], v[1], v[2], 0.0);
+        let v4 = Vector4::new(v[0], v[1], v[2], 1.0);
         let mut v4 = self.translate * self.rotate * self.scale * v4;
         v4 /= v4[3];
-        let mut p = Point3::origin();
-        p[0] = v4[0];
-        p[1] = v4[1];
-        p[2] = v4[2];
+        let mut p = Point3::from(v4.xyz());
         p
     }
 }

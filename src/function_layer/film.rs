@@ -20,7 +20,8 @@ impl Film {
     }
 
     pub fn deposit(&mut self, xy: Vector2<usize>, spectrum: &SpectrumRGB) {
-        self.image.as_ref().unwrap().borrow_mut().put_pixel(xy.x as u32, xy.y as u32, Rgb(spectrum.to_slice()));
+        let rgb = spectrum.rgb() * 255.0;
+        self.image.as_ref().unwrap().borrow_mut().put_pixel(xy.x as u32, xy.y as u32, Rgb([rgb.x as u8, rgb.y as u8, rgb.z as u8]));
     }
 
     pub fn save(&self, filename: &str, fmt: ImageFormat) {

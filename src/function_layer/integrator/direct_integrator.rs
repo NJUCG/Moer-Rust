@@ -3,6 +3,7 @@ use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::integrator::integrator::{convert_pdf, Integrator};
 use crate::function_layer::light::light::{InfiniteLight, Light};
 use crate::function_layer::ray::Ray;
+use crate::function_layer::RR;
 use crate::function_layer::sampler::sampler::Sampler;
 use crate::function_layer::scene::Scene;
 use crate::function_layer::shape::intersection::compute_ray_differentials;
@@ -11,7 +12,7 @@ pub struct DirectIntegratorSampleLight;
 
 // TODO 目前由于环境光采样还有些bug，先不要在场景中配置环境光
 impl Integrator for DirectIntegratorSampleLight {
-    fn li(&self, ray: &Ray, scene: &Scene, sampler: Rc<dyn Sampler>) -> SpectrumRGB {
+    fn li(&self, ray: &mut Ray, scene: &Scene, sampler: RR<dyn Sampler>) -> SpectrumRGB {
         let mut spectrum = SpectrumRGB::same(0.0);
         let intersection_opt = scene.ray_intersect(ray);
         if intersection_opt.is_none() {
@@ -27,10 +28,10 @@ impl Integrator for DirectIntegratorSampleLight {
             spectrum += light.borrow().evaluate_emission(&intersection, &(-ray.direction));
         }
         if scene.infinite_lights.is_some() {
-            let res = scene.infinite_lights.as_ref().unwrap().sample(&intersection, sampler.next_2d());
+            let res = scene.infinite_lights.as_ref().unwrap().sample(&intersection, sampler.borrow_mut().next_2d());
             let mut shadow_ray = Ray::new(intersection.position + res.direction * 1e-4, res.direction);
             shadow_ray.t_max = res.distance;
-            let occlude = scene.ray_intersect(&shadow_ray);
+            let occlude = scene.ray_intersect(&mut shadow_ray);
             if occlude.is_none() {
                 let material = shape.material();
                 let bsdf = material.unwrap().compute_bsdf(&intersection);
@@ -41,11 +42,11 @@ impl Integrator for DirectIntegratorSampleLight {
             return spectrum;
         }
         let mut pdf_light = 0.0;
-        let light = scene.sample_light(sampler.next_1d(), &mut pdf_light);
-        let mut light_sample_result = light.borrow().sample(&intersection, sampler.next_2d());
+        let light = scene.sample_light(sampler.borrow_mut().next_1d(), &mut pdf_light);
+        let mut light_sample_result = light.borrow().sample(&intersection, sampler.borrow_mut().next_2d());
         let mut shadow_ray = Ray::new(intersection.position, light_sample_result.direction);
         shadow_ray.t_max = light_sample_result.distance;
-        let occlude = scene.ray_intersect(&shadow_ray);
+        let occlude = scene.ray_intersect(&mut shadow_ray);
         if occlude.is_none() {
             let material = shape.material();
             let bsdf = material.unwrap().compute_bsdf(&intersection);
@@ -62,7 +63,7 @@ impl Integrator for DirectIntegratorSampleLight {
 pub struct DirectIntegratorSampleBSDF;
 
 impl Integrator for DirectIntegratorSampleBSDF {
-    fn li(&self, ray: &Ray, scene: &Scene, sampler: Rc<dyn Sampler>) -> SpectrumRGB {
+    fn li(&self, ray: &mut Ray, scene: &Scene, sampler: RR<dyn Sampler>) -> SpectrumRGB {
         let mut spectrum = SpectrumRGB::same(0.0);
         let intersection_opt = scene.ray_intersect(ray);
         if intersection_opt.is_none() {
@@ -75,9 +76,9 @@ impl Integrator for DirectIntegratorSampleBSDF {
         }
         let material = shape.material();
         let bsdf = material.unwrap().compute_bsdf(&intersection);
-        let bsdf_sample_result = bsdf.sample(&-ray.direction, &sampler.next_2d());
-        let shadow_ray = Ray::new(intersection.position, bsdf_sample_result.wi);
-        let find_light = scene.ray_intersect(&shadow_ray);
+        let bsdf_sample_result = bsdf.sample(&-ray.direction, &sampler.borrow_mut() .next_2d());
+        let mut shadow_ray = Ray::new(intersection.position, bsdf_sample_result.wi);
+        let find_light = scene.ray_intersect(&mut shadow_ray);
         match find_light {
             None => {
                 let env_s = scene.infinite_lights.as_ref().unwrap().evaluate_emission_ray(&shadow_ray);

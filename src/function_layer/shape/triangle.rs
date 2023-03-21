@@ -102,7 +102,8 @@ impl Shape for TriangleMesh {
             self.acc.as_ref().unwrap().borrow_mut().attach_shape(triangle);
         }
         self.acc.as_ref().unwrap().borrow_mut().build();
-        self.shape.set_bounds(self.acc.as_ref().unwrap().borrow().bound3());
+        let b3 = self.acc.as_ref().unwrap().borrow().bound3();
+        self.shape.set_bounds(b3);
     }
 }
 
@@ -160,6 +161,7 @@ impl Shape for Triangle {
         let v0 = m.transform().to_world_point(&m.mesh.vertex_buffer[self.v0idx]);
         let v1 = m.transform().to_world_point(&m.mesh.vertex_buffer[self.v1idx]);
         let v2 = m.transform().to_world_point(&m.mesh.vertex_buffer[self.v2idx]);
+
         let edge0 = v1 - v0;
         let edge1 = v2 - v0;
         let normal = edge0.cross(&edge1).normalize();
@@ -168,7 +170,7 @@ impl Shape for Triangle {
         let b = normal.dot(dir);
         if b == 0.0 { return None; }
         let t = -a / b;
-        if t < ray.t_max || t > ray.t_max { return None; }
+        if t < ray.t_min || t > ray.t_max { return None; }
         let hit = origin + t * dir;
         let v1 = (hit - v0).cross(&edge1);
         let v2 = edge0.cross(&edge1);

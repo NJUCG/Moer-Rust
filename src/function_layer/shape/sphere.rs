@@ -1,6 +1,3 @@
-use nalgebra::Vector2;
-use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Intersection, Ray, Shape};
 use super::shape::ShapeBase;
 
 struct Sphere {

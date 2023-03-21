@@ -15,6 +15,7 @@ pub struct RayDifferential {
 pub struct Ray {
     pub origin: Point3<f32>,
     pub direction: V3f,
+    pub inv_dir: V3f,
     // pub direction_inv: Vector3f,
     pub t: f32,
     pub t_min: f32,
@@ -28,8 +29,13 @@ impl Ray {
     pub fn new(origin: Point3<f32>, direction: V3f) -> Self {
         let t = 0.0;
         let t_min = 1e-4;
-        let t_max = f32::MAX;
-        Self { origin, direction, t, t_min, t_max, differential: None }
+        let t_max = f32::INFINITY;
+        let inv_dir = V3f::new(
+            1.0 / direction.x,
+            1.0 / direction.y,
+            1.0 / direction.z,
+        );
+        Self { origin, direction, inv_dir, t, t_min, t_max, differential: None }
     }
 
     pub fn from_o2d(origin: Point3<f32>, destination: Point3<f32>) -> Self {
@@ -38,7 +44,12 @@ impl Ray {
         let t_min = 1e-4;
         let t_max = o2d.norm() - 1e-4;
         let direction = o2d.normalize();
-        Self { origin, direction, t, t_min, t_max, differential: None }
+        let inv_dir = V3f::new(
+            1.0 / direction.x,
+            1.0 / direction.y,
+            1.0 / direction.z,
+        );
+        Self { origin, inv_dir, direction, t, t_min, t_max, differential: None }
     }
 
     pub fn at(&self, t: f32) -> Point3<f32> {

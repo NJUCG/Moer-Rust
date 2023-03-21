@@ -2,15 +2,16 @@
 
 use std::rc::Rc;
 use image::imageops::FilterType;
+use image::Rgb32FImage;
 use nalgebra::{clamp, Vector2, Vector3};
 use crate::function_layer::Image;
 
 pub struct MipMap {
-    pub pyramid: Vec<Rc<Image>>,
+    pub pyramid: Vec<Rc<Rgb32FImage>>,
 }
 
 impl MipMap {
-    pub fn new(origin: Rc<Image>) -> Self {
+    pub fn new(origin: Rc<Rgb32FImage>) -> Self {
         let size = origin.dimensions();
         if !size.0.is_power_of_two() {
             panic!("目前只支持对长宽为2的次幂的图片做mipmap");
@@ -21,7 +22,7 @@ impl MipMap {
         for _ in 1..n_levels {
             let previous = pyramid.last().unwrap();
             let p_size = previous.dimensions();
-            let current: Image = image::imageops::resize(previous.as_ref(),
+            let current = image::imageops::resize(previous.as_ref(),
                                                          p_size.0 / 2, p_size.1 / 2, FilterType::Nearest);
             pyramid.push(Rc::new(current));
         }

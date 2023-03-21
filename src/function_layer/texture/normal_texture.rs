@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use image::Rgb32FImage;
 use nalgebra::{clamp, Vector2, Vector3};
 use serde_json::Value;
 use crate::function_layer::Image;
@@ -8,7 +9,7 @@ use super::texture::{Texture, TextureCoord, TextureMapping, UVMapping};
 pub struct NormalTexture {
     size: Vector2<usize>,
     mapping: Rc<dyn TextureMapping>,
-    normal_map: Rc<Image>,
+    normal_map: Rc<Rgb32FImage>,
 }
 
 impl NormalTexture {

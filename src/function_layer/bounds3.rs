@@ -21,7 +21,7 @@ impl Bounds3 {
         Self { p_min, p_max }
     }
     pub fn empty() -> Self {
-        Self { p_min: V3f::from([f32::MAX; 3]), p_max: V3f::from([f32::MIN; 3]) }
+        Self { p_min: V3f::from([f32::INFINITY; 3]), p_max: V3f::from([f32::MIN; 3]) }
     }
 
     pub fn diagonal(&self) -> V3f { &self.p_max - &self.p_min }
@@ -67,16 +67,30 @@ impl Bounds3 {
             p.y >= b.p_min.y && p.y <= b.p_max.y &&
             p.z >= b.p_min.z && p.z <= b.p_max.z
     }
-    pub fn intersect_p(&self, ray: &Ray, inv_dir: &V3f, dir_neg: [bool; 3]) -> bool {
-        let mut t_min = (self.p_min - &ray.origin.coords).component_mul(inv_dir);
-        let mut t_max = (self.p_max - &ray.origin.coords).component_mul(inv_dir);
-        if dir_neg[0] { swap(&mut t_min.x, &mut t_max.x); }
-        if dir_neg[1] { swap(&mut t_min.y, &mut t_max.y); }
-        if dir_neg[2] { swap(&mut t_min.z, &mut t_max.z); }
-        let t_enter = t_min.x.max(t_min.y).max(t_min.z);
-        let t_exit = t_max.x.min(t_max.y).min(t_max.z);
+    pub fn intersect_p(&self, ray: &Ray) -> bool {
+        // let mut t_min = (self.p_min - &ray.origin.coords).component_mul(inv_dir);
+        // let mut t_max = (self.p_max - &ray.origin.coords).component_mul(inv_dir);
+        // if dir_neg[0] { swap(&mut t_min.x, &mut t_max.x); }
+        // if dir_neg[1] { swap(&mut t_min.y, &mut t_max.y); }
+        // if dir_neg[2] { swap(&mut t_min.z, &mut t_max.z); }
+        // let t_enter = t_min.x.max(t_min.y).max(t_min.z);
+        // let t_exit = t_max.x.min(t_max.y).min(t_max.z);
 
-        t_enter <= t_exit && t_exit >= 0.0
+        // t_enter <= t_exit && t_exit >= 0.0
+        let mut t_near = ray.t_min;
+        let mut t_far = ray.t_max;
+        let inv_dir = &ray.inv_dir;
+        for i in 0..3 {
+            let t0 = (self.p_min[i] - ray.origin[i]) * inv_dir[i];
+            let t1 = (self.p_max[i] - ray.origin[i]) * inv_dir[i];
+            let (t0, t1) = if inv_dir[i] < 0.0 {
+                (t1, t0)
+            } else { (t0, t1) };
+            t_near = t_near.max(t0);
+            t_far = t_far.min(t1);
+            if t_near > t_far { return false; }
+        }
+        true
     }
     pub fn union_bounds(b1: &Bounds3, b2: &Bounds3) -> Bounds3 {
         Bounds3 {
@@ -97,13 +111,17 @@ impl Bounds3 {
             Axis::Z => { self.centroid().z }
         }
     }
+
+    pub fn arr_bounds(v: Vec<Bounds3>) -> Bounds3 {
+        v.iter().fold(Bounds3::default(), |b1, b2| { Bounds3::union_bounds(&b1, b2) })
+    }
 }
 
 
 impl Default for Bounds3 {
     fn default() -> Self {
         Bounds3 {
-            p_min: V3f::from([f32::MAX; 3]),
+            p_min: V3f::from([f32::INFINITY; 3]),
             p_max: V3f::from([f32::MIN; 3]),
         }
     }

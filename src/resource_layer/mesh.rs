@@ -1,3 +1,4 @@
+use std::process::exit;
 use std::rc::Rc;
 use nalgebra::{Point3, Vector2};
 use crate::function_layer::V3f;
@@ -66,7 +67,7 @@ impl MeshData {
         }
         let mut tex_coord_buffer = vec![];
         if t_buf.len() != 0 {
-            let t_buf_size = tex_coord_buffer.len() / 2;
+            let t_buf_size = t_buf.len() / 2;
             tex_coord_buffer.reserve(t_buf_size);
             for i in 0..t_buf_size {
                 let uv = &t_buf[i * 2..i * 2 + 2];

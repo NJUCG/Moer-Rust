@@ -110,7 +110,7 @@ impl Light for EnvironmentLight {
         LightSampleResult {
             energy,
             direction: Vector3::new(x, y, z),
-            distance: f32::MAX,
+            distance: f32::INFINITY,
             normal: Vector3::zeros(),
             pdf,
             is_delta: false,

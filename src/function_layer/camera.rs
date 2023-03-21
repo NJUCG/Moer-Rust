@@ -12,6 +12,7 @@ pub trait Camera {
     fn sample_ray(&self, sample: &CameraSample, ndc: V2f) -> Ray;
     fn sample_ray_differentials(&self, sample: &CameraSample, ndc: V2f) -> Ray;
     fn film(&self) -> Option<RR<Film>>;
+    fn transform(&self) -> &Transform;
 }
 
 pub struct CameraSample {
@@ -37,7 +38,7 @@ impl CameraBase {
         let time_start = json["timeStart"].as_f64().unwrap_or(0.0) as f32;
         let time_end = json["timeEnd"].as_f64().unwrap_or(0.0) as f32;
         let film = Some(Rc::new(RefCell::new(Film::from_json(&json["film"]))));
-        let transform = Transform::default();
+        let transform = Transform::identity();
         Self {
             t_min,
             t_max,
@@ -137,9 +138,9 @@ impl Camera for PinholeCamera {
         let y = (0.5 - ndc[1]) * film.size[1] as f32 + sample.xy[1];
         let tan_half_fov = (self.c.vertical_fov * 0.5).tan();
         let z = film.size[1] as f32 * -0.5 / tan_half_fov;
-        let direction = self.transform().to_world_vec(&V3f::new(x, y, z));
-        let direction_x = self.transform().to_world_vec(&V3f::new(x + 1.0, y, z));
-        let direction_y = self.transform().to_world_vec(&V3f::new(x, y + 1.0, z));
+        let direction = self.transform().to_world_vec(&V3f::new(x, y, z)).normalize();
+        let direction_x = self.transform().to_world_vec(&V3f::new(x + 1.0, y, z)).normalize();
+        let direction_y = self.transform().to_world_vec(&V3f::new(x, y + 1.0, z)).normalize();
         let origin = self.transform().to_world_point(&Point3::origin());
 
         let mut ray = Ray::new(origin, direction);
@@ -161,6 +162,10 @@ impl Camera for PinholeCamera {
             None => None,
             Some(f) => Some(f.clone())
         }
+    }
+
+    fn transform(&self) -> &Transform {
+        &self.c.c.transform
     }
 }
 

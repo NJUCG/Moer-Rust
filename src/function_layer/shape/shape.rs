@@ -73,7 +73,7 @@ impl ShapeBase {
             } else { Matrix4::identity() };
             Transform::new(translate_mat, rotate_mat, scale_mat)
         } else {
-            Transform::default()
+            Transform::identity()
         };
         Self {
             geometry_id: 0,
