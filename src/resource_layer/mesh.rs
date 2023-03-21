@@ -1,4 +1,3 @@
-use std::process::exit;
 use std::rc::Rc;
 use nalgebra::{Point3, Vector2};
 use crate::function_layer::V3f;

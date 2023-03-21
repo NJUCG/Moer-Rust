@@ -8,13 +8,12 @@ use std::fs::File;
 use std::io;
 use std::io::{BufReader, Write};
 use std::time::Instant;
-use image::{DynamicImage, ImageFormat};
+use image::ImageFormat;
 use nalgebra::Vector2;
 use serde_json::Value;
 use function_layer::{Camera, Scene, construct_integrator, construct_sampler, construct_camera};
 use function_layer::camera::CameraSample;
 use core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{Image, V3f};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let scene_dir = args().nth(1).expect("No input scene!");
@@ -28,6 +27,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let integrator = construct_integrator(&json["integrator"]);
     let sampler = construct_sampler(&json["sampler"]);
     let spp = sampler.borrow().xsp() * sampler.borrow().ysp();
+    println!("spp: {spp}");
     let film = camera.film().unwrap();
     let [width, height] = film.borrow().size;
     let start = Instant::now();

@@ -1,4 +1,3 @@
-use std::rc::Rc;
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::integrator::integrator::{convert_pdf, Integrator};
 use crate::function_layer::light::light::{InfiniteLight, Light};

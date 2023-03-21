@@ -20,8 +20,9 @@ impl Default for Transform {
         Transform::identity()
     }
 }
+
 impl Transform {
-    pub fn identity() ->Self {
+    pub fn identity() -> Self {
         Self {
             translate: M4f::identity(),
             inv_translate: M4f::identity(),
@@ -88,7 +89,7 @@ impl Transform {
         let v4 = Vector4::new(v[0], v[1], v[2], 1.0);
         let mut v4 = self.translate * self.rotate * self.scale * v4;
         v4 /= v4[3];
-        let mut p = Point3::from(v4.xyz());
+        let p = Point3::from(v4.xyz());
         p
     }
 }

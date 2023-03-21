@@ -1,4 +1,3 @@
-use std::process::exit;
 use crate::function_layer::{Acceleration, Ray};
 use crate::function_layer::acceleration::acceleration::AccelerationType;
 use super::acceleration::AccelerationBase;

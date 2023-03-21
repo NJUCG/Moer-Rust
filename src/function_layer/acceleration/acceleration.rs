@@ -33,7 +33,7 @@ pub trait Acceleration {
         self.acceleration_mut().shapes.push(shape)
     }
     fn atp(&self) -> AccelerationType;
-    fn bound3(&self) -> Bounds3 { self.acceleration().bounds.clone() }
+    fn bound3(&self) -> &Bounds3 { &self.acceleration().bounds }
 }
 
 #[derive(Default)]
@@ -57,7 +57,7 @@ pub fn set_acc_type(tp: &str) {
 pub fn create_acceleration() -> RR<dyn Acceleration> {
     match unsafe { ACC_TYPE } {
         AccelerationType::BVH => { RR::new(RefCell::new(BVHAccel::default())) }
-        // AccelerationType::Linear => { RR::new(RefCell::new(LinearAccel::default())) }
+        AccelerationType::Linear => { RR::new(RefCell::new(LinearAccel::default())) }
         _ => panic!("Not implemented yet!")
     }
 }

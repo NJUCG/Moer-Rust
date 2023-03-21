@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 
-use std::mem::swap;
 use crate::function_layer::V3f;
 use super::ray::Ray;
 

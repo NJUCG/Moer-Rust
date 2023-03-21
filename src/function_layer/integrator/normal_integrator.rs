@@ -1,4 +1,3 @@
-use std::rc::Rc;
 use nalgebra::Vector3;
 use crate::core_layer::colorspace::SpectrumRGB;
 use super::integrator::Integrator;

@@ -102,7 +102,7 @@ impl Shape for TriangleMesh {
             self.acc.as_ref().unwrap().borrow_mut().attach_shape(triangle);
         }
         self.acc.as_ref().unwrap().borrow_mut().build();
-        let b3 = self.acc.as_ref().unwrap().borrow().bound3();
+        let b3 = self.acc.as_ref().unwrap().borrow().bound3().clone();
         self.shape.set_bounds(b3);
     }
 }

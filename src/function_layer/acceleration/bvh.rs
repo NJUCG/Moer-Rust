@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use std::rc::Rc;
-use crate::function_layer::{Acceleration, Bounds3, Intersection, Ray, RR, Shape, V3f};
+use crate::function_layer::{Acceleration, Bounds3, Ray, RR, Shape};
 use super::acceleration::{AccelerationBase, AccelerationType};
 
 pub struct BVHBuildNode {
@@ -54,8 +54,7 @@ impl Acceleration for BVHAccel {
         for shape in &self.acc.shapes {
             shape.borrow_mut().init_internal_acceleration();
         }
-        let n_shapes = self.acc.shapes.len();
-        let root = recursively_build(&mut self.acc.shapes, 0, n_shapes);
+        let root = recursively_build(&mut self.acc.shapes[..], 0);
         self.acc.bounds = root.bounds.clone();
         self.root = Some(root);
     }
@@ -65,24 +64,24 @@ impl Acceleration for BVHAccel {
     }
 }
 
-fn recursively_build(shapes: &mut Vec<RR<dyn Shape>>, b: usize, e: usize) -> Rc<BVHBuildNode> {
+fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize) -> Rc<BVHBuildNode> {
     let mut res = BVHBuildNode::default();
     let bounds: Vec<_> = shapes.iter().map(|s: &RR<dyn Shape>| s.borrow().shape().bounds3.clone()).collect();
     res.bounds = Bounds3::arr_bounds(bounds);
-    if e - b <= MAX_PRIMS_IN_NODE {
+    if shapes.len() <= MAX_PRIMS_IN_NODE {
         res.first_shape_offset = b;
-        res.n_shapes = e - b;
+        res.n_shapes = shapes.len();
         return Rc::new(res);
     }
-    let mid = (e - b) / 2;
+    let mid = shapes.len() / 2;
     let axis = res.bounds.max_extent();
-    let _ = shapes[b..e].select_nth_unstable_by(mid, |s1: &RR<dyn Shape>, s2: &RR<dyn Shape>| {
+    let _ = shapes.select_nth_unstable_by(mid, |s1: &RR<dyn Shape>, s2: &RR<dyn Shape>| {
         s1.borrow().shape().bounds3.centroid_axis(axis).partial_cmp(
             &s2.borrow().shape().bounds3.centroid_axis(axis)
         ).unwrap()
     });
-    let l = recursively_build(shapes, b, b + mid + 1);
-    let r = recursively_build(shapes, b + mid + 1, e);
+    let l = recursively_build(&mut shapes[..mid + 1], b);
+    let r = recursively_build(&mut shapes[mid + 1..], b + mid + 1);
     res.left = Some(l);
     res.right = Some(r);
     Rc::new(res)
