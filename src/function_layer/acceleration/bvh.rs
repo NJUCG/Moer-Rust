@@ -42,10 +42,7 @@ impl Acceleration for BVHAccel {
     fn ray_intersect(&self, ray: &mut Ray) -> Option<(u64, u64, f32, f32)> {
         let root = self.root.clone();
         if root.is_none() { return None; }
-        let its = BVHAccel::get_intersection(root.unwrap(), ray, &self.acc.shapes);
-        if let Some((_, g_id, p_id, u, v)) = its {
-            Some((g_id, p_id, u, v))
-        } else { None }
+        BVHAccel::get_intersection(root.unwrap(), ray, &self.acc.shapes)
     }
 
     fn build(&mut self) {
@@ -86,7 +83,7 @@ fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize) -> Rc<BVHBuildNode>
 }
 
 impl BVHAccel {
-    pub fn get_intersection(node: Rc<BVHBuildNode>, ray: &mut Ray, shapes: &Vec<RR<dyn Shape>>) -> Option<(f32, u64, u64, f32, f32)> {
+    pub fn get_intersection(node: Rc<BVHBuildNode>, ray: &mut Ray, shapes: &Vec<RR<dyn Shape>>) -> Option<(u64, u64, f32, f32)> {
         if !node.bounds.intersect_p(ray) {
             return None;
         }
@@ -103,7 +100,7 @@ impl BVHAccel {
                 }
             }
             if dist.is_infinite() { return None; }
-            return Some((dist, sp.geometry_id(), p_id, u, v));
+            return Some((sp.geometry_id(), p_id, u, v));
         }
         let hit1 = BVHAccel::get_intersection(node.left.as_ref().unwrap().clone(), ray, shapes);
         let hit2 = BVHAccel::get_intersection(node.right.as_ref().unwrap().clone(), ray, shapes);
