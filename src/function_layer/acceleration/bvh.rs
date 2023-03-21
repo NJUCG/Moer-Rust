@@ -22,7 +22,7 @@ impl Default for BVHBuildNode {
     }
 }
 
-const MAX_PRIMS_IN_NODE: usize = 16;
+const MAX_PRIMS_IN_NODE: usize = 8;
 
 #[derive(Default)]
 pub struct BVHAccel {
@@ -75,8 +75,8 @@ fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize) -> Rc<BVHBuildNode>
             &s2.borrow().shape().bounds3.centroid_axis(axis)
         ).unwrap()
     });
-    let l = recursively_build(&mut shapes[..mid + 1], b);
-    let r = recursively_build(&mut shapes[mid + 1..], b + mid + 1);
+    let l = recursively_build(&mut shapes[..mid], b);
+    let r = recursively_build(&mut shapes[mid..], b + mid);
     res.left = Some(l);
     res.right = Some(r);
     Rc::new(res)
