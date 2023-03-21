@@ -16,8 +16,8 @@ pub enum Axis { X, Y, Z }
 
 impl Bounds3 {
     pub fn new(p1: V3f, p2: V3f) -> Self {
-        let p_min = V3f::new(p1.x.min(p2.x), p1.y.min(p2.y), p1.z.min(p2.z));
-        let p_max = V3f::new(p1.x.max(p2.x), p1.y.max(p2.y), p1.z.max(p2.z));
+        let p_min = p1.inf(&p2);
+        let p_max = p1.sup(&p2);
         Self { p_min, p_max }
     }
     pub fn empty() -> Self {

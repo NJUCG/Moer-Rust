@@ -30,7 +30,6 @@ pub trait Acceleration {
     fn ray_intersect(&self, ray: &mut Ray) -> Option<(u64, u64, f32, f32)>;
     fn build(&mut self);
     fn attach_shape(&mut self, shape: RR<dyn Shape>) {
-        shape.borrow_mut().set_geometry_id(self.acceleration().shapes.len() as u64);
         self.acceleration_mut().shapes.push(shape)
     }
     fn atp(&self) -> AccelerationType;

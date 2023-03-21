@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use nalgebra::{Matrix4, Point3, Vector4};
-use crate::function_layer::{Ray, V3f};
+use crate::function_layer::{Bounds3, Ray, V3f};
 
 type M4f = Matrix4<f32>;
 
@@ -93,6 +93,19 @@ impl Transform {
         p
     }
 
+    pub fn to_world_bounds3(&self, b: Bounds3) -> Bounds3 {
+        let mut res = Bounds3::default();
+        let ps = [&b.p_min, &b.p_max];
+        for i in 0..2 {
+            for j in 0..2 {
+                for k in 0..2 {
+                    let p = Point3::new(ps[i].x, ps[j].y, ps[k].z);
+                    res.expand(&self.to_world_point(&p).coords);
+                }
+            }
+        }
+        res
+    }
     pub fn local_ray(&self, ray: &Ray) -> Ray {
         let origin = &ray.origin;
         let dir = &ray.direction;
