@@ -7,7 +7,9 @@ use serde_json::Value;
 use crate::core_layer::transform::{Transform, Transformable};
 use crate::function_layer::{Bounds3, Light, Material, Ray, construct_material, Intersection, RR};
 use crate::function_layer::material::matte::MatteMaterial;
+use crate::function_layer::shape::disk::Disk;
 use crate::function_layer::shape::parallelogram::Parallelogram;
+use crate::function_layer::shape::sphere::Sphere;
 use super::triangle::TriangleMesh;
 
 pub trait Shape: Transformable {
@@ -96,7 +98,8 @@ pub fn construct_shape(json: &Value) -> RR<dyn Shape> {
     match json["type"].as_str().unwrap() {
         "triangle" => Rc::new(RefCell::new(TriangleMesh::from_json(json))),
         "parallelogram" => Rc::new(RefCell::new(Parallelogram::from_json(json))),
-        // "sphere" => Rc::new(RefCell::new())
+        "sphere" => Rc::new(RefCell::new(Sphere::from_json(json))),
+        "disk" => Rc::new(RefCell::new(Disk::from_json(json))),
         t => panic!("Invalid shape type: {}", t)
     }
 }

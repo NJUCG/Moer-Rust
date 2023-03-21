@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use nalgebra::{Matrix4, Point3, Vector4};
-use crate::function_layer::V3f;
+use crate::function_layer::{Ray, V3f};
 
 type M4f = Matrix4<f32>;
 
@@ -82,7 +82,7 @@ impl Transform {
     pub fn to_world_vec(&self, v: &V3f) -> V3f {
         let v4 = Vector4::new(v[0], v[1], v[2], 0.0);
         let v4 = self.translate * self.rotate * self.scale * v4;
-        V3f::new(v4[0], v4[1], v4[2])
+        v4.xyz()
     }
 
     pub fn to_world_point(&self, v: &Point3<f32>) -> Point3<f32> {
@@ -91,6 +91,22 @@ impl Transform {
         v4 /= v4[3];
         let p = Point3::from(v4.xyz());
         p
+    }
+
+    pub fn local_ray(&self, ray: &Ray) -> Ray {
+        let origin = &ray.origin;
+        let dir = &ray.direction;
+        let o = origin.to_homogeneous();
+        let d = dir.to_homogeneous();
+        let o = self.inv_rotate * self.inv_translate * o;
+        let d = self.inv_rotate * self.inv_translate * d;
+
+        let origin = Point3::from(o.xyz() / o.w);
+        let direction = d.xyz();
+        let mut res = Ray::new(origin, direction);
+        res.t_min = ray.t_min;
+        res.t_max = ray.t_max;
+        res
     }
 }
 

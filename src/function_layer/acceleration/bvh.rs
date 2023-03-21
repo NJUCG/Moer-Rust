@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::rc::Rc;
 use crate::function_layer::{Acceleration, Bounds3, Ray, RR, Shape};
 use super::acceleration::{AccelerationBase, AccelerationType};
@@ -24,7 +22,7 @@ impl Default for BVHBuildNode {
     }
 }
 
-const MAX_PRIMS_IN_NODE: usize = 8;
+const MAX_PRIMS_IN_NODE: usize = 16;
 
 #[derive(Default)]
 pub struct BVHAccel {

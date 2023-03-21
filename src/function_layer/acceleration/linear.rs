@@ -2,9 +2,15 @@ use crate::function_layer::{Acceleration, Ray};
 use crate::function_layer::acceleration::acceleration::AccelerationType;
 use super::acceleration::AccelerationBase;
 
-#[derive(Default)]
 pub struct LinearAccel {
     pub acc: AccelerationBase,
+}
+
+impl Default for LinearAccel {
+    fn default() -> Self {
+        eprintln!("Warning: Linear method is slow!");
+        Self { acc: Default::default() }
+    }
 }
 
 impl Acceleration for LinearAccel {

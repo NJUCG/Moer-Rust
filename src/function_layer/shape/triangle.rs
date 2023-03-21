@@ -5,7 +5,7 @@ use std::rc::Rc;
 use nalgebra::{Point3, Vector2, Vector3};
 use serde_json::Value;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Acceleration, create_acceleration, Intersection, Ray, RR};
+use crate::function_layer::{Acceleration, create_acceleration, Intersection, Ray, RR, V3f};
 use crate::resource_layer::MeshData;
 use super::shape::{ShapeBase, Shape};
 
@@ -73,9 +73,9 @@ impl Shape for TriangleMesh {
         let (tw, tu, tv) = (twuv[0], twuv[1], twuv[2]);
         intersection.tex_coord = w * tw + u * tu + v * tv;
         // TODO 计算交点的切线和副切线
-        let mut tangent = Vector3::new(1.0, 0.0, 0.0);
+        let mut tangent = V3f::new(1.0, 0.0, 0.0);
         if tangent.dot(&intersection.normal).abs() > 0.9 {
-            tangent = Vector3::new(0.0, 1.0, 0.0);
+            tangent = V3f::new(0.0, 1.0, 0.0);
         }
         let bitangent = tangent.cross(&intersection.normal).normalize();
         tangent = intersection.normal.cross(&bitangent).normalize();

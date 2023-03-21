@@ -30,6 +30,7 @@ pub trait Acceleration {
     fn ray_intersect(&self, ray: &mut Ray) -> Option<(u64, u64, f32, f32)>;
     fn build(&mut self);
     fn attach_shape(&mut self, shape: RR<dyn Shape>) {
+        shape.borrow_mut().set_geometry_id(self.acceleration().shapes.len() as u64);
         self.acceleration_mut().shapes.push(shape)
     }
     fn atp(&self) -> AccelerationType;
@@ -56,8 +57,8 @@ pub fn set_acc_type(tp: &str) {
 
 pub fn create_acceleration() -> RR<dyn Acceleration> {
     match unsafe { ACC_TYPE } {
-        AccelerationType::BVH => { RR::new(RefCell::new(BVHAccel::default())) }
-        AccelerationType::Linear => { RR::new(RefCell::new(LinearAccel::default())) }
+        AccelerationType::BVH => RR::new(RefCell::new(BVHAccel::default())),
+        AccelerationType::Linear => RR::new(RefCell::new(LinearAccel::default())),
         _ => panic!("Not implemented yet!")
     }
 }

@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use std::mem::swap;
 use crate::function_layer::V3f;
 use super::ray::Ray;
 
@@ -67,29 +68,18 @@ impl Bounds3 {
             p.z >= b.p_min.z && p.z <= b.p_max.z
     }
     pub fn intersect_p(&self, ray: &Ray) -> bool {
-        // let mut t_min = (self.p_min - &ray.origin.coords).component_mul(inv_dir);
-        // let mut t_max = (self.p_max - &ray.origin.coords).component_mul(inv_dir);
-        // if dir_neg[0] { swap(&mut t_min.x, &mut t_max.x); }
-        // if dir_neg[1] { swap(&mut t_min.y, &mut t_max.y); }
-        // if dir_neg[2] { swap(&mut t_min.z, &mut t_max.z); }
-        // let t_enter = t_min.x.max(t_min.y).max(t_min.z);
-        // let t_exit = t_max.x.min(t_max.y).min(t_max.z);
-
-        // t_enter <= t_exit && t_exit >= 0.0
         let mut t_near = ray.t_min;
         let mut t_far = ray.t_max;
         let inv_dir = &ray.inv_dir;
-        for i in 0..3 {
-            let t0 = (self.p_min[i] - ray.origin[i]) * inv_dir[i];
-            let t1 = (self.p_max[i] - ray.origin[i]) * inv_dir[i];
-            let (t0, t1) = if inv_dir[i] < 0.0 {
-                (t1, t0)
-            } else { (t0, t1) };
-            t_near = t_near.max(t0);
-            t_far = t_far.min(t1);
-            if t_near > t_far { return false; }
-        }
-        true
+
+        let mut t_min = (self.p_min - ray.origin.coords).component_mul(inv_dir);
+        let mut t_max = (self.p_max - ray.origin.coords).component_mul(inv_dir);
+        if inv_dir.x < 0.0 { swap(&mut t_min.x, &mut t_max.x); }
+        if inv_dir.y < 0.0 { swap(&mut t_min.y, &mut t_max.y); }
+        if inv_dir.z < 0.0 { swap(&mut t_min.z, &mut t_max.z); }
+        t_near = t_near.max(t_min.max());
+        t_far = t_far.min(t_max.min());
+        t_near < t_far
     }
     pub fn union_bounds(b1: &Bounds3, b2: &Bounds3) -> Bounds3 {
         Bounds3 {
