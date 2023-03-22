@@ -20,8 +20,8 @@ pub trait Acceleration {
         if hit.is_none() { return None; }
         let (geom_id, prime_id, u, v) = hit.unwrap();
         let mut its = Intersection::default();
-        self.acceleration().shapes[geom_id as usize]
-            .borrow().fill_intersection(ray.t_max, prime_id, u, v, &mut its);
+        let shape = self.acceleration().shapes[geom_id as usize].borrow();
+        shape.fill_intersection(ray.t_max, prime_id, u, v, &mut its);
         Some(its)
     }
     fn ray_intersect(&self, ray: &mut Ray) -> Option<(u64, u64, f32, f32)>;

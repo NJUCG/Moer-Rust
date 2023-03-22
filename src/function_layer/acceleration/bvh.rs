@@ -78,6 +78,9 @@ fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize) -> Rc<BVHBuildNode>
             &s2.borrow().shape().bounds3.centroid_axis(axis)
         ).unwrap()
     });
+    for i in 0..shapes.len() {
+        shapes[i].borrow_mut().set_geometry_id((i + b) as u64);
+    }
     res.split_axis = axis;
     let l = recursively_build(&mut shapes[..mid], b);
     let r = recursively_build(&mut shapes[mid..], b + mid);
@@ -110,7 +113,7 @@ impl BVHAccel {
             Axis::Y => ray.direction.y < 0.0,
             Axis::Z => ray.direction.z < 0.0
         };
-        if flip { two_child.reverse();}
+        if flip { two_child.reverse(); }
         let hit1 = BVHAccel::get_intersection(two_child[0].clone(), ray, shapes);
         let hit2 = BVHAccel::get_intersection(two_child[1].clone(), ray, shapes);
         if hit2.is_some() { hit2 } else { hit1 }

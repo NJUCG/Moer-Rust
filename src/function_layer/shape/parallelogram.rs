@@ -106,4 +106,8 @@ impl Shape for Parallelogram {
         self.fill_intersection(0.0, 0, sample.x, sample.y, &mut its);
         (its, self.pdf)
     }
+
+    fn shape_type(&self) -> String {
+        "parallerlogram".to_owned()
+    }
 }

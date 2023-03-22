@@ -103,6 +103,10 @@ impl Shape for TriangleMesh {
         let b3 = self.acc.as_ref().unwrap().borrow().bound3().clone();
         self.shape.set_bounds(b3);
     }
+
+    fn shape_type(&self) -> String {
+        "Triangles".to_owned()
+    }
 }
 
 struct Triangle {

@@ -33,6 +33,7 @@ pub trait Shape: Transformable {
     fn fill_intersection(&self, distance: f32, prim_id: u64, u: f32, v: f32, intersection: &mut Intersection);
     fn uniform_sample_on_surface(&self, sample: Vector2<f32>) -> (Intersection, f32);
     fn init_internal_acceleration(&mut self) {}
+    fn shape_type(&self) -> String {"".to_owned()}
 }
 
 #[derive(Clone, Default)]
