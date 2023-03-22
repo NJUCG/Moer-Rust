@@ -70,7 +70,7 @@ impl Shape for Parallelogram {
         let b = normal.dot(dir);
         if b == 0.0 { return None; }
         let t = -a / b;
-        if t < ray.t_max || t > ray.t_max { return None; }
+        if t < ray.t_min || t > ray.t_max { return None; }
         let (edge0, edge1) = (&self.edge0, &self.edge1);
         let hit = origin + t * dir;
         let v1 = (hit - self.base).cross(edge1);

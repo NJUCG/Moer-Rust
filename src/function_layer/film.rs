@@ -1,6 +1,7 @@
 use std::cell::RefCell;
+use std::fs::File;
 use std::rc::Rc;
-use image::{ImageFormat, Rgb};
+use image::{ImageBuffer, ImageFormat, ImageResult, Rgb};
 use nalgebra::Vector2;
 use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
@@ -20,12 +21,42 @@ impl Film {
     }
 
     pub fn deposit(&mut self, xy: Vector2<usize>, spectrum: &SpectrumRGB) {
-        let rgb = spectrum.rgb() * 255.0;
-        self.image.as_ref().unwrap().borrow_mut().put_pixel(xy.x as u32, xy.y as u32, Rgb([rgb.x as u8, rgb.y as u8, rgb.z as u8]));
+        let rgb = spectrum.rgb();
+        self.image.as_ref().unwrap().borrow_mut().put_pixel(xy.x as u32, xy.y as u32, Rgb([rgb.x, rgb.y, rgb.z]));
     }
 
-    pub fn save(&self, filename: &str, fmt: ImageFormat) {
-        self.image.as_ref().unwrap().borrow().
-            save_with_format(filename, fmt).expect("saving error");
+    pub fn save(&self, filename: &str, fmt: ImageFormat) -> ImageResult<()> {
+        match fmt {
+            ImageFormat::Hdr => self.save_hdr(filename),
+            ImageFormat::Png => self.save_png(filename),
+            _ => panic!("Image format is not supported!"),
+        }
+    }
+
+    pub fn save_png(&self, filename: &str) -> ImageResult<()> {
+        let img = self.image.as_ref().unwrap().borrow();
+        let mut png_image = ImageBuffer::new(img.width(), img.height());
+        for (x, y, pixel) in img.enumerate_pixels() {
+            let png_pixel = Rgb::from([
+                (pixel[0] * 255.0) as u8,
+                (pixel[1] * 255.0) as u8,
+                (pixel[2] * 255.0) as u8
+            ]);
+            png_image.put_pixel(x, y, png_pixel);
+        }
+        png_image.save(filename)?;
+        Ok(())
+    }
+
+    fn save_hdr(&self, filename: &str) -> ImageResult<()> {
+        let file = File::create(filename).unwrap();
+        let img = self.image.as_ref().unwrap().borrow();
+        let (width, height) = img.dimensions();
+        let encoder = image::codecs::hdr::HdrEncoder::new(file);
+        encoder.encode(
+            &img.pixels().map(|p: &Rgb<f32>| p.clone()).collect::<Vec<_>>()[..],
+            width as usize, height as usize,
+        )?;
+        Ok(())
     }
 }

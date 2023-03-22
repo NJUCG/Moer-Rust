@@ -58,7 +58,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         eprintln!("Unknown image format. The default is png");
         ImageFormat::Png
     };
-    film.borrow().save(out_name, format);
+    film.borrow().save(out_name, format).unwrap();
     Ok(())
 }
 

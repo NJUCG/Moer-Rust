@@ -25,7 +25,7 @@ impl Default for BVHBuildNode {
     }
 }
 
-const MAX_PRIMS_IN_NODE: usize = 8;
+const MAX_PRIMS_IN_NODE: usize = 1;
 
 #[derive(Default)]
 pub struct BVHAccel {
