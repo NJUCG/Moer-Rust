@@ -48,6 +48,7 @@ pub fn set_acc_type(tp: &str) {
             _ => panic!("Unknown acc type!"),
         }
     }
+    println!("Using acceleration type: {}", tp);
 }
 
 pub fn create_acceleration() -> RR<dyn Acceleration> {
