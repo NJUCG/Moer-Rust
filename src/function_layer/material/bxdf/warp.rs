@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::f32::consts::PI;
 use nalgebra::{Vector2, Vector3};
 use fastapprox::fast::{sin, cos};

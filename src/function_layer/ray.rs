@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use nalgebra::Point3;
 use crate::function_layer::V3f;
 
@@ -38,6 +36,7 @@ impl Ray {
         Self { origin, direction, inv_dir, t, t_min, t_max, differential: None }
     }
 
+    #[allow(dead_code)]
     pub fn from_o2d(origin: Point3<f32>, destination: Point3<f32>) -> Self {
         let o2d = destination - origin;
         let t = 0.0;
@@ -57,7 +56,7 @@ impl Ray {
         let o = self.origin;
         o + delta
     }
-
+    #[allow(dead_code)]
     pub fn change_dir(&mut self, dir: V3f) {
         self.direction = dir;
     }

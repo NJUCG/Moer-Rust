@@ -1,9 +1,6 @@
-#![allow(dead_code)]
-
 use std::rc::Rc;
 use nalgebra::{Point3, Vector2};
 use crate::function_layer::{Shape, Ray, V3f};
-
 
 #[derive(Default)]
 pub struct Intersection {

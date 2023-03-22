@@ -1,9 +1,6 @@
-#![allow(dead_code)]
-
 use std::cell::RefCell;
 use crate::function_layer::{Shape, Intersection, Ray, Bounds3, RR};
-use super::linear::LinearAccel;
-use super::bvh::BVHAccel;
+use super::{linear::LinearAccel, bvh::BVHAccel};
 
 #[derive(Copy, Clone)]
 pub enum AccelerationType {

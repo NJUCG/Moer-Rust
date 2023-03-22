@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::cell::RefCell;
 use std::rc::Rc;
 use nalgebra::{Point3, Vector2, Vector3};

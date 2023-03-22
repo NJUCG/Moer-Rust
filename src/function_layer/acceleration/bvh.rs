@@ -26,7 +26,7 @@ const MAX_PRIMS_IN_NODE: usize = 8;
 
 #[derive(Default)]
 pub struct BVHAccel {
-    pub root: Option<Rc<BVHBuildNode>>,
+    root: Option<Rc<BVHBuildNode>>,
     pub acc: AccelerationBase,
 }
 
@@ -61,7 +61,7 @@ impl Acceleration for BVHAccel {
 
 fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize) -> Rc<BVHBuildNode> {
     let mut res = BVHBuildNode::default();
-    let bounds: Vec<_> = shapes.iter().map(|s: &RR<dyn Shape>| s.borrow().shape().bounds3.clone()).collect();
+    let bounds: Vec<_> = shapes.iter().map(|s: &RR<dyn Shape>| s.borrow().get_bounds().clone()).collect();
     res.bounds = Bounds3::arr_bounds(bounds);
     if shapes.len() <= MAX_PRIMS_IN_NODE {
         res.first_shape_offset = b;

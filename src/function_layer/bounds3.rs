@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::mem::swap;
 use crate::function_layer::V3f;
 use super::ray::Ray;
@@ -20,8 +18,9 @@ impl Bounds3 {
         let p_max = p1.sup(&p2);
         Self { p_min, p_max }
     }
+
     pub fn empty() -> Self {
-        Self { p_min: V3f::from([f32::INFINITY; 3]), p_max: V3f::from([f32::MIN; 3]) }
+        Self { p_min: V3f::from([f32::INFINITY; 3]), p_max: V3f::from([f32::NEG_INFINITY; 3]) }
     }
 
     pub fn diagonal(&self) -> V3f { &self.p_max - &self.p_min }
@@ -87,6 +86,7 @@ impl Bounds3 {
             p_max: b1.p_max.sup(&b2.p_max),
         }
     }
+    #[allow(dead_code)]
     pub fn union_point(b: &Bounds3, p: &V3f) -> Bounds3 {
         Bounds3 {
             p_min: b.p_min.inf(p),
@@ -109,9 +109,6 @@ impl Bounds3 {
 
 impl Default for Bounds3 {
     fn default() -> Self {
-        Bounds3 {
-            p_min: V3f::from([f32::INFINITY; 3]),
-            p_max: V3f::from([f32::MIN; 3]),
-        }
+        Bounds3::empty()
     }
 }

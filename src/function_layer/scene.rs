@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::rc::Rc;
 use serde_json::Value;
 use crate::core_layer::distribution::Distribution;

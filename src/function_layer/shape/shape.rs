@@ -1,18 +1,12 @@
-#![allow(dead_code)]
-
 use std::cell::RefCell;
 use std::rc::Rc;
 use nalgebra::{Matrix4, Vector2, Vector3};
 use serde_json::Value;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Bounds3, Light, Material, Ray, construct_material, Intersection, RR};
-use crate::function_layer::material::matte::MatteMaterial;
-use crate::function_layer::shape::cone::Cone;
-use crate::function_layer::shape::cylinder::Cylinder;
-use crate::function_layer::shape::disk::Disk;
-use crate::function_layer::shape::parallelogram::Parallelogram;
-use crate::function_layer::shape::sphere::Sphere;
-use super::triangle::TriangleMesh;
+use crate::function_layer::{Bounds3, Light, Material, Ray, construct_material, Intersection, RR,
+                            material::matte::MatteMaterial};
+use super::{cone::Cone, cylinder::Cylinder, disk::Disk,
+            parallelogram::Parallelogram, sphere::Sphere, triangle::TriangleMesh};
 
 pub trait Shape: Transformable {
     fn shape(&self) -> &ShapeBase;
@@ -90,9 +84,6 @@ impl ShapeBase {
 
     pub fn transform(&self) -> &Transform {
         &self.transform
-    }
-    pub fn bounds3(&self) -> &Bounds3 {
-        &self.bounds3
     }
 }
 

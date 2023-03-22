@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 use std::fmt::{Display, Formatter};
 use std::ops::{Add, AddAssign, Index, Sub, SubAssign};
 use crate::function_layer::V3f;

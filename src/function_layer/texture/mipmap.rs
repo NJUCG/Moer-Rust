@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::rc::Rc;
 use image::imageops::FilterType;
 use image::Rgb32FImage;

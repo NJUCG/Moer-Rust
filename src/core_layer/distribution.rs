@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 #[derive(Clone, PartialEq)]
 pub struct Distribution<T: Clone> {
     data: Vec<T>,
@@ -30,6 +28,7 @@ impl<T: Clone + PartialEq> Distribution<T> {
         self.data[idx.min(self.cdf.len() - 2)].clone()
     }
 
+    #[allow(dead_code)]
     pub fn pdf(&self, sampled: T) -> f32 {
         let entry = self.data.iter().position(move |x| *x == sampled);
         if let Some(idx) = entry {

@@ -1,9 +1,8 @@
-#![allow(dead_code)]
 use std::rc::Rc;
 use nalgebra::Vector2;
 use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::shape::intersection::Intersection;
+use crate::function_layer::Intersection;
 use super::texture::{Texture, TextureCoord, UVMapping};
 use super::mipmap::MipMap;
 use super::texture::TextureMapping;

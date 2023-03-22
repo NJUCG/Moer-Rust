@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use nalgebra::{Matrix4, Point3, Vector4};
 use crate::function_layer::{Bounds3, Ray, V3f};
 

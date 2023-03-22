@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 use std::rc::Rc;
 use nalgebra::Vector2;
 use crate::function_layer::Intersection;
