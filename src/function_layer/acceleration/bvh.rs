@@ -84,9 +84,7 @@ fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize) -> Rc<BVHBuildNode>
 
 impl BVHAccel {
     pub fn get_intersection(node: Rc<BVHBuildNode>, ray: &mut Ray, shapes: &Vec<RR<dyn Shape>>) -> Option<(u64, u64, f32, f32)> {
-        if !node.bounds.intersect_p(ray) {
-            return None;
-        }
+        if !node.bounds.intersect_p(ray) { return None; }
         if node.left.is_none() && node.right.is_none() {
             let (mut dist, mut p_id, mut u, mut v) = (f32::INFINITY, 0u64, 0.0, 0.0);
             let mut sp = shapes[node.first_shape_offset].borrow();

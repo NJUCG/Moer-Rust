@@ -53,7 +53,7 @@ impl Bounds3 {
         if self.p_max.z > self.p_min.z { o.z /= self.p_max.z - self.p_min.z; }
         o
     }
-    #[allow(dead_code)]
+
     pub fn overlaps(b1: &Bounds3, b2: &Bounds3) -> bool {
         let x = b1.p_max.x >= b2.p_min.x && b1.p_min.x <= b2.p_max.x;
         let y = b1.p_max.y >= b2.p_min.y && b1.p_min.y <= b2.p_max.y;
@@ -103,6 +103,24 @@ impl Bounds3 {
 
     pub fn arr_bounds(v: Vec<Bounds3>) -> Bounds3 {
         v.iter().fold(Bounds3::default(), |b1, b2| { Bounds3::union_bounds(&b1, b2) })
+    }
+
+    pub fn sub_bounds(b: &Bounds3) -> [Bounds3; 8] {
+        let diff = (b.p_max - b.p_min) / 2.0;
+        let mut arr = Vec::with_capacity(8);
+        for i in [0.0, 1.0] {
+            for j in [0.0, 1.0] {
+                for k in [0.0, 1.0] {
+                    let p_min = b.p_min + V3f::new(i * diff.x, j * diff.y, k * diff.z);
+                    let p_max = p_min + diff;
+                    arr.push(Bounds3 {
+                        p_min,
+                        p_max,
+                    })
+                }
+            }
+        }
+        arr.try_into().unwrap()
     }
 }
 

@@ -1,10 +1,10 @@
 use std::cell::RefCell;
 use crate::function_layer::{Shape, Intersection, Ray, Bounds3, RR};
+use crate::function_layer::acceleration::octree::Octree;
 use super::{linear::LinearAccel, bvh::BVHAccel};
 
 #[derive(Copy, Clone)]
 pub enum AccelerationType {
-    Embree,
     Linear,
     Octree,
     BVH,
@@ -42,7 +42,6 @@ pub struct AccelerationBase {
 pub fn set_acc_type(tp: &str) {
     unsafe {
         ACC_TYPE = match tp {
-            "embree" => AccelerationType::Embree,
             "linear" => AccelerationType::Linear,
             "octree" => AccelerationType::Octree,
             "bvh" => AccelerationType::BVH,
@@ -55,6 +54,6 @@ pub fn create_acceleration() -> RR<dyn Acceleration> {
     match unsafe { ACC_TYPE } {
         AccelerationType::BVH => RR::new(RefCell::new(BVHAccel::default())),
         AccelerationType::Linear => RR::new(RefCell::new(LinearAccel::default())),
-        _ => panic!("Not implemented yet!")
+        AccelerationType::Octree => RR::new(RefCell::new(Octree::default())),
     }
 }

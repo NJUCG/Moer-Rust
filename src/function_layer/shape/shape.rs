@@ -20,8 +20,8 @@ pub trait Shape: Transformable {
     fn material(&self) -> Option<Rc<dyn Material>> {
         self.shape().material.clone()
     }
-    fn get_bounds(&self) -> Bounds3 {
-        self.shape().bounds3.clone()
+    fn get_bounds(&self) -> &Bounds3 {
+        &self.shape().bounds3
     }
     fn geometry_id(&self) -> u64 {
         self.shape().geometry_id
