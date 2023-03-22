@@ -78,7 +78,7 @@ impl Bounds3 {
         if inv_dir.z < 0.0 { swap(&mut t_min.z, &mut t_max.z); }
         t_near = t_near.max(t_min.max());
         t_far = t_far.min(t_max.min());
-        t_near < t_far
+        t_near <= t_far
     }
     pub fn union_bounds(b1: &Bounds3, b2: &Bounds3) -> Bounds3 {
         Bounds3 {

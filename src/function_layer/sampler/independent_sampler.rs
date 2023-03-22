@@ -33,10 +33,10 @@ impl Sampler for IndependentSampler {
     }
 
     fn next_1d(&mut self) -> f32 {
-        self.rng.gen()
+        self.rng.gen::<f32>() + f32::EPSILON
     }
 
     fn next_2d(&mut self) -> Vector2<f32> {
-        Vector2::new(0.2, 0.2)
+        Vector2::new(self.rng.gen::<f32>() + f32::EPSILON, self.rng.gen::<f32>() + f32::EPSILON)
     }
 }
