@@ -1,5 +1,6 @@
 use std::rc::Rc;
 use crate::function_layer::{Acceleration, Bounds3, Ray, RR, Shape};
+use crate::function_layer::bounds3::Axis;
 use super::acceleration::{AccelerationBase, AccelerationType};
 
 pub struct BVHBuildNode {
@@ -8,6 +9,7 @@ pub struct BVHBuildNode {
     right: Option<Rc<BVHBuildNode>>,
     first_shape_offset: usize,
     n_shapes: usize,
+    split_axis: Axis,
 }
 
 impl Default for BVHBuildNode {
@@ -18,6 +20,7 @@ impl Default for BVHBuildNode {
             right: None,
             first_shape_offset: 0,
             n_shapes: 0,
+            split_axis: Axis::X,
         }
     }
 }
@@ -75,6 +78,7 @@ fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize) -> Rc<BVHBuildNode>
             &s2.borrow().shape().bounds3.centroid_axis(axis)
         ).unwrap()
     });
+    res.split_axis = axis;
     let l = recursively_build(&mut shapes[..mid], b);
     let r = recursively_build(&mut shapes[mid..], b + mid);
     res.left = Some(l);
@@ -100,8 +104,15 @@ impl BVHAccel {
             if dist.is_infinite() { return None; }
             return Some((sp.geometry_id(), p_id, u, v));
         }
-        let hit1 = BVHAccel::get_intersection(node.left.as_ref().unwrap().clone(), ray, shapes);
-        let hit2 = BVHAccel::get_intersection(node.right.as_ref().unwrap().clone(), ray, shapes);
+        let mut two_child = [node.left.as_ref().unwrap().clone(), node.right.as_ref().unwrap().clone()];
+        let flip: bool = match node.split_axis {
+            Axis::X => ray.direction.x < 0.0,
+            Axis::Y => ray.direction.y < 0.0,
+            Axis::Z => ray.direction.z < 0.0
+        };
+        if flip { two_child.reverse();}
+        let hit1 = BVHAccel::get_intersection(two_child[0].clone(), ray, shapes);
+        let hit2 = BVHAccel::get_intersection(two_child[1].clone(), ray, shapes);
         if hit2.is_some() { hit2 } else { hit1 }
     }
 }

@@ -1,8 +1,6 @@
 use crate::function_layer::{Acceleration, Bounds3, Ray, RR, Shape};
 use super::acceleration::{AccelerationBase, AccelerationType};
 
-const N_SUB: usize = 8;
-
 const MAX_DEPTH: usize = 4;
 const MAX_LEAF_SIZE: usize = 32;
 
@@ -10,7 +8,7 @@ const MAX_LEAF_SIZE: usize = 32;
 struct OctreeNode {
     bounds: Bounds3,
     index_buf: Option<Vec<usize>>,
-    sub_nodes: Option<[Option<Box<OctreeNode>>; N_SUB]>,
+    sub_nodes: Option<[Option<Box<OctreeNode>>; 8]>,
 }
 
 #[derive(Default)]

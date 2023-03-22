@@ -1,5 +1,3 @@
-extern crate core;
-
 mod function_layer;
 mod core_layer;
 mod resource_layer;
@@ -46,8 +44,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             film.borrow_mut().deposit(Vector2::new(x, y), &(li / spp as f32));
         }
         update_progress(y as f64 / height as f64);
-        // println!();
     }
+    println!();
     println!("Render complete: ");
     println!("Time taken: {:.2} s", start.elapsed().as_secs_f32());
 
