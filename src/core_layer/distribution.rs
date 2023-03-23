@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 #[derive(Clone, PartialEq)]
 pub struct Distribution<T: Clone> {
     data: Vec<T>,
@@ -24,9 +26,13 @@ impl<T: Clone + PartialEq> Distribution<T> {
     pub fn sample(&self, sample: f32, pdf: &mut f32) -> Option<T> {
         if self.cdf.len() == 1 {
             *pdf = 0.0;
-            return None
+            return None;
         }
-        let idx = self.cdf.binary_search_by(|probe: &f32| probe.partial_cmp(&sample).unwrap());
+        let idx = self.cdf.binary_search_by(|probe: &f32|
+            match probe.partial_cmp(&sample).unwrap() {
+                Ordering::Equal => Ordering::Greater,
+                ord => ord,
+            });
         let idx = match idx { Ok(i) | Err(i) => i, } - 1;
         *pdf = self.cdf[idx + 1] - self.cdf[idx];
         Some(self.data[idx.min(self.cdf.len() - 2)].clone())

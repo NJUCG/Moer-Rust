@@ -20,12 +20,12 @@ impl LambertReflection {
 
 impl BSDF for LambertReflection {
     fn f(&self, wo: &V3f, wi: &V3f) -> SpectrumRGB {
-        let wo_local = self.to_local(wo);
+        let _wo_local = self.to_local(wo);
         let wi_local = self.to_local(wi);
-        if wo_local[1] <= 0.0 || wi_local[1] <= 0.0 {
-            SpectrumRGB::same(0.0)
-        } else { self.albedo * (INV_PI * wi_local[1]) }
-        // self.albedo * (INV_PI * wi_local[1])
+        // if wo_local[1] <= 0.0 || wi_local[1] <= 0.0 {
+        //     SpectrumRGB::same(0.0)
+        // } else { self.albedo * (INV_PI * wi_local[1]) }
+        self.albedo * (INV_PI * wi_local[1])
     }
 
     fn sample(&self, _wo: &V3f, sample: &Vector2<f32>) -> BSDFSampleResult {
