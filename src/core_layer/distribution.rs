@@ -33,7 +33,7 @@ impl<T: Clone + PartialEq> Distribution<T> {
                 Ordering::Equal => Ordering::Greater,
                 ord => ord,
             });
-        let idx = match idx { Ok(i) | Err(i) => i, } - 1;
+        let idx = idx.err().unwrap() - 1;
         *pdf = self.cdf[idx + 1] - self.cdf[idx];
         Some(self.data[idx.min(self.cdf.len() - 2)].clone())
     }

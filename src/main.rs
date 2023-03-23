@@ -26,12 +26,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     let scene = Scene::from_json(&json["scene"]);
     let integrator = construct_integrator(&json["integrator"]);
     let sampler = construct_sampler(&json["sampler"]);
-    let spp = sampler.borrow().xsp() * sampler.borrow().ysp() * 10;
+    let spp = sampler.borrow().xsp() * sampler.borrow().ysp();
     println!("spp: {spp}");
     let film = camera.film().unwrap();
     let [width, height] = film.borrow().size;
     let start = Instant::now();
-    for y in 20..height {
+    for y in 0..height {
         for x in 0..width {
             let ndc = Vector2::new(x as f32 / width as f32, y as f32 / height as f32);
             let mut li = SpectrumRGB::same(0.0);
@@ -39,8 +39,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                 let mut ray = camera.sample_ray_differentials(
                     &CameraSample { xy: sampler.borrow_mut().next_2d(), lens: Vector2::zeros(), time: 0.0 }, ndc,
                 );
-                let delta_li =integrator.li(&mut ray, &scene, sampler.clone());
-                li += delta_li;
+                li += integrator.li(&mut ray, &scene, sampler.clone());
+                ;
             }
             film.borrow_mut().deposit(Vector2::new(x, y), &(li / spp as f32));
         }
@@ -62,7 +62,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     film.borrow().save(out_name, format).unwrap();
     Ok(())
 }
-
 
 pub fn update_progress(progress: f64) {
     let bar_width = 70;
