@@ -88,8 +88,8 @@ impl Light for EnvironmentLight {
         let inv_height = 1.0 / sz.y as f32;
         let mut pdf = 0.0;
         let index = self.energy_distribution.sample(sample.x, &mut pdf).unwrap();
-        let u = index.x as f32 * inv_width;
-        let v = index.y as f32 * inv_height;
+        let u = (index.x as f32 * inv_width) % 1.0;
+        let v = (index.y as f32 * inv_height) % 2.0;
         let phi = u * 2.0 * PI;
         let theta = v * PI;
         let sin_theta = theta.sin();
