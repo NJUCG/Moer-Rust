@@ -31,7 +31,8 @@ impl Scene {
         let mut light_v = vec![];
         for light in lights {
             let light = construct_light(&light);
-            match light.borrow().light_type() {
+            let ltp = light.borrow().light_type();
+            match ltp {
                 // 如果是环境光源，不加入光源分布
                 LightType::EnvironmentLight => {
                     let light = EnvironmentLight::copy_constr(light.borrow().as_any().downcast_ref::<EnvironmentLight>().unwrap());

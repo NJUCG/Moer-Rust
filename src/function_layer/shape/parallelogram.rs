@@ -107,6 +107,6 @@ impl Shape for Parallelogram {
     }
 
     fn shape_type(&self) -> String {
-        "parallerlogram".to_owned()
+        "Parallelogram".to_owned()
     }
 }

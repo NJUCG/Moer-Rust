@@ -40,7 +40,6 @@ fn main() -> Result<(), Box<dyn Error>> {
                     &CameraSample { xy: sampler.borrow_mut().next_2d(), lens: Vector2::zeros(), time: 0.0 }, ndc,
                 );
                 li += integrator.li(&mut ray, &scene, sampler.clone());
-                ;
             }
             film.borrow_mut().deposit(Vector2::new(x, y), &(li / spp as f32));
         }

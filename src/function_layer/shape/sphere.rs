@@ -4,7 +4,7 @@ use nalgebra::{Point3, Vector2};
 use serde_json::Value;
 use crate::core_layer::constants::INV_PI;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Intersection, Ray, Shape, V3f};
+use crate::function_layer::{Bounds3, Intersection, Ray, Shape, V3f};
 use crate::function_layer::shape::shape::fetch_v3f;
 use super::shape::ShapeBase;
 
@@ -17,10 +17,14 @@ pub struct Sphere {
 
 impl Sphere {
     pub fn from_json(json: &Value) -> Self {
-        let shape = ShapeBase::from_json(json);
+        let mut shape = ShapeBase::from_json(json);
         let center = fetch_v3f(json, "center", V3f::default());
         let center = Point3::from(center.unwrap());
         let radius = json["radius"].as_f64().unwrap() as f32;
+        shape.bounds3 = Bounds3::new(
+            (center - V3f::from([radius; 3])).coords,
+            (center + V3f::from([radius; 3])).coords,
+        );
         Sphere {
             shape,
             center,
@@ -49,7 +53,7 @@ impl Shape for Sphere {
         let dir = &ray.direction;
         let o2c = self.center - origin;
         let b = o2c.dot(dir);
-        let c = o2c.norm() * o2c.norm() - self.radius * self.radius;
+        let c = o2c.dot(&o2c) - self.radius * self.radius;
         let delta = b * b - c;
         if delta <= 0.0 { return None; }
         let sqrt_delta = delta.sqrt();
@@ -68,7 +72,7 @@ impl Shape for Sphere {
         if !hit { return None; }
         // TODO 计算 u, v考虑旋转
         let normal = (ray.at(ray.t_max) - self.center).normalize();
-        let cos_theta = normal.x;
+        let cos_theta = normal.y;
         let u = if normal.z.abs() < 1e-4 {
             if normal.x > 0.0 { PI * 0.5 } else { PI * 1.5 }
         } else {
