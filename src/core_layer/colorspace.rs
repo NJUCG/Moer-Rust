@@ -52,6 +52,7 @@ impl SpectrumRGB {
         Self { rgb: Vector3::from([f; 3]) }
     }
 
+    #[allow(dead_code)]
     pub fn new(r: f32, g: f32, b: f32) -> Self {
         Self { rgb: Vector3::new(r, g, b) }
     }

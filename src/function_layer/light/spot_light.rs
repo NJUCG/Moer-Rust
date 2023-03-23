@@ -4,6 +4,7 @@ use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::core_layer::constants::EPSILON;
 use crate::function_layer::{Intersection, Light, V3f};
+use crate::function_layer::shape::shape::fetch_v3f;
 use super::light::{LightType, LightSampleResult};
 
 pub struct SpotLight {
@@ -13,11 +14,11 @@ pub struct SpotLight {
 
 impl SpotLight {
     pub fn from_json(json: &Value) -> Self {
-        let position: Vec<f32> = serde_json::from_value(json["position"].clone()).unwrap();
-        let energy: Vec<f32> = serde_json::from_value(json["energy"].clone()).unwrap();
+        let position= fetch_v3f(json, "position", V3f::default()).unwrap();
+        let energy = fetch_v3f(json, "energy", V3f::default()).unwrap();
         Self {
-            position: Point3::from_slice(&position),
-            energy: SpectrumRGB::new(energy[0], energy[1], energy[2]),
+            position: Point3::from(position),
+            energy: SpectrumRGB::from_rgb(energy),
         }
     }
 }

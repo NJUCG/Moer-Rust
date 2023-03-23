@@ -3,8 +3,7 @@ use std::rc::Rc;
 use nalgebra::{Matrix4, Vector2, Vector3};
 use serde_json::Value;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Bounds3, Light, Material, Ray, construct_material, Intersection, RR,
-                            material::matte::MatteMaterial};
+use crate::function_layer::{Bounds3, Light, Material, Ray, construct_material, Intersection, RR, material::matte::MatteMaterial, V3f};
 use super::{cone::Cone, cylinder::Cylinder, disk::Disk,
             parallelogram::Parallelogram, sphere::Sphere, triangle::TriangleMesh};
 
@@ -45,10 +44,10 @@ pub struct ShapeBase {
     pub bounds3: Bounds3,
 }
 
-fn fetch_v3f(json: &Value, field: &str, dft: Vector3<f32>) -> Vector3<f32> {
+pub fn fetch_v3f(json: &Value, field: &str, dft: Vector3<f32>) -> Result<V3f, V3f> {
     match json.get(field) {
-        None => dft,
-        Some(val) => Vector3::<f32>::from_vec(serde_json::from_value(val.clone()).unwrap())
+        None => Err(dft),
+        Some(val) => Ok(Vector3::<f32>::from_vec(serde_json::from_value(val.clone()).unwrap()))
     }
 }
 
@@ -63,12 +62,12 @@ impl ShapeBase {
             let translate = fetch_v3f(transform, "translate", Vector3::zeros());
             let scale = fetch_v3f(transform, "scale", Vector3::from([1.0; 3]));
 
-            let translate_mat = Transform::translation(&translate);
-            let scale_mat = Transform::scalation(&scale);
+            let translate_mat = Transform::translation(&match translate { Ok(i) | Err(i) => i});
+            let scale_mat = Transform::scalation(&match scale { Ok(i) | Err(i) => i});
             let rotate_mat = if !transform["rotate"].is_null() {
                 let axis = fetch_v3f(&transform["rotate"], "axis", Vector3::from([1.0; 3]));
                 let radian = transform["rotate"]["radian"].as_f64().unwrap_or(0.0);
-                Transform::rotation(&axis, radian as f32)
+                Transform::rotation(&axis.unwrap(), radian as f32)
             } else { Matrix4::identity() };
             Transform::new(translate_mat, rotate_mat, scale_mat)
         } else {

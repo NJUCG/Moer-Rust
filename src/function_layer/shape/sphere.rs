@@ -5,6 +5,7 @@ use serde_json::Value;
 use crate::core_layer::constants::INV_PI;
 use crate::core_layer::transform::{Transform, Transformable};
 use crate::function_layer::{Intersection, Ray, Shape, V3f};
+use crate::function_layer::shape::shape::fetch_v3f;
 use super::shape::ShapeBase;
 
 #[derive(Clone)]
@@ -17,8 +18,8 @@ pub struct Sphere {
 impl Sphere {
     pub fn from_json(json: &Value) -> Self {
         let shape = ShapeBase::from_json(json);
-        let center: Vec<f32> = serde_json::from_value(json["center"].clone()).unwrap();
-        let center = Point3::from_slice(&center);
+        let center = fetch_v3f(json, "center", V3f::default());
+        let center = Point3::from(center.unwrap());
         let radius = json["radius"].as_f64().unwrap() as f32;
         Sphere {
             shape,

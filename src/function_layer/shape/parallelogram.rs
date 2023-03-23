@@ -3,6 +3,7 @@ use nalgebra::{Point3, Vector2};
 use serde_json::Value;
 use crate::core_layer::transform::{Transform, Transformable};
 use crate::function_layer::{Intersection, Ray, Shape, V3f};
+use crate::function_layer::shape::shape::fetch_v3f;
 use super::shape::ShapeBase;
 
 #[derive(Clone)]
@@ -16,12 +17,10 @@ pub struct Parallelogram {
 
 impl Parallelogram {
     pub fn from_json(json: &Value) -> Self {
-        let base: Vec<f32> = serde_json::from_value(json["base"].clone()).unwrap();
-        let edge0: Vec<f32> = serde_json::from_value(json["edge0"].clone()).unwrap();
-        let edge1: Vec<f32> = serde_json::from_value(json["edge1"].clone()).unwrap();
-        let base = Point3::from([base[0], base[1], base[2]]);
-        let edge0 = V3f::from_vec(edge0);
-        let edge1 = V3f::from_vec(edge1);
+        let base = fetch_v3f(json, "base", V3f::default()).unwrap();
+        let edge0 = fetch_v3f(json, "edge0", V3f::default()).unwrap();
+        let edge1 = fetch_v3f(json, "edge1", V3f::default()).unwrap();
+        let base = Point3::from(base);
 
         let mut shape = ShapeBase::from_json(json);
         let trans = &shape.transform;

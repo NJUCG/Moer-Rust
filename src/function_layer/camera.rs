@@ -5,6 +5,7 @@ use nalgebra::{Matrix4, Point3, Vector2};
 use serde_json::Value;
 use crate::core_layer::transform::Transform;
 use crate::function_layer::{V3f, Ray, Film, ray::RayDifferential, RR};
+use crate::function_layer::shape::shape::fetch_v3f;
 
 type V2f = Vector2<f32>;
 
@@ -93,8 +94,8 @@ impl PerspectiveCamera {
 }
 
 fn fetch_point(json: &Value, field: &str) -> Point3<f32> {
-    let arr: Vec<f32> = serde_json::from_value(json[field].clone()).unwrap();
-    let res = Point3::from_slice(&arr);
+    let arr= fetch_v3f(json, field, V3f::default());
+    let res = Point3::from(arr.unwrap());
     res
 }
 

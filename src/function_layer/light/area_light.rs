@@ -4,6 +4,7 @@ use nalgebra::Vector2;
 use serde_json::Value;
 use crate::core_layer::{colorspace::SpectrumRGB, constants::EPSILON};
 use crate::function_layer::{construct_shape, Intersection, RR, Shape, V3f};
+use crate::function_layer::shape::shape::fetch_v3f;
 use super::light::{Light, LightSampleResult, LightType};
 
 pub struct AreaLight {
@@ -14,8 +15,8 @@ pub struct AreaLight {
 impl AreaLight {
     pub fn from_json(json: &Value) -> Self {
         let shape = construct_shape(&json["shape"]);
-        let energy: Vec<f32> = serde_json::from_value(json["energy"].clone()).unwrap();
-        let energy = SpectrumRGB::new(energy[0], energy[1], energy[2]);
+        let energy = fetch_v3f(json, "energy", V3f::default());
+        let energy = SpectrumRGB::from_rgb(match energy { Ok(i) | Err(i) => i });
         Self {
             shape: Some(shape),
             energy,

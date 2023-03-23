@@ -4,15 +4,12 @@ use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
 use super::bxdf::BSDF;
 use super::bxdf::lambert::LambertReflection;
-use crate::function_layer::{
-    Intersection,
-    Texture,
-    texture::{
-        constant_texture::ConstantTexture,
-        normal_texture::NormalTexture,
-        texture::construct_texture,
-    },
-};
+use crate::function_layer::{Intersection, Texture, texture::{
+    constant_texture::ConstantTexture,
+    normal_texture::NormalTexture,
+    texture::construct_texture,
+}, V3f};
+use crate::function_layer::shape::shape::fetch_v3f;
 
 use super::Material;
 
@@ -36,8 +33,8 @@ impl MatteMaterial {
         let albedo = if json["albedo"].is_object() {
             construct_texture::<SpectrumRGB>(json)
         } else if json["albedo"].is_array() {
-            let arr: Vec<f32> = serde_json::from_value(json["albedo"].clone()).unwrap();
-            let s = SpectrumRGB::from_rgb(Vector3::new(arr[0], arr[1], arr[2]));
+            let rgb = fetch_v3f(json, "albedo", V3f::default());
+            let s = SpectrumRGB::from_rgb(rgb.unwrap());
             Rc::new(ConstantTexture::new(&s))
         } else {
             panic!("Error in albedo format!");
