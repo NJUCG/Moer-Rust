@@ -10,6 +10,5 @@ fastapprox = "0.3.0"
 image = "0.24.5"
 nalgebra = "0.32.2"
 rand = "0.8.5"
-serde = { version = "1.0.15", features = ["derive"] }
 serde_json = "1.0.94"
 tobj = "3.2.4"

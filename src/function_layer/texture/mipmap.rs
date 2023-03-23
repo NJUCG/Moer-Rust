@@ -54,7 +54,7 @@ impl MipMap {
     pub fn look_up(&self, uv: Vector2<f32>, duv0: Vector2<f32>, duv1: Vector2<f32>) -> Vector3<f32> {
         let width = duv0.amax().max(duv1.amax());
 
-        let level = self.pyramid.len() as f32 - 1.0 + fastapprox::fast::log2(width.max(1e-8));
+        let level = self.pyramid.len() as f32 - 1.0 + width.max(1e-8).log2();
         // let x = uv.x * self.pyramid[0].dimensions().0 as f32;
         // let y = uv.y * self.pyramid[0].dimensions().0 as f32;
         if level < 0.0 {

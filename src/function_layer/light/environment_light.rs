@@ -92,10 +92,10 @@ impl Light for EnvironmentLight {
         let v = (index.y as f32 * inv_height) % 2.0;
         let phi = u * 2.0 * PI;
         let theta = v * PI;
-        let sin_theta = theta.sin();
-        let cos_theta = theta.cos();
-        let sin_phi = phi.sin();
-        let cos_phi = phi.cos();
+        let sin_theta = fastapprox::fast::sin(theta);
+        let cos_theta = fastapprox::fast::cos(theta);
+        let sin_phi = fastapprox::fast::sinfull(phi);
+        let cos_phi = fastapprox::fast::cosfull(phi);
 
         let x = sin_theta * sin_phi;
         let y = cos_theta;
