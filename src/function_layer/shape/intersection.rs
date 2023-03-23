@@ -26,12 +26,13 @@ pub struct Intersection {
 
 pub fn compute_ray_differentials(intersection: &mut Intersection, ray: &Ray) {
     loop {
+        if ray.differential.is_none() { break; }
         let p = intersection.position;
         let n = intersection.normal;
         let df = ray.differential.as_ref().unwrap();
         let ox = V3f::from(df.origin_x.coords);
         let oy = V3f::from(df.origin_y.coords);
-        let d = n.dot(&V3f::from(p.coords));
+        let d = n.dot(&p.coords);
         let tx = -(n.dot(&ox) - d) / n.dot(&df.direction_x);
         if tx.is_infinite() || tx.is_nan() { break; }
         let ty = -(n.dot(&oy) - d) / n.dot(&df.direction_y);
@@ -57,7 +58,7 @@ pub fn compute_ray_differentials(intersection: &mut Intersection, ray: &Ray) {
         let dp_dv = intersection.dp_dv;
         let dp_dx = intersection.dp_dx;
         let dp_dy = intersection.dp_dy;
-        let a = [[dp_du[d1], dp_dy[d1]], [dp_du[d2], dp_dv[d2]]];
+        let a = [[dp_du[d1], dp_dv[d1]], [dp_du[d2], dp_dv[d2]]];
         let bx = [dp_dx[d1], dp_dx[d2]];
         let by = [dp_dy[d1], dp_dy[d2]];
 
@@ -76,14 +77,11 @@ pub fn compute_ray_differentials(intersection: &mut Intersection, ray: &Ray) {
         intersection.dv_dy = dv_dy;
         return;
     }
-
-    if ray.differential.is_none() {
-        intersection.du_dx = 0.0;
-        intersection.dv_dx = 0.0;
-        intersection.du_dy = 0.0;
-        intersection.dv_dy = 0.0;
-        intersection.dp_dx = V3f::zeros();
-        intersection.dp_dy = V3f::zeros();
-        return;
-    }
+    intersection.du_dx = 0.0;
+    intersection.dv_dx = 0.0;
+    intersection.du_dy = 0.0;
+    intersection.dv_dy = 0.0;
+    intersection.dp_dx = V3f::zeros();
+    intersection.dp_dy = V3f::zeros();
+    return;
 }

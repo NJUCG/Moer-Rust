@@ -54,7 +54,7 @@ impl EnvironmentLight {
         let weight_func = |index: Vector2<usize>| {
             let u = index.x as f32 * inv_width;
             let v = index.y as f32 * inv_height;
-            let sin_theta = fastapprox::fast::sin(PI * (index.y as f32 + 0.5) * inv_height);
+            let sin_theta = (PI * (index.y as f32 + 0.5) * inv_height).sin();
             let tex_coord = TextureCoord {
                 coord: Vector2::new(u, v),
                 duv_dx: Vector2::zeros(),
@@ -87,15 +87,15 @@ impl Light for EnvironmentLight {
         let inv_width = 1.0 / sz.x as f32;
         let inv_height = 1.0 / sz.y as f32;
         let mut pdf = 0.0;
-        let index = self.energy_distribution.sample(sample.x, &mut pdf);
+        let index = self.energy_distribution.sample(sample.x, &mut pdf).unwrap();
         let u = index.x as f32 * inv_width;
         let v = index.y as f32 * inv_height;
         let phi = u * 2.0 * PI;
         let theta = v * PI;
-        let sin_theta = fastapprox::fast::sin(theta);
-        let cos_theta = fastapprox::fast::cos(theta);
-        let sin_phi = fastapprox::fast::sin(phi);
-        let cos_phi = fastapprox::fast::cos(phi);
+        let sin_theta = theta.sin();
+        let cos_theta = theta.cos();
+        let sin_phi = phi.sin();
+        let cos_phi = phi.cos();
 
         let x = sin_theta * sin_phi;
         let y = cos_theta;

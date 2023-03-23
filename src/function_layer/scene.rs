@@ -7,7 +7,7 @@ use crate::function_layer::light::{light::LightType,
 use crate::function_layer::{Ray, Light, Intersection, Acceleration, construct_shape, construct_light, RR, create_acceleration, set_acc_type};
 
 pub struct Scene {
-    pub infinite_lights: Option<Rc<EnvironmentLight>>,
+    pub infinite_lights: Vec<Rc<EnvironmentLight>>,
     acceleration: RR<dyn Acceleration>,
     light_distribution: Distribution<RR<dyn Light>>,
 }
@@ -25,7 +25,7 @@ impl Scene {
             geom_id += 1;
             acceleration.borrow_mut().attach_shape(shape);
         }
-        let mut infinite_lights: Option<Rc<EnvironmentLight>> = None;
+        let mut infinite_lights = vec![];
 
         let lights = json["lights"].as_array().unwrap().to_vec();
         let mut light_v = vec![];
@@ -35,7 +35,7 @@ impl Scene {
                 // 如果是环境光源，不加入光源分布
                 LightType::EnvironmentLight => {
                     let light = EnvironmentLight::copy_constr(light.borrow().as_any().downcast_ref::<EnvironmentLight>().unwrap());
-                    infinite_lights = Some(Rc::new(light));
+                    infinite_lights.push(Rc::new(light));
                     continue;
                 }
                 // 如果是面光源，将其shape也加入加速结构
@@ -67,7 +67,7 @@ impl Scene {
         self.acceleration.borrow().get_intersect(ray)
     }
 
-    pub fn sample_light(&self, sample: f32, pdf: &mut f32) -> RR<dyn Light> {
+    pub fn sample_light(&self, sample: f32, pdf: &mut f32) -> Option<RR<dyn Light>> {
         self.light_distribution.sample(sample, pdf)
     }
 }

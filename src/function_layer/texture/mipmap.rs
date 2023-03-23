@@ -20,7 +20,7 @@ impl MipMap {
             let previous = pyramid.last().unwrap();
             let p_size = previous.dimensions();
             let current = image::imageops::resize(previous.as_ref(),
-                                                         p_size.0 / 2, p_size.1 / 2, FilterType::Nearest);
+                                                  p_size.0 / 2, p_size.1 / 2, FilterType::Nearest);
             pyramid.push(Rc::new(current));
         }
         Self {
@@ -28,11 +28,12 @@ impl MipMap {
         }
     }
 
-    pub fn texel(&self, level: u32, x: u32, y: u32) -> Vector3<f32> {
+    pub fn texel(&self, level: u32, x: i64, y: i64) -> Vector3<f32> {
         let image = &self.pyramid[level as usize];
-        let x = clamp(x, 0, image.dimensions().0);
-        let y = clamp(y, 0, image.dimensions().1);
-        Vector3::from(image.get_pixel(x, y).0)
+        let x = clamp(x, 0, image.dimensions().0 as i64);
+        let y = clamp(y, 0, image.dimensions().1 as i64);
+        let rbg = image.get_pixel(x as u32, y as u32).0;
+        Vector3::from(rbg)
     }
 
     pub fn bilinear(&self, level: u32, uv: Vector2<f32>) -> Vector3<f32> {
@@ -40,10 +41,10 @@ impl MipMap {
         let (x, y) = self.pyramid[level as usize].dimensions();
         let x = uv.x * x as f32 - 0.5;
         let y = uv.y * y as f32 - 0.5;
-        let x0 = x.floor() as u32;
-        let y0 = y.floor() as u32;
-        let dx = x.fract();
-        let dy = y.fract();
+        let x0 = x.floor() as i64;
+        let y0 = y.floor() as i64;
+        let dx = x - x.floor();
+        let dy = y - y.floor();
         (1.0 - dx) * (1.0 - dy) * self.texel(level, x0, y0) +
             (1.0 - dx) * dy * self.texel(level, x0, y0 + 1) +
             dx * (1.0 - dy) * self.texel(level, x0 + 1, y0) +
@@ -52,6 +53,7 @@ impl MipMap {
 
     pub fn look_up(&self, uv: Vector2<f32>, duv0: Vector2<f32>, duv1: Vector2<f32>) -> Vector3<f32> {
         let width = duv0.amax().max(duv1.amax());
+
         let level = self.pyramid.len() as f32 - 1.0 + fastapprox::fast::log2(width.max(1e-8));
         // let x = uv.x * self.pyramid[0].dimensions().0 as f32;
         // let y = uv.y * self.pyramid[0].dimensions().0 as f32;

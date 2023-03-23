@@ -23,6 +23,7 @@ pub fn convert_pdf(result: &LightSampleResult, _intersection: &Intersection) -> 
             pdf *= distance * distance;
             pdf /= result.normal.dot(&result.direction).abs();
         }
+        // 环境光的pdf转换在采样时已经完成
         LightType::EnvironmentLight => ()
     };
     pdf
