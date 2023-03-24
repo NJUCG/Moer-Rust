@@ -34,6 +34,6 @@ pub fn construct_integrator(json: &Value) -> Rc<dyn Integrator> {
         "directSampleLight" => Rc::new(DirectIntegratorSampleLight {}),
         "directSampleBSDF" => Rc::new(DirectIntegratorSampleBSDF {}),
         "normal" => Rc::new(NormalIntegrator {}),
-        _ => panic!("Invalid integrator type!"),
+        tp => panic!("Invalid integrator type: {}!", tp),
     }
 }

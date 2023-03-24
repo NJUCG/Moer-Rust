@@ -4,7 +4,7 @@ use nalgebra::{Matrix4, Vector2, Vector3};
 use serde_json::Value;
 use crate::core_layer::transform::{Transform, Transformable};
 use crate::function_layer::{Bounds3, Light, Material, Ray, construct_material, Intersection, RR, material::matte::MatteMaterial, V3f};
-use super::{cone::Cone, cylinder::Cylinder, disk::Disk,
+use super::{cone::Cone, cylinder::Cylinder, disk::Disk, cube::Cube,
             parallelogram::Parallelogram, sphere::Sphere, triangle::TriangleMesh};
 
 pub trait Shape: Transformable {
@@ -62,8 +62,8 @@ impl ShapeBase {
             let translate = fetch_v3f(transform, "translate", Vector3::zeros());
             let scale = fetch_v3f(transform, "scale", Vector3::from([1.0; 3]));
 
-            let translate_mat = Transform::translation(&match translate { Ok(i) | Err(i) => i});
-            let scale_mat = Transform::scalation(&match scale { Ok(i) | Err(i) => i});
+            let translate_mat = Transform::translation(&match translate { Ok(i) | Err(i) => i });
+            let scale_mat = Transform::scalation(&match scale { Ok(i) | Err(i) => i });
             let rotate_mat = if !transform["rotate"].is_null() {
                 let axis = fetch_v3f(&transform["rotate"], "axis", Vector3::from([1.0; 3]));
                 let radian = transform["rotate"]["radian"].as_f64().unwrap_or(0.0);
@@ -95,6 +95,7 @@ pub fn construct_shape(json: &Value) -> RR<dyn Shape> {
         "disk" => Rc::new(RefCell::new(Disk::from_json(json))),
         "cylinder" => Rc::new(RefCell::new(Cylinder::from_json(json))),
         "cone" => Rc::new(RefCell::new(Cone::from_json(json))),
+        "cube" => Rc::new(RefCell::new(Cube::from_json(json))),
         t => panic!("Invalid shape type: {}", t)
     }
 }

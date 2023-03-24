@@ -112,8 +112,8 @@ impl Transform {
         let o = self.inv_rotate * self.inv_translate * o;
         let d = self.inv_rotate * self.inv_translate * d;
 
-        let origin = Point3::from(o.xyz() / o.w);
-        let direction = d.xyz();
+        let origin = Point3::from_homogeneous(o).unwrap();
+        let direction = V3f::from_homogeneous(d).unwrap();
         let mut res = Ray::new(origin, direction);
         res.t_min = ray.t_min;
         res.t_max = ray.t_max;

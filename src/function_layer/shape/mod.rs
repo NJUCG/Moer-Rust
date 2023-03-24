@@ -6,6 +6,7 @@ mod parallelogram;
 mod disk;
 mod cylinder;
 mod cone;
+mod cube;
 
 pub use shape::Shape;
 pub use intersection::Intersection;

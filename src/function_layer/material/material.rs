@@ -7,6 +7,7 @@ use crate::function_layer::{
     shape::intersection::Intersection,
     texture::{normal_texture::NormalTexture, texture::Texture},
 };
+use crate::function_layer::material::mirror::MirrorMaterial;
 
 pub trait Material {
     fn normal_map(&self) -> Option<Rc<NormalTexture>>;
@@ -34,6 +35,7 @@ pub trait Material {
 pub fn construct_material(json: &Value) -> Rc<dyn Material> {
     match json["type"].as_str().expect("No material type annotation!") {
         "matte" => Rc::new(MatteMaterial::from_json(json)),
-        _ => panic!("Invalid type")
+        "mirror" => Rc::new(MirrorMaterial::from_json(json)),
+        tp => panic!("Invalid type: {}", tp)
     }
 }
