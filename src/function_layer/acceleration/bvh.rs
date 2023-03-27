@@ -123,17 +123,12 @@ impl BVHAccel {
     pub fn get_intersection(node: Rc<BVHBuildNode>, ray: &mut Ray, shapes: &Vec<RR<dyn Shape>>) -> Option<(u64, u64, f32, f32)> {
         if !node.bounds.intersect_p(ray) { return None; }
         if node.left.is_none() && node.right.is_none() {
-            let (mut dist, mut p_id, mut u, mut v) = (f32::INFINITY, 0u64, 0.0, 0.0);
-            let mut gid = 0;
             let shape = shapes[node.shape_idx].borrow();
             let its = shape.ray_intersect_shape(ray);
-            if let Some(r) = its {
-                dist = ray.t_max;
-                (p_id, u, v) = r;
-                gid = shape.geometry_id();
-            }
-            if dist.is_infinite() { return None; }
-            return Some((gid, p_id, u, v));
+            return if let Some(r) = its {
+                let (p_id, u, v) = r;
+                Some((shape.geometry_id(), p_id, u, v))
+            } else { None };
         }
         let mut two_child = [node.left.as_ref().unwrap().clone(), node.right.as_ref().unwrap().clone()];
         let flip: bool = match node.split_axis {
