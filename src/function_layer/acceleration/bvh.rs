@@ -27,6 +27,8 @@ impl Default for BVHBuildNode {
 
 const MAX_PRIMS_IN_NODE: usize = 1;
 
+const USE_SAH: bool = true;
+
 #[derive(Default)]
 pub struct BVHAccel {
     root: Option<Rc<BVHBuildNode>>,
@@ -62,18 +64,23 @@ impl Acceleration for BVHAccel {
     }
 }
 
+fn get_bounds_arr(shapes: &[RR<dyn Shape>]) -> Bounds3 {
+    let bounds_v: Vec<_> = shapes.iter().
+        map(|s: &RR<dyn Shape>| s.borrow().get_bounds().clone()).collect();
+    Bounds3::arr_bounds(bounds_v)
+}
+
 fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize) -> Rc<BVHBuildNode> {
     let mut res = BVHBuildNode::default();
-    let bounds: Vec<_> = shapes.iter().map(|s: &RR<dyn Shape>| s.borrow().get_bounds().clone()).collect();
-    res.bounds = Bounds3::arr_bounds(bounds);
+    res.bounds = get_bounds_arr(shapes);
     if shapes.len() <= MAX_PRIMS_IN_NODE {
         res.first_shape_offset = b;
         res.n_shapes = shapes.len();
         return Rc::new(res);
     }
-    let mid = shapes.len() / 2;
+    let mut mid = shapes.len() / 2;
     let axis = res.bounds.max_extent();
-    let _ = shapes.select_nth_unstable_by(mid, |s1: &RR<dyn Shape>, s2: &RR<dyn Shape>| {
+    let _ = shapes.sort_unstable_by(|s1: &RR<dyn Shape>, s2: &RR<dyn Shape>| {
         s1.borrow().shape().bounds3.centroid_axis(axis).partial_cmp(
             &s2.borrow().shape().bounds3.centroid_axis(axis)
         ).unwrap()
@@ -82,6 +89,29 @@ fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize) -> Rc<BVHBuildNode>
         shapes[i].borrow_mut().set_geometry_id((i + b) as u64);
     }
     res.split_axis = axis;
+    if USE_SAH && shapes.len() >= 10 {
+        let len = shapes.len();
+        let part = len.min(10);
+        let mut scores = Vec::with_capacity(part);
+        scores.push(f32::MAX);
+        for idx in 1..part {
+            let pp = len * idx / part;
+            let ls = &shapes[..pp];
+            let rs = &shapes[pp..];
+            assert_eq!(ls.len() + rs.len(), shapes.len());
+            let lbs = get_bounds_arr(ls);
+            let rbs = get_bounds_arr(rs);
+            let l_area = lbs.surface_area();
+            let r_area = rbs.surface_area();
+            // let area = l_area + r_area;
+            scores.push(l_area * ls.len() as f32 + r_area * rs.len() as f32);
+        }
+        let cut = scores
+            .iter()
+            .enumerate()
+            .min_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap()).map(|(i, _)| i).unwrap();
+        mid = len * cut / part;
+    }
     let l = recursively_build(&mut shapes[..mid], b);
     let r = recursively_build(&mut shapes[mid..], b + mid);
     res.left = Some(l);

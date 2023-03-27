@@ -95,8 +95,12 @@ impl Shape for TriangleMesh {
         for prime_id in 0..prim_count {
             let v_indices: Vec<usize> = (0..3).map(|i: usize|
                 self.mesh.face_buffer[prime_id][i].vertex_index).collect();
+            let v0 = mesh.mesh.vertex_buffer[v_indices[0]];
+            let v1 = mesh.mesh.vertex_buffer[v_indices[1]];
+            let v2 = mesh.mesh.vertex_buffer[v_indices[2]];
+
             let triangle = Rc::new(RefCell::new(
-                Triangle::new(prime_id, v_indices[0], v_indices[1], v_indices[2], Some(mesh.clone()))));
+                Triangle::new(prime_id, v0, v1, v2, mesh.transform(), mesh.geometry_id())));
             self.acc.as_ref().unwrap().borrow_mut().attach_shape(triangle);
         }
         self.acc.as_ref().unwrap().borrow_mut().build();
@@ -111,33 +115,30 @@ impl Shape for TriangleMesh {
 
 struct Triangle {
     pub prim_id: usize,
-    pub v0idx: usize,
-    pub v1idx: usize,
-    pub v2idx: usize,
-    pub mesh: Option<Rc<TriangleMesh>>,
+    pub v0: Point3<f32>,
+    // pub v1: Point3<f32>,
+    // pub v2: Point3<f32>,
+    pub e0: V3f,
+    pub e1: V3f,
     shape: ShapeBase,
 }
 
 impl Triangle {
-    pub fn new(prim_id: usize, v0idx: usize, v1idx: usize, v2idx: usize, mesh: Option<Rc<TriangleMesh>>) -> Self {
+    // 三角形没有记录transform，其坐标均为世界坐标
+    pub fn new(prim_id: usize, v0: Point3<f32>, v1: Point3<f32>, v2: Point3<f32>, t: &Transform, gid: u64) -> Self {
         let mut shape = ShapeBase::default();
-        shape.geometry_id = mesh.as_ref().unwrap().geometry_id();
-        let m = mesh.as_ref().unwrap();
-        let v0 = m.transform().to_world_point(&m.mesh.vertex_buffer[v0idx]);
-        let v1 = m.transform().to_world_point(&m.mesh.vertex_buffer[v1idx]);
-        let v2 = m.transform().to_world_point(&m.mesh.vertex_buffer[v2idx]);
+        shape.geometry_id = gid;
+        let v0 = t.to_world_point(&v0);
+        let v1 = t.to_world_point(&v1);
+        let v2 = t.to_world_point(&v2);
+        let e0 = v1 - v0;
+        let e1 = v2 - v0;
+
         shape.bounds3.expand(&v0.coords);
         shape.bounds3.expand(&v1.coords);
         shape.bounds3.expand(&v2.coords);
 
-        Self {
-            prim_id,
-            v0idx,
-            v1idx,
-            v2idx,
-            mesh,
-            shape,
-        }
+        Self { prim_id, v0, e0, e1, shape }
     }
 }
 
@@ -157,36 +158,21 @@ impl Shape for Triangle {
     }
 
     fn ray_intersect_shape(&self, ray: &mut Ray) -> Option<(u64, f32, f32)> {
-        let origin = &ray.origin;
-        let dir = &ray.direction;
-        let m = self.mesh.as_ref().unwrap();
-        let v0 = m.transform().to_world_point(&m.mesh.vertex_buffer[self.v0idx]);
-        let v1 = m.transform().to_world_point(&m.mesh.vertex_buffer[self.v1idx]);
-        let v2 = m.transform().to_world_point(&m.mesh.vertex_buffer[self.v2idx]);
-
-        let edge0 = v1 - v0;
-        let edge1 = v2 - v0;
-        let normal = edge0.cross(&edge1).normalize();
-        let d = -normal.dot(&v0.coords);
-        let a = normal.dot(&origin.coords) + d;
-        let b = normal.dot(dir);
-        if b == 0.0 { return None; }
-        let t = -a / b;
-        if t < ray.t_min || t > ray.t_max { return None; }
-        let hit = origin + t * dir;
-        let v1 = (hit - v0).cross(&edge1);
-        let v2 = edge0.cross(&edge1);
-        let mut u = v1.norm() / v2.norm();
-        if v1.dot(&v2) < 0.0 { u *= -1.0; }
-        let v1 = (hit - v0).cross(&edge0);
-        let v2 = -v2; //cross(edge1, edge0)
-        let mut v = v1.norm() / v2.norm();
-        if v1.dot(&v2) < 0.0 { v *= -1.0; }
-
-        if u >= 0.0 && v >= 0.0 && (u + v) <= 1.0 {
-            ray.t_max = t;
-            Some((self.prim_id as u64, u, v))
-        } else { None }
+        let (u, v, t_tmp): (f32, f32, f32);
+        let pvec: V3f = ray.direction.cross(&self.e1);
+        let det = self.e0.dot(&pvec);
+        if det.abs() < 0.00001 { return None; }
+        let det_inv = 1.0 / det;
+        let tvec: V3f = &ray.origin - &self.v0;
+        let qvec: V3f = tvec.cross(&self.e0);
+        t_tmp = self.e1.dot(&qvec) * det_inv;
+        if t_tmp < ray.t_min || t_tmp > ray.t_max { return None; }
+        u = tvec.dot(&pvec) * det_inv;
+        if u < 0.0 || u > 1.0 { return None; }
+        v = ray.direction.dot(&qvec) * det_inv;
+        if v < 0.0 || u + v > 1.0 { return None; }
+        ray.t_max = t_tmp;
+        Some((self.prim_id as u64, u, v))
     }
 
     fn fill_intersection(&self, _distance: f32, _prim_id: u64, _u: f32, _v: f32, _intersection: &mut Intersection) {

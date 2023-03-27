@@ -28,10 +28,9 @@ impl Bounds3 {
         let d = self.diagonal();
         if d.x > d.y && d.x > d.z { Axis::X } else if d.y > d.z { Axis::Y } else { Axis::Z }
     }
-    #[allow(dead_code)]
-    pub fn surface_area(&self) -> f64 {
+    pub fn surface_area(&self) -> f32 {
         let d = self.diagonal();
-        2.0 * (d.x * d.y + d.y * d.z + d.z * d.x) as f64
+        2.0 * (d.x * d.y + d.y * d.z + d.z * d.x)
     }
     pub fn centroid(&self) -> V3f { 0.5 * &self.p_min + 0.5 * &self.p_max }
     pub fn expand(&mut self, p: &V3f) {
