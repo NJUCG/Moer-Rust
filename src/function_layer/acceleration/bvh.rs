@@ -7,8 +7,7 @@ pub struct BVHBuildNode {
     bounds: Bounds3,
     left: Option<Rc<BVHBuildNode>>,
     right: Option<Rc<BVHBuildNode>>,
-    first_shape_offset: usize,
-    n_shapes: usize,
+    shape_idx: usize,
     split_axis: Axis,
 }
 
@@ -18,14 +17,11 @@ impl Default for BVHBuildNode {
             bounds: Default::default(),
             left: None,
             right: None,
-            first_shape_offset: 0,
-            n_shapes: 0,
+            shape_idx: 0,
             split_axis: Axis::X,
         }
     }
 }
-
-const MAX_PRIMS_IN_NODE: usize = 1;
 
 const USE_SAH: bool = true;
 
@@ -73,9 +69,13 @@ fn get_bounds_arr(shapes: &[RR<dyn Shape>]) -> Bounds3 {
 fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize) -> Rc<BVHBuildNode> {
     let mut res = BVHBuildNode::default();
     res.bounds = get_bounds_arr(shapes);
-    if shapes.len() <= MAX_PRIMS_IN_NODE {
-        res.first_shape_offset = b;
-        res.n_shapes = shapes.len();
+    if shapes.len() == 1 {
+        res.shape_idx = b;
+        return Rc::new(res);
+    }
+    if shapes.len() == 2 {
+        res.left = Some(recursively_build(&mut shapes[..1], b));
+        res.right = Some(recursively_build(&mut shapes[1..], b + 1));
         return Rc::new(res);
     }
     let mut mid = shapes.len() / 2;
@@ -124,18 +124,16 @@ impl BVHAccel {
         if !node.bounds.intersect_p(ray) { return None; }
         if node.left.is_none() && node.right.is_none() {
             let (mut dist, mut p_id, mut u, mut v) = (f32::INFINITY, 0u64, 0.0, 0.0);
-            let mut sp = shapes[node.first_shape_offset].borrow();
-            for shape_idx in node.first_shape_offset..node.first_shape_offset + node.n_shapes {
-                let shape = shapes[shape_idx].borrow();
-                let its = shape.ray_intersect_shape(ray);
-                if let Some(r) = its {
-                    dist = ray.t_max;
-                    (p_id, u, v) = r;
-                    sp = shape;
-                }
+            let mut gid = 0;
+            let shape = shapes[node.shape_idx].borrow();
+            let its = shape.ray_intersect_shape(ray);
+            if let Some(r) = its {
+                dist = ray.t_max;
+                (p_id, u, v) = r;
+                gid = shape.geometry_id();
             }
             if dist.is_infinite() { return None; }
-            return Some((sp.geometry_id(), p_id, u, v));
+            return Some((gid, p_id, u, v));
         }
         let mut two_child = [node.left.as_ref().unwrap().clone(), node.right.as_ref().unwrap().clone()];
         let flip: bool = match node.split_axis {
