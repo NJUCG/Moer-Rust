@@ -89,9 +89,9 @@ fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize) -> Rc<BVHBuildNode>
         shapes[i].borrow_mut().set_geometry_id((i + b) as u64);
     }
     res.split_axis = axis;
-    if USE_SAH && shapes.len() >= 10 {
+    if USE_SAH && shapes.len() > 4 {
         let len = shapes.len();
-        let part = len.min(10);
+        let part = len.min(32);
         let mut scores = Vec::with_capacity(part);
         scores.push(f32::MAX);
         for idx in 1..part {
@@ -109,7 +109,7 @@ fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize) -> Rc<BVHBuildNode>
         let cut = scores
             .iter()
             .enumerate()
-            .min_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap()).map(|(i, _)| i).unwrap();
+            .min_by(|(_, a), (_, b)| a.total_cmp(b)).map(|(i, _)| i).unwrap();
         mid = len * cut / part;
     }
     let l = recursively_build(&mut shapes[..mid], b);

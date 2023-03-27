@@ -66,7 +66,7 @@ impl Shape for Cube {
                 biases.push((hit_point[i] - max[i]).abs());
             }
             let p_id: usize = biases.iter().enumerate().
-                min_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap()).map(|(i, _)| i).unwrap();
+                min_by(|(_, a), (_, b)| a.total_cmp(b)).map(|(i, _)| i).unwrap();
             let axis = (p_id / 2 + 1) % 3;
             let u = (hit_point[axis] - min[axis]) / (max[axis] - min[axis]);
             let axis = (axis + 1) % 3;

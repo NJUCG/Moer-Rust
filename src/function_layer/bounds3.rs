@@ -105,7 +105,7 @@ impl Bounds3 {
     }
 
     pub fn arr_bounds(v: Vec<Bounds3>) -> Bounds3 {
-        v.iter().fold(Bounds3::default(), |b1, b2| { Bounds3::union_bounds(&b1, b2) })
+        v.into_iter().fold(Bounds3::default(), |b1, b2| { Bounds3::union_bounds(&b1, &b2) })
     }
 
     pub fn sub_bounds(b: &Bounds3) -> [Bounds3; 8] {
