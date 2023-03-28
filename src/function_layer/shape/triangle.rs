@@ -182,4 +182,7 @@ impl Shape for Triangle {
     fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (Intersection, f32) {
         todo!()
     }
+    fn shape_type(&self) -> String {
+        "Triangle".to_owned()
+    }
 }

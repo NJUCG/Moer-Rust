@@ -1,23 +1,34 @@
-use std::rc::Rc;
 use crate::function_layer::{Acceleration, Bounds3, Ray, RR, Shape};
 use crate::function_layer::bounds3::Axis;
 use super::acceleration::{AccelerationBase, AccelerationType};
 
-pub struct BVHBuildNode {
-    bounds: Bounds3,
-    left: Option<Rc<BVHBuildNode>>,
-    right: Option<Rc<BVHBuildNode>>,
-    shape_idx: usize,
-    split_axis: Axis,
+pub enum BVHNode {
+    Node {
+        bounds: Bounds3,
+        left: usize,
+        right: usize,
+        split_axis: Axis,
+    },
+    Leaf {
+        bounds: Bounds3,
+        shape_idx: usize,
+    },
 }
 
-impl Default for BVHBuildNode {
+impl BVHNode {
+    pub fn get_bounds(&self) -> &Bounds3 {
+        match self {
+            BVHNode::Node { bounds: b, .. } | BVHNode::Leaf { bounds: b, .. } => b
+        }
+    }
+}
+
+impl Default for BVHNode {
     fn default() -> Self {
-        BVHBuildNode {
+        BVHNode::Node {
             bounds: Default::default(),
-            left: None,
-            right: None,
-            shape_idx: 0,
+            left: 0,
+            right: 0,
             split_axis: Axis::X,
         }
     }
@@ -27,7 +38,7 @@ const USE_SAH: bool = true;
 
 #[derive(Default)]
 pub struct BVHAccel {
-    root: Option<Rc<BVHBuildNode>>,
+    root: Vec<BVHNode>,
     pub acc: AccelerationBase,
 }
 
@@ -41,18 +52,17 @@ impl Acceleration for BVHAccel {
     }
 
     fn ray_intersect(&self, ray: &mut Ray) -> Option<(u64, u64, f32, f32)> {
-        let root = self.root.clone();
-        if root.is_none() { return None; }
-        BVHAccel::get_intersection(root.unwrap(), ray, &self.acc.shapes)
+        let root = &self.root;
+        if root.is_empty() { return None; }
+        BVHAccel::get_intersection(root, 0, ray, &self.acc.shapes)
     }
 
     fn build(&mut self) {
         for shape in &self.acc.shapes {
             shape.borrow_mut().init_internal_acceleration();
         }
-        let root = recursively_build(&mut self.acc.shapes[..], 0);
-        self.acc.bounds = root.bounds.clone();
-        self.root = Some(root);
+        recursively_build(&mut self.acc.shapes, 0, &mut self.root);
+        self.acc.bounds = self.root[0].get_bounds().clone();
     }
 
     fn atp(&self) -> AccelerationType {
@@ -66,20 +76,22 @@ fn get_bounds_arr(shapes: &[RR<dyn Shape>]) -> Bounds3 {
     Bounds3::arr_bounds(bounds_v)
 }
 
-fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize) -> Rc<BVHBuildNode> {
-    let mut res = BVHBuildNode::default();
-    res.bounds = get_bounds_arr(shapes);
+fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize, tree: &mut Vec<BVHNode>) -> usize {
+    let bounds = get_bounds_arr(shapes);
+    let idx = tree.len();
     if shapes.len() == 1 {
-        res.shape_idx = b;
-        return Rc::new(res);
+        tree.push(BVHNode::Leaf { bounds, shape_idx: b });
+        return idx;
     }
     if shapes.len() == 2 {
-        res.left = Some(recursively_build(&mut shapes[..1], b));
-        res.right = Some(recursively_build(&mut shapes[1..], b + 1));
-        return Rc::new(res);
+        tree.push(BVHNode::default());
+        let l = recursively_build(&mut shapes[..1], b, tree);
+        let r = recursively_build(&mut shapes[1..], b + 1, tree);
+        tree[idx] = BVHNode::Node { bounds, left: l, right: r, split_axis: Axis::X };
+        return idx;
     }
     let mut mid = shapes.len() / 2;
-    let axis = res.bounds.max_extent();
+    let axis = bounds.max_extent();
     let _ = shapes.sort_unstable_by(|s1: &RR<dyn Shape>, s2: &RR<dyn Shape>| {
         s1.borrow().shape().bounds3.centroid_axis(axis).partial_cmp(
             &s2.borrow().shape().bounds3.centroid_axis(axis)
@@ -88,7 +100,6 @@ fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize) -> Rc<BVHBuildNode>
     for i in 0..shapes.len() {
         shapes[i].borrow_mut().set_geometry_id((i + b) as u64);
     }
-    res.split_axis = axis;
     if USE_SAH && shapes.len() > 4 {
         let len = shapes.len();
         let part = len.min(32);
@@ -112,33 +123,48 @@ fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize) -> Rc<BVHBuildNode>
             .min_by(|(_, a), (_, b)| a.total_cmp(b)).map(|(i, _)| i).unwrap();
         mid = len * cut / part;
     }
-    let l = recursively_build(&mut shapes[..mid], b);
-    let r = recursively_build(&mut shapes[mid..], b + mid);
-    res.left = Some(l);
-    res.right = Some(r);
-    Rc::new(res)
+    tree.push(BVHNode::Node {
+        bounds: Default::default(),
+        left: 0,
+        right: 0,
+        split_axis: Axis::X,
+    });
+    let l = recursively_build(&mut shapes[..mid], b, tree);
+    let r = recursively_build(&mut shapes[mid..], b + mid, tree);
+    tree[idx] = BVHNode::Node {
+        bounds,
+        left: l,
+        right: r,
+        split_axis: axis,
+    };
+    idx
 }
 
 impl BVHAccel {
-    pub fn get_intersection(node: Rc<BVHBuildNode>, ray: &mut Ray, shapes: &Vec<RR<dyn Shape>>) -> Option<(u64, u64, f32, f32)> {
-        if !node.bounds.intersect_p(ray) { return None; }
-        if node.left.is_none() && node.right.is_none() {
-            let shape = shapes[node.shape_idx].borrow();
-            let its = shape.ray_intersect_shape(ray);
-            return if let Some(r) = its {
-                let (p_id, u, v) = r;
-                Some((shape.geometry_id(), p_id, u, v))
-            } else { None };
+    pub fn get_intersection(nodes: &Vec<BVHNode>, root: usize, ray: &mut Ray, shapes: &Vec<RR<dyn Shape>>) -> Option<(u64, u64, f32, f32)> {
+        if !nodes[root].get_bounds().intersect_p(ray) { return None; }
+        let node = &nodes[root];
+        match node {
+            BVHNode::Node { left: l, right: r, split_axis: axis, .. } => {
+                let mut two_children = [*l, *r];
+                let flip: bool = match axis {
+                    Axis::X => ray.direction.x < 0.0,
+                    Axis::Y => ray.direction.y < 0.0,
+                    Axis::Z => ray.direction.z < 0.0
+                };
+                if flip { two_children.reverse(); }
+                let hit1 = BVHAccel::get_intersection(nodes, two_children[0], ray, shapes);
+                let hit2 = BVHAccel::get_intersection(nodes, two_children[1], ray, shapes);
+                if hit2.is_some() { hit2 } else { hit1 }
+            }
+            BVHNode::Leaf { shape_idx: idx, .. } => {
+                let shape = shapes[*idx].borrow();
+                let its = shape.ray_intersect_shape(ray);
+                if let Some(r) = its {
+                    let (p_id, u, v) = r;
+                    Some((shape.geometry_id(), p_id, u, v))
+                } else { None }
+            }
         }
-        let mut two_child = [node.left.as_ref().unwrap().clone(), node.right.as_ref().unwrap().clone()];
-        let flip: bool = match node.split_axis {
-            Axis::X => ray.direction.x < 0.0,
-            Axis::Y => ray.direction.y < 0.0,
-            Axis::Z => ray.direction.z < 0.0
-        };
-        if flip { two_child.reverse(); }
-        let hit1 = BVHAccel::get_intersection(two_child[0].clone(), ray, shapes);
-        let hit2 = BVHAccel::get_intersection(two_child[1].clone(), ray, shapes);
-        if hit2.is_some() { hit2 } else { hit1 }
     }
 }

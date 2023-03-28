@@ -22,7 +22,10 @@ impl Bounds3 {
     pub fn empty() -> Self {
         Self { p_min: V3f::from([f32::INFINITY; 3]), p_max: V3f::from([f32::NEG_INFINITY; 3]) }
     }
-
+    #[allow(dead_code)]
+    pub fn is_empty(&self) -> bool {
+        self.p_min.x > self.p_max.x || self.p_min.y > self.p_max.y || self.p_min.z > self.p_max.z
+    }
     pub fn diagonal(&self) -> V3f { &self.p_max - &self.p_min }
     pub fn max_extent(&self) -> Axis {
         let d = self.diagonal();
