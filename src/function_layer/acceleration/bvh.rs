@@ -38,7 +38,7 @@ const USE_SAH: bool = true;
 
 #[derive(Default)]
 pub struct BVHAccel {
-    root: Vec<BVHNode>,
+    nodes: Vec<BVHNode>,
     pub acc: AccelerationBase,
 }
 
@@ -52,17 +52,16 @@ impl Acceleration for BVHAccel {
     }
 
     fn ray_intersect(&self, ray: &mut Ray) -> Option<(u64, u64, f32, f32)> {
-        let root = &self.root;
-        if root.is_empty() { return None; }
-        BVHAccel::get_intersection(root, 0, ray, &self.acc.shapes)
+        if self.nodes.is_empty() { return None; }
+        BVHAccel::get_intersection(&self.nodes, 0, ray, &self.acc.shapes)
     }
 
     fn build(&mut self) {
         for shape in &self.acc.shapes {
             shape.borrow_mut().init_internal_acceleration();
         }
-        recursively_build(&mut self.acc.shapes, 0, &mut self.root);
-        self.acc.bounds = self.root[0].get_bounds().clone();
+        recursively_build(&mut self.acc.shapes, 0, &mut self.nodes);
+        self.acc.bounds = self.nodes[0].get_bounds().clone();
     }
 
     fn atp(&self) -> AccelerationType {
@@ -76,18 +75,18 @@ fn get_bounds_arr(shapes: &[RR<dyn Shape>]) -> Bounds3 {
     Bounds3::arr_bounds(bounds_v)
 }
 
-fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize, tree: &mut Vec<BVHNode>) -> usize {
+fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize, nodes: &mut Vec<BVHNode>) -> usize {
     let bounds = get_bounds_arr(shapes);
-    let idx = tree.len();
+    let idx = nodes.len();
     if shapes.len() == 1 {
-        tree.push(BVHNode::Leaf { bounds, shape_idx: b });
+        nodes.push(BVHNode::Leaf { bounds, shape_idx: b });
         return idx;
     }
     if shapes.len() == 2 {
-        tree.push(BVHNode::default());
-        let l = recursively_build(&mut shapes[..1], b, tree);
-        let r = recursively_build(&mut shapes[1..], b + 1, tree);
-        tree[idx] = BVHNode::Node { bounds, left: l, right: r, split_axis: Axis::X };
+        nodes.push(BVHNode::default());
+        let l = recursively_build(&mut shapes[..1], b, nodes);
+        let r = recursively_build(&mut shapes[1..], b + 1, nodes);
+        nodes[idx] = BVHNode::Node { bounds, left: l, right: r, split_axis: Axis::X };
         return idx;
     }
     let mut mid = shapes.len() / 2;
@@ -123,15 +122,15 @@ fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize, tree: &mut Vec<BVHN
             .min_by(|(_, a), (_, b)| a.total_cmp(b)).map(|(i, _)| i).unwrap();
         mid = len * cut / part;
     }
-    tree.push(BVHNode::Node {
+    nodes.push(BVHNode::Node {
         bounds: Default::default(),
         left: 0,
         right: 0,
         split_axis: Axis::X,
     });
-    let l = recursively_build(&mut shapes[..mid], b, tree);
-    let r = recursively_build(&mut shapes[mid..], b + mid, tree);
-    tree[idx] = BVHNode::Node {
+    let l = recursively_build(&mut shapes[..mid], b, nodes);
+    let r = recursively_build(&mut shapes[mid..], b + mid, nodes);
+    nodes[idx] = BVHNode::Node {
         bounds,
         left: l,
         right: r,
