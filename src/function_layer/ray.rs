@@ -14,6 +14,7 @@ pub struct Ray {
     pub origin: Point3<f32>,
     pub direction: V3f,
     pub inv_dir: V3f,
+    pub neg_dir: [bool; 3],
     // pub direction_inv: Vector3f,
     pub t: f32,
     pub t_min: f32,
@@ -33,7 +34,8 @@ impl Ray {
             1.0 / direction.y,
             1.0 / direction.z,
         );
-        Self { origin, direction, inv_dir, t, t_min, t_max, differential: None }
+        let neg_dir = [inv_dir.x < 0.0, inv_dir.y < 0.0, inv_dir.z < 0.0];
+        Self { origin, direction, inv_dir, neg_dir, t, t_min, t_max, differential: None }
     }
 
     #[allow(dead_code)]
@@ -48,16 +50,13 @@ impl Ray {
             1.0 / direction.y,
             1.0 / direction.z,
         );
-        Self { origin, inv_dir, direction, t, t_min, t_max, differential: None }
+        let neg_dir = [inv_dir.x < 0.0, inv_dir.y < 0.0, inv_dir.z < 0.0];
+        Self { origin, inv_dir, neg_dir, direction, t, t_min, t_max, differential: None }
     }
 
     pub fn at(&self, t: f32) -> Point3<f32> {
         let delta = t * self.direction;
         let o = self.origin;
         o + delta
-    }
-    #[allow(dead_code)]
-    pub fn change_dir(&mut self, dir: V3f) {
-        self.direction = dir;
     }
 }

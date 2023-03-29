@@ -73,17 +73,15 @@ impl Bounds3 {
         t_near <= t_far
     }
     pub fn intersect_t(&self, ray: &Ray) -> (f32, f32) {
-        let mut t_near = ray.t_min;
-        let mut t_far = ray.t_max;
         let inv_dir = &ray.inv_dir;
-
+        let neg_dir = ray.neg_dir;
         let mut t_min = (self.p_min - ray.origin.coords).component_mul(inv_dir);
         let mut t_max = (self.p_max - ray.origin.coords).component_mul(inv_dir);
-        if inv_dir.x < 0.0 { swap(&mut t_min.x, &mut t_max.x); }
-        if inv_dir.y < 0.0 { swap(&mut t_min.y, &mut t_max.y); }
-        if inv_dir.z < 0.0 { swap(&mut t_min.z, &mut t_max.z); }
-        t_near = t_near.max(t_min.max());
-        t_far = t_far.min(t_max.min());
+        for i in 0..3 {
+            if neg_dir[i] { swap(&mut t_min[i], &mut t_max[i]); }
+        }
+        let t_near = ray.t_min.max(t_min.max());
+        let t_far = ray.t_max.min(t_max.min());
         (t_near, t_far)
     }
     pub fn union_bounds(b1: &Bounds3, b2: &Bounds3) -> Bounds3 {
