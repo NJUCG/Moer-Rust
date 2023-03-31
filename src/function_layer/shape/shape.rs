@@ -3,7 +3,8 @@ use std::rc::Rc;
 use nalgebra::{Matrix4, Vector2, Vector3};
 use serde_json::Value;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Bounds3, Light, Material, Ray, construct_material, Intersection, RR, material::matte::MatteMaterial, V3f};
+use crate::function_layer::{Bounds3, Light, Material, Ray, Intersection,
+                            RR, V3f, material::matte::MatteMaterial, construct_material};
 use super::{cone::Cone, cylinder::Cylinder, disk::Disk, cube::Cube,
             parallelogram::Parallelogram, sphere::Sphere, triangle::TriangleMesh};
 

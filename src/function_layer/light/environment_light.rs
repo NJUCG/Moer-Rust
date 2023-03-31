@@ -4,9 +4,9 @@ use std::rc::Rc;
 use nalgebra::{Vector2, Vector3};
 use serde_json::Value;
 use crate::core_layer::{colorspace::SpectrumRGB, constants::INV_PI, distribution::Distribution};
-use super::light::{InfiniteLight, Light, LightSampleResult, LightType};
 use crate::function_layer::{Intersection, Texture, Ray, construct_texture, V3f};
 use crate::function_layer::texture::TextureCoord;
+use super::light::{InfiniteLight, Light, LightSampleResult, LightType};
 
 pub struct EnvironmentLight {
     environment_map: Rc<dyn Texture<SpectrumRGB>>,

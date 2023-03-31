@@ -1,6 +1,6 @@
-use crate::function_layer::{Acceleration, Bounds3, Ray, RR, Shape};
-use crate::function_layer::bounds3::Axis;
 use super::acceleration::{AccelerationBase, AccelerationType};
+use crate::function_layer::{Acceleration, Bounds3, Ray, RR, Shape, bounds3::Axis};
+
 
 pub enum BVHNode {
     Node {

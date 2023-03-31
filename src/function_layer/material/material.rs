@@ -1,13 +1,10 @@
 use std::rc::Rc;
 use nalgebra::Vector3;
 use serde_json::Value;
-use super::bxdf::bsdf::BSDF;
-use super::matte::MatteMaterial;
-use crate::function_layer::{
-    shape::intersection::Intersection,
-    texture::{normal_texture::NormalTexture, texture::Texture},
-};
-use crate::function_layer::material::mirror::MirrorMaterial;
+use crate::function_layer::{Intersection, Texture};
+use crate::function_layer::texture::normal_texture::NormalTexture;
+use super::{mirror::MirrorMaterial, bxdf::bsdf::BSDF, matte::MatteMaterial};
+
 
 pub trait Material {
     fn normal_map(&self) -> Option<Rc<NormalTexture>>;

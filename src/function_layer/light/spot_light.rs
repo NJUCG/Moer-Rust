@@ -1,10 +1,8 @@
 use std::any::Any;
 use nalgebra::{Point3, Vector2, Vector3};
 use serde_json::Value;
-use crate::core_layer::colorspace::SpectrumRGB;
-use crate::core_layer::constants::EPSILON;
-use crate::function_layer::{Intersection, Light, V3f};
-use crate::function_layer::shape::shape::fetch_v3f;
+use crate::core_layer::{colorspace::SpectrumRGB, constants::EPSILON};
+use crate::function_layer::{Intersection, Light, V3f, fetch_v3f};
 use super::light::{LightType, LightSampleResult};
 
 pub struct SpotLight {
@@ -14,7 +12,7 @@ pub struct SpotLight {
 
 impl SpotLight {
     pub fn from_json(json: &Value) -> Self {
-        let position= fetch_v3f(json, "position", V3f::default()).unwrap();
+        let position = fetch_v3f(json, "position", V3f::default()).unwrap();
         let energy = fetch_v3f(json, "energy", V3f::default()).unwrap();
         Self {
             position: Point3::from(position),

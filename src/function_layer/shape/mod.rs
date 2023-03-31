@@ -8,5 +8,5 @@ mod cylinder;
 mod cone;
 mod cube;
 
-pub use shape::Shape;
-pub use intersection::Intersection;
+pub use shape::{Shape, fetch_v3f};
+pub use intersection::{Intersection, compute_ray_differentials};

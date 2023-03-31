@@ -2,14 +2,13 @@ use std::rc::Rc;
 use nalgebra::Vector3;
 use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
-use super::bxdf::BSDF;
-use super::bxdf::lambert::LambertReflection;
-use crate::function_layer::{Intersection, Texture, texture::{
+use super::bxdf::{BSDF, lambert::LambertReflection};
+use crate::function_layer::texture::{
     constant_texture::ConstantTexture,
     normal_texture::NormalTexture,
     texture::construct_texture,
-}, V3f};
-use crate::function_layer::shape::shape::fetch_v3f;
+};
+use crate::function_layer::{Intersection, Texture, V3f, fetch_v3f};
 
 use super::Material;
 

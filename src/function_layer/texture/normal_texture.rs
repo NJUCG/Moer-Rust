@@ -2,7 +2,7 @@ use std::rc::Rc;
 use image::Rgb32FImage;
 use nalgebra::{clamp, Vector2, Vector3};
 use serde_json::Value;
-use crate::function_layer::shape::intersection::Intersection;
+use crate::function_layer::Intersection;
 use super::texture::{Texture, TextureCoord, TextureMapping, UVMapping};
 
 pub struct NormalTexture {

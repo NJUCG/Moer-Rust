@@ -1,8 +1,7 @@
 use nalgebra::Vector2;
 use crate::core_layer::{colorspace::SpectrumRGB, constants::INV_PI};
-use crate::function_layer::material::bxdf::bsdf::BSDFType;
 use crate::function_layer::V3f;
-use super::bsdf::{BSDF, BSDFSampleResult};
+use super::bsdf::{BSDF, BSDFSampleResult, BSDFType};
 use super::warp::{square_to_cosine_hemisphere, square_to_cosine_hemisphere_pdf};
 
 

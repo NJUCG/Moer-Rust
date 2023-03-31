@@ -1,6 +1,5 @@
 use crate::function_layer::{Acceleration, Ray};
-use crate::function_layer::acceleration::acceleration::AccelerationType;
-use super::acceleration::AccelerationBase;
+use super::acceleration::{AccelerationBase, AccelerationType};
 
 pub struct LinearAccel {
     pub acc: AccelerationBase,

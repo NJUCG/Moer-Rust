@@ -3,9 +3,9 @@ use std::rc::Rc;
 use nalgebra::Vector2;
 use serde_json::Value;
 use crate::core_layer::{colorspace::SpectrumRGB, constants::EPSILON};
-use crate::function_layer::{construct_shape, Intersection, RR, Shape, V3f};
-use crate::function_layer::shape::shape::fetch_v3f;
+use crate::function_layer::{Intersection, RR, Shape, V3f, construct_shape, fetch_v3f};
 use super::light::{Light, LightSampleResult, LightType};
+
 
 pub struct AreaLight {
     pub shape: Option<RR<dyn Shape>>,

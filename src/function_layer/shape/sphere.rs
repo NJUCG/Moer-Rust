@@ -4,8 +4,7 @@ use nalgebra::{Point3, Vector2};
 use serde_json::Value;
 use crate::core_layer::constants::INV_PI;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Bounds3, Intersection, Ray, Shape, V3f};
-use crate::function_layer::shape::shape::fetch_v3f;
+use crate::function_layer::{Bounds3, Intersection, Ray, Shape, V3f, fetch_v3f};
 use super::shape::ShapeBase;
 
 #[derive(Clone)]

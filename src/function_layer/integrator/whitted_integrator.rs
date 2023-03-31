@@ -1,9 +1,8 @@
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{Integrator, Light, Ray, RR, Sampler, Scene};
-use crate::function_layer::integrator::integrator::convert_pdf;
-use crate::function_layer::light::light::InfiniteLight;
+use super::integrator::convert_pdf;
 use crate::function_layer::material::bxdf::BSDFType;
-use crate::function_layer::shape::intersection::compute_ray_differentials;
+use crate::function_layer::{Integrator, Light, InfiniteLight, Ray, RR, Sampler, Scene, compute_ray_differentials};
+
 
 pub struct WhittedIntegrator;
 

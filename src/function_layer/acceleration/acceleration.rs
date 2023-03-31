@@ -1,6 +1,6 @@
 use crate::function_layer::{Shape, Intersection, Ray, Bounds3, RR};
-use crate::function_layer::acceleration::octree::Octree;
-use super::{linear::LinearAccel, bvh::BVHAccel};
+use super::{linear::LinearAccel, bvh::BVHAccel, octree::Octree};
+
 
 #[derive(Copy, Clone)]
 pub enum AccelerationType {

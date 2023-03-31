@@ -1,9 +1,7 @@
 use nalgebra::Vector2;
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::material::bxdf::bsdf::BSDFType;
 use crate::function_layer::V3f;
-use super::bsdf::BSDFSampleResult;
-use super::bsdf::BSDF;
+use super::bsdf::{BSDFSampleResult, BSDF, BSDFType};
 
 
 pub struct SpecularReflection {

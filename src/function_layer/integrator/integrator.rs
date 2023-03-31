@@ -1,15 +1,11 @@
 use std::rc::Rc;
 use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::integrator::whitted_integrator::WhittedIntegrator;
 use crate::function_layer::light::light::{LightSampleResult, LightType};
-use super::direct_integrator::{DirectIntegratorSampleBSDF, DirectIntegratorSampleLight};
-use super::normal_integrator::NormalIntegrator;
-use crate::function_layer::ray::Ray;
-use crate::function_layer::RR;
-use crate::function_layer::sampler::sampler::Sampler;
-use crate::function_layer::scene::Scene;
-use crate::function_layer::shape::intersection::Intersection;
+use crate::function_layer::{Intersection, Scene, Sampler, RR, Ray};
+use super::{normal_integrator::NormalIntegrator, whitted_integrator::WhittedIntegrator,
+            direct_integrator::{DirectIntegratorSampleBSDF, DirectIntegratorSampleLight}};
+
 
 pub trait Integrator {
     fn li(&self, ray: &mut Ray, scene: &Scene, sampler: RR<dyn Sampler>) -> SpectrumRGB;

@@ -1,8 +1,7 @@
 use std::rc::Rc;
 use serde_json::Value;
 use crate::function_layer::{Intersection, Material, V3f};
-use crate::function_layer::material::bxdf::BSDF;
-use crate::function_layer::material::bxdf::specular::SpecularReflection;
+use super::bxdf::{BSDF, specular::SpecularReflection};
 use crate::function_layer::texture::normal_texture::NormalTexture;
 
 pub struct MirrorMaterial {

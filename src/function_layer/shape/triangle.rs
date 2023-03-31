@@ -8,7 +8,6 @@ use crate::resource_layer::MeshData;
 use super::shape::{ShapeBase, Shape};
 
 
-// #[derive(Clone)]
 pub struct TriangleMesh {
     shape: ShapeBase,
     mesh: Rc<MeshData>,
@@ -24,6 +23,7 @@ impl Clone for TriangleMesh {
         }
     }
 }
+
 impl TriangleMesh {
     pub fn from_json(json: &Value) -> Self {
         let shape = ShapeBase::from_json(json);

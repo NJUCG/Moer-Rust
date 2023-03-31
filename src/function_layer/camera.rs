@@ -4,8 +4,7 @@ use std::rc::Rc;
 use nalgebra::{Matrix4, Point3, Vector2};
 use serde_json::Value;
 use crate::core_layer::transform::Transform;
-use crate::function_layer::{V3f, Ray, Film, ray::RayDifferential, RR};
-use crate::function_layer::shape::shape::fetch_v3f;
+use crate::function_layer::{V3f, Ray, Film, ray::RayDifferential, RR, fetch_v3f};
 
 type V2f = Vector2<f32>;
 
