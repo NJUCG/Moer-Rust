@@ -2,10 +2,13 @@ use nalgebra::Vector2;
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::V3f;
 
+pub enum BSDFType {Diffuse, Specular}
+
 pub struct BSDFSampleResult {
     pub weight: SpectrumRGB,
     pub wi: V3f,
     pub pdf: f32,
+    pub tp: BSDFType,
 }
 
 pub trait BSDF {

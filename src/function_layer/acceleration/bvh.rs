@@ -23,6 +23,7 @@ impl BVHNode {
             BVHNode::Node { bounds: b, .. } | BVHNode::Leaf { bounds: b, .. } => b
         }
     }
+    #[allow(dead_code)]
     pub fn get_father_idx(&self) -> usize {
         match self {
             BVHNode::Node { .. } | BVHNode::Leaf { .. } => 0

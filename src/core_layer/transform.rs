@@ -84,11 +84,9 @@ impl Transform {
     }
 
     pub fn to_world_point(&self, v: &Point3<f32>) -> Point3<f32> {
-        let v4 = Vector4::new(v[0], v[1], v[2], 1.0);
-        let mut v4 = self.translate * self.rotate * self.scale * v4;
-        v4 /= v4[3];
-        let p = Point3::from(v4.xyz());
-        p
+        let v4 = v.to_homogeneous();
+        let v4 = self.translate * self.rotate * self.scale * v4;
+        Point3::from_homogeneous(v4).unwrap()
     }
 
     pub fn to_world_bounds3(&self, b: Bounds3) -> Bounds3 {

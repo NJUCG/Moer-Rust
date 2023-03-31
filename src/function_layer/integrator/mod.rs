@@ -1,5 +1,6 @@
 pub mod integrator;
-pub mod direct_integrator;
-pub mod normal_integrator;
+mod direct_integrator;
+mod normal_integrator;
+mod whitted_integrator;
 
 pub use integrator::Integrator;

@@ -59,4 +59,20 @@ impl Ray {
         let o = self.origin;
         o + delta
     }
+
+    pub fn change_dir(&mut self, dir: V3f) {
+        let inv_dir = V3f::new(
+            1.0 / dir.x,
+            1.0 / dir.y,
+            1.0 / dir.z,
+        );
+        self.neg_dir = [inv_dir.x < 0.0, inv_dir.y < 0.0, inv_dir.z < 0.0];
+        self.inv_dir = inv_dir;
+        self.direction = dir;
+    }
+
+    pub fn reset(&mut self) {
+        self.t_min = 1e-4;
+        self.t_max = f32::INFINITY;
+    }
 }

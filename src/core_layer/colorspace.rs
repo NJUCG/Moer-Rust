@@ -1,4 +1,4 @@
-use std::ops::{AddAssign, Div, Mul};
+use std::ops::{AddAssign, Div, Mul, MulAssign};
 use nalgebra::Vector3;
 use crate::function_layer::V3f;
 
@@ -44,6 +44,14 @@ impl Mul<SpectrumRGB> for SpectrumRGB {
 
     fn mul(self, rhs: SpectrumRGB) -> Self::Output {
         SpectrumRGB::from_rgb(self.rgb.component_mul(&rhs.rgb))
+    }
+}
+
+impl MulAssign<&SpectrumRGB> for SpectrumRGB {
+    fn mul_assign(&mut self, rhs: &SpectrumRGB) {
+        self.rgb.x *= rhs.rgb.x;
+        self.rgb.y *= rhs.rgb.y;
+        self.rgb.z *= rhs.rgb.z;
     }
 }
 

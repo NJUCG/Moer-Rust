@@ -90,7 +90,7 @@ impl Shape for Cube {
         let trans = self.transform();
         let mut normal = V3f::zeros();
         normal[p_id / 2] = if prim_id % 2 == 1 { 1.0 } else { -1.0 };
-        intersection.normal = trans.to_world_vec(&normal);
+        intersection.normal = trans.to_world_vec(&normal).normalize();
 
         let mut hit_point = Point3::from([0.0; 3]);
         hit_point[p_id / 2] = if prim_id % 2 == 1 { self.box_max[p_id / 2] } else { self.box_min[p_id / 2] };
@@ -98,7 +98,9 @@ impl Shape for Cube {
         hit_point[axis] = self.box_min[axis] + u * (self.box_max[axis] - self.box_min[axis]);
         let axis = (axis + 1) % 3;
         hit_point[axis] = self.box_min[axis] + v * (self.box_max[axis] - self.box_min[axis]);
-        intersection.position = trans.to_world_point(&hit_point);
+        intersection.position = Point3::from_homogeneous(
+            trans.translate * trans.rotate * hit_point.to_homogeneous()
+        ).unwrap();
 
         intersection.shape = Some(Rc::new(self.clone()));
         intersection.distance = distance;

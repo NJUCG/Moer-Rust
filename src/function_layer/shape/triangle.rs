@@ -3,18 +3,27 @@ use std::rc::Rc;
 use nalgebra::{Point3, Vector2, Vector3};
 use serde_json::Value;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Acceleration, create_acceleration, Intersection, Ray, RR, V3f};
+use crate::function_layer::{Acceleration, create_acceleration, Intersection, Ray, V3f};
 use crate::resource_layer::MeshData;
 use super::shape::{ShapeBase, Shape};
 
 
-#[derive(Clone)]
+// #[derive(Clone)]
 pub struct TriangleMesh {
     shape: ShapeBase,
     mesh: Rc<MeshData>,
-    acc: Option<RR<dyn Acceleration>>,
+    acc: Option<Box<dyn Acceleration>>,
 }
 
+impl Clone for TriangleMesh {
+    fn clone(&self) -> Self {
+        Self {
+            shape: self.shape.clone(),
+            mesh: self.mesh.clone(),
+            acc: None,
+        }
+    }
+}
 impl TriangleMesh {
     pub fn from_json(json: &Value) -> Self {
         let shape = ShapeBase::from_json(json);
@@ -44,7 +53,7 @@ impl Shape for TriangleMesh {
         match &self.acc {
             None => None,
             Some(acc) => {
-                let opt_its = acc.borrow().ray_intersect(ray);
+                let opt_its = acc.ray_intersect(ray);
                 match opt_its {
                     None => None,
                     Some((_, p, u, v)) => Some((p, u, v))
@@ -101,10 +110,10 @@ impl Shape for TriangleMesh {
 
             let triangle = Rc::new(RefCell::new(
                 Triangle::new(prime_id, v0, v1, v2, mesh.transform(), mesh.geometry_id())));
-            self.acc.as_ref().unwrap().borrow_mut().attach_shape(triangle);
+            self.acc.as_mut().unwrap().attach_shape(triangle);
         }
-        self.acc.as_ref().unwrap().borrow_mut().build();
-        let b3 = self.acc.as_ref().unwrap().borrow().bound3().clone();
+        self.acc.as_mut().unwrap().build();
+        let b3 = self.acc.as_ref().unwrap().bound3().clone();
         self.shape.set_bounds(b3);
     }
 

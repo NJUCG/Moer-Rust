@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use crate::function_layer::{Shape, Intersection, Ray, Bounds3, RR};
 use crate::function_layer::acceleration::octree::Octree;
 use super::{linear::LinearAccel, bvh::BVHAccel};
@@ -51,10 +50,10 @@ pub fn set_acc_type(tp: &str) {
     println!("Using acceleration type: {}", tp);
 }
 
-pub fn create_acceleration() -> RR<dyn Acceleration> {
+pub fn create_acceleration() -> Box<dyn Acceleration> {
     match unsafe { ACC_TYPE } {
-        AccelerationType::BVH => RR::new(RefCell::new(BVHAccel::default())),
-        AccelerationType::Linear => RR::new(RefCell::new(LinearAccel::default())),
-        AccelerationType::Octree => RR::new(RefCell::new(Octree::default())),
+        AccelerationType::BVH => Box::new(BVHAccel::default()),
+        AccelerationType::Linear => Box::new(LinearAccel::default()),
+        AccelerationType::Octree => Box::new(Octree::default()),
     }
 }

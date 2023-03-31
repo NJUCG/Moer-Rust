@@ -8,7 +8,7 @@ use crate::function_layer::{Ray, Light, Intersection, Acceleration, construct_sh
 
 pub struct Scene {
     pub infinite_lights: Vec<Rc<EnvironmentLight>>,
-    acceleration: RR<dyn Acceleration>,
+    acceleration: Box<dyn Acceleration>,
     light_distribution: Distribution<RR<dyn Light>>,
 }
 
@@ -17,13 +17,13 @@ impl Scene {
         let mut geom_id = 0;
         let acc = json["acceleration"].as_str().unwrap_or("bvh");
         set_acc_type(acc);
-        let acceleration = create_acceleration();
+        let mut acceleration = create_acceleration();
         let shapes = json["shapes"].as_array().unwrap();
         for shape in shapes {
             let shape = construct_shape(shape);
             shape.borrow_mut().set_geometry_id(geom_id);
             geom_id += 1;
-            acceleration.borrow_mut().attach_shape(shape);
+            acceleration.attach_shape(shape);
         }
         let mut infinite_lights = vec![];
 
@@ -48,7 +48,7 @@ impl Scene {
                     shape.set_geometry_id(geom_id);
                     drop(shape);
                     geom_id += 1;
-                    acceleration.borrow_mut().attach_shape(al.shape.as_ref().unwrap().clone());
+                    acceleration.attach_shape(al.shape.as_ref().unwrap().clone());
                 }
                 LightType::SpotLight => ()
             }
@@ -56,7 +56,7 @@ impl Scene {
         }
         let light_distribution = Distribution::new(light_v,
                                                    |_light| 1.0);
-        acceleration.borrow_mut().build();
+        acceleration.build();
         Self {
             infinite_lights,
             acceleration,
@@ -65,7 +65,7 @@ impl Scene {
     }
 
     pub fn ray_intersect(&self, ray: &mut Ray) -> Option<Intersection> {
-        self.acceleration.borrow().get_intersect(ray)
+        self.acceleration.get_intersect(ray)
     }
 
     pub fn sample_light(&self, sample: f32, pdf: &mut f32) -> Option<RR<dyn Light>> {

@@ -1,5 +1,6 @@
 use nalgebra::Vector2;
 use crate::core_layer::colorspace::SpectrumRGB;
+use crate::function_layer::material::bxdf::bsdf::BSDFType;
 use crate::function_layer::V3f;
 use super::bsdf::BSDFSampleResult;
 use super::bsdf::BSDF;
@@ -23,6 +24,7 @@ impl BSDF for SpecularReflection {
             weight: SpectrumRGB::same(1.0),
             wi: self.to_world(&wi_local),
             pdf: 1.0,
+            tp: BSDFType::Specular,
         }
     }
 

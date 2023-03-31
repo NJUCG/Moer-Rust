@@ -1,4 +1,4 @@
-mod bxdf;
+pub mod bxdf;
 pub mod material;
 pub mod matte;
 mod mirror;
