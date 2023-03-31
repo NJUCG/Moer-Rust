@@ -7,11 +7,13 @@ pub enum BVHNode {
         bounds: Bounds3,
         left: usize,
         right: usize,
+        // father: usize,
         split_axis: Axis,
     },
     Leaf {
         bounds: Bounds3,
         shape_idx: usize,
+        // father: usize,
     },
 }
 
@@ -19,6 +21,11 @@ impl BVHNode {
     pub fn get_bounds(&self) -> &Bounds3 {
         match self {
             BVHNode::Node { bounds: b, .. } | BVHNode::Leaf { bounds: b, .. } => b
+        }
+    }
+    pub fn get_father_idx(&self) -> usize {
+        match self {
+            BVHNode::Node { .. } | BVHNode::Leaf { .. } => 0
         }
     }
 }
@@ -61,6 +68,7 @@ impl Acceleration for BVHAccel {
             shape.borrow_mut().init_internal_acceleration();
         }
         recursively_build(&mut self.acc.shapes, 0, &mut self.nodes);
+        // TODO: 单纯的SAH构建的树可能不平衡
         self.acc.bounds = self.nodes[0].get_bounds().clone();
     }
 
@@ -159,8 +167,7 @@ impl BVHAccel {
             BVHNode::Leaf { shape_idx: idx, .. } => {
                 let shape = shapes[*idx].borrow();
                 let its = shape.ray_intersect_shape(ray);
-                if let Some(r) = its {
-                    let (p_id, u, v) = r;
+                if let Some((p_id, u, v)) = its {
                     Some((shape.geometry_id(), p_id, u, v))
                 } else { None }
             }
