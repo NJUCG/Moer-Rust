@@ -8,6 +8,7 @@ use crate::function_layer::{Intersection, Texture, Ray, construct_texture, V3f};
 use crate::function_layer::texture::TextureCoord;
 use super::light::{InfiniteLight, Light, LightSampleResult, LightType};
 
+#[derive(Clone)]
 pub struct EnvironmentLight {
     environment_map: Rc<dyn Texture<SpectrumRGB>>,
     energy_distribution: Distribution<Vector2<usize>>,
@@ -67,12 +68,6 @@ impl EnvironmentLight {
         Self {
             environment_map,
             energy_distribution,
-        }
-    }
-    pub fn copy_constr(env: &EnvironmentLight) -> Self {
-        Self {
-            environment_map: env.environment_map.clone(),
-            energy_distribution: env.energy_distribution.clone(),
         }
     }
 }

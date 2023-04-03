@@ -35,7 +35,7 @@ impl Scene {
             match ltp {
                 // 如果是环境光源，不加入光源分布
                 LightType::EnvironmentLight => {
-                    let light = EnvironmentLight::copy_constr(light.borrow().as_any().downcast_ref::<EnvironmentLight>().unwrap());
+                    let light = light.borrow().as_any().downcast_ref::<EnvironmentLight>().unwrap().clone();
                     infinite_lights.push(Rc::new(light));
                     continue;
                 }

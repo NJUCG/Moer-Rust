@@ -4,10 +4,7 @@ mod resource_layer;
 
 use std::env::{args, current_dir, set_current_dir};
 use std::error::Error;
-use std::fs::File;
-use std::io;
 use std::io::{BufReader, Write};
-use std::time::Instant;
 use image::ImageFormat;
 use nalgebra::Vector2;
 use serde_json::Value;
@@ -20,7 +17,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     set_current_dir(scene_dir).expect("Invalid scene dir!");
     println!("{}", current_dir().unwrap().display());
     let scene_path = "scene.json";
-    let scene = BufReader::new(File::open(scene_path).unwrap());
+    let scene = BufReader::new(std::fs::File::open(scene_path).unwrap());
     let json: Value = serde_json::from_reader(scene)?;
     let camera = construct_camera(&json["camera"]);
     let scene = Scene::from_json(&json["scene"]);
@@ -30,7 +27,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("spp: {spp}");
     let film = camera.film().unwrap();
     let [width, height] = film.borrow().size;
-    let start = Instant::now();
+    let start = std::time::Instant::now();
     for y in 0..height {
         for x in 0..width {
             let ndc = Vector2::new(x as f32 / width as f32, y as f32 / height as f32);
@@ -62,7 +59,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub fn update_progress(progress: f64) {
+fn update_progress(progress: f64) {
     let bar_width = 70;
     print!("[");
     let pos = bar_width as f64 * progress;
@@ -72,6 +69,6 @@ pub fn update_progress(progress: f64) {
         } else if i == pos as i32 { print!(">"); } else { print!(" "); }
     }
     print!("] {} %", (progress * 100.0) as i32);
-    io::stdout().flush().unwrap();
+    std::io::stdout().flush().unwrap();
     print!("\r");
 }
