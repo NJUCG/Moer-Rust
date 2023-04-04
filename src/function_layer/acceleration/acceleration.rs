@@ -1,6 +1,5 @@
-use crate::function_layer::{Shape, Intersection, Ray, Bounds3, RR};
-use super::{linear::LinearAccel, bvh::BVHAccel, octree::Octree};
-
+use super::{bvh::BVHAccel, linear::LinearAccel, octree::Octree};
+use crate::function_layer::{Bounds3, Intersection, Ray, Shape, RR};
 
 #[derive(Copy, Clone)]
 pub enum AccelerationType {
@@ -16,7 +15,9 @@ pub trait Acceleration {
     fn acceleration_mut(&mut self) -> &mut AccelerationBase;
     fn get_intersect(&self, ray: &mut Ray) -> Option<Intersection> {
         let hit = self.ray_intersect(ray);
-        if hit.is_none() { return None; }
+        if hit.is_none() {
+            return None;
+        }
         let (geom_id, prime_id, u, v) = hit.unwrap();
         let mut its = Intersection::default();
         let shape = self.acceleration().shapes[geom_id as usize].borrow();
@@ -29,7 +30,9 @@ pub trait Acceleration {
         self.acceleration_mut().shapes.push(shape)
     }
     fn atp(&self) -> AccelerationType;
-    fn bound3(&self) -> &Bounds3 { &self.acceleration().bounds }
+    fn bound3(&self) -> &Bounds3 {
+        &self.acceleration().bounds
+    }
 }
 
 #[derive(Default)]

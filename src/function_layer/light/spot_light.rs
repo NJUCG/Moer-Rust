@@ -1,11 +1,11 @@
-use std::any::Any;
-use cgmath::Zero;
-use nalgebra::{Point3};
-use cgmath::Vector2;
-use serde_json::Value;
+use super::light::{LightSampleResult, LightType};
 use crate::core_layer::{colorspace::SpectrumRGB, constants::EPSILON};
-use crate::function_layer::{Intersection, Light, V3f, fetch_v3f};
-use super::light::{LightType, LightSampleResult};
+use crate::function_layer::{fetch_v3f, Intersection, Light, V3f};
+use cgmath::Point3;
+use cgmath::Vector2;
+use cgmath::{InnerSpace, Zero};
+use serde_json::Value;
+use std::any::Any;
 
 pub struct SpotLight {
     position: Point3<f32>,
@@ -33,8 +33,8 @@ impl Light for SpotLight {
         let shading_point2sample = self.position - shading_point.position;
         LightSampleResult {
             energy: self.energy,
-            direction: V3f::from(shading_point2sample.normalize().data.0[0]),
-            distance: shading_point2sample.norm() - EPSILON,
+            direction: shading_point2sample.normalize(),
+            distance: shading_point2sample.magnitude() - EPSILON,
             normal: V3f::zero(),
             pdf: 1.0,
             is_delta: true,
@@ -55,7 +55,9 @@ impl Light for SpotLight {
     }
 
     fn do_equal(&self, rhs: &dyn Light) -> bool {
-        if rhs.light_type() != LightType::SpotLight { return false; }
+        if rhs.light_type() != LightType::SpotLight {
+            return false;
+        }
         let other = rhs.as_any().downcast_ref::<Self>().unwrap();
         self.position == other.position && self.energy == other.energy
     }

@@ -1,10 +1,9 @@
-use std::rc::Rc;
-use cgmath::{Vector2, Zero};
-use serde_json::Value;
+use super::image_texture::ImageTexture;
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::shape::intersection::Intersection;
-use super::image_texture::ImageTexture;
-
+use cgmath::{Vector2, Zero};
+use serde_json::Value;
+use std::rc::Rc;
 
 pub struct TextureCoord {
     pub coord: Vector2<f32>,
@@ -48,6 +47,6 @@ pub trait Texture<TReturn> {
 pub fn construct_texture<TReturn>(json: &Value) -> Rc<dyn Texture<SpectrumRGB>> {
     match json["type"].as_str().expect("No spectrum type given!") {
         "imageTex" => Rc::new(ImageTexture::from_json(json)),
-        _ => panic!("Invalid spectrum type!")
+        _ => panic!("Invalid spectrum type!"),
     }
 }

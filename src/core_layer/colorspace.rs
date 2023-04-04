@@ -1,6 +1,6 @@
-use std::ops::{AddAssign, Div, Mul, MulAssign};
-use cgmath::{ElementWise, Zero};
 use crate::function_layer::V3f;
+use cgmath::{ElementWise, Zero};
+use std::ops::{AddAssign, Div, Mul, MulAssign};
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct SpectrumRGB {
@@ -8,7 +8,9 @@ pub struct SpectrumRGB {
 }
 
 impl SpectrumRGB {
-    pub fn rgb(&self) -> V3f { self.rgb }
+    pub fn rgb(&self) -> V3f {
+        self.rgb
+    }
 }
 
 impl AddAssign<SpectrumRGB> for SpectrumRGB {
@@ -21,7 +23,9 @@ impl Div<f32> for SpectrumRGB {
     type Output = SpectrumRGB;
 
     fn div(self, rhs: f32) -> Self::Output {
-        SpectrumRGB { rgb: self.rgb / rhs }
+        SpectrumRGB {
+            rgb: self.rgb / rhs,
+        }
     }
 }
 
@@ -57,12 +61,16 @@ impl MulAssign<&SpectrumRGB> for SpectrumRGB {
 
 impl SpectrumRGB {
     pub fn same(f: f32) -> Self {
-        Self { rgb: V3f::from([f; 3]) }
+        Self {
+            rgb: V3f::from([f; 3]),
+        }
     }
 
     #[allow(dead_code)]
     pub fn new(r: f32, g: f32, b: f32) -> Self {
-        Self { rgb: V3f::new(r, g, b) }
+        Self {
+            rgb: V3f::new(r, g, b),
+        }
     }
 
     pub fn from_rgb(rgb: V3f) -> Self {

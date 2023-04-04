@@ -16,11 +16,10 @@ impl<T: Clone + PartialEq> Distribution<T> {
             cdf.push(w + cdf.last().unwrap());
         }
         let inv_total = 1.0 / cdf.last().unwrap();
-        for e in cdf.iter_mut() { *e *= inv_total; }
-        Self {
-            data,
-            cdf,
+        for e in cdf.iter_mut() {
+            *e *= inv_total;
         }
+        Self { data, cdf }
     }
 
     pub fn sample(&self, sample: f32, pdf: &mut f32) -> Option<T> {
@@ -28,11 +27,12 @@ impl<T: Clone + PartialEq> Distribution<T> {
             *pdf = 0.0;
             return None;
         }
-        let idx = self.cdf.binary_search_by(|probe: &f32|
-            match probe.partial_cmp(&sample).unwrap() {
-                Ordering::Equal => Ordering::Greater,
-                ord => ord,
-            });
+        let idx =
+            self.cdf
+                .binary_search_by(|probe: &f32| match probe.partial_cmp(&sample).unwrap() {
+                    Ordering::Equal => Ordering::Greater,
+                    ord => ord,
+                });
         let idx = idx.err().unwrap() - 1;
         *pdf = self.cdf[idx + 1] - self.cdf[idx];
         Some(self.data[idx.min(self.cdf.len() - 2)].clone())

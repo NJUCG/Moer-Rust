@@ -1,13 +1,11 @@
-use std::f32::consts::PI;
-use std::rc::Rc;
-use cgmath::{InnerSpace, Zero};
-use nalgebra::{Point3, Vector3};
-use cgmath::Vector2;
-use serde_json::Value;
+use super::shape::ShapeBase;
 use crate::core_layer::constants::INV_PI;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Bounds3, Intersection, Ray, Shape, V3f, fetch_v3f};
-use super::shape::ShapeBase;
+use crate::function_layer::{fetch_v3f, Bounds3, Intersection, Ray, Shape, V3f};
+use cgmath::{InnerSpace, Point3, Vector2, Zero};
+use serde_json::Value;
+use std::f32::consts::PI;
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct Sphere {
@@ -49,13 +47,15 @@ impl Shape for Sphere {
     }
 
     fn ray_intersect_shape(&self, ray: &mut Ray) -> Option<(u64, f32, f32)> {
-        let origin = &ray.origin;
+        let origin = ray.origin;
         let dir = ray.direction;
-        let o2c = V3f::from((self.center - origin).data.0[0]);
+        let o2c = self.center - origin;
         let b = o2c.dot(dir);
         let c = o2c.dot(o2c) - self.radius * self.radius;
         let delta = b * b - c;
-        if delta <= 0.0 { return None; }
+        if delta <= 0.0 {
+            return None;
+        }
         let sqrt_delta = delta.sqrt();
         let t1 = b - sqrt_delta;
         let t2 = b + sqrt_delta;
@@ -69,27 +69,38 @@ impl Shape for Sphere {
             ray.t_max = t1;
             hit = true;
         }
-        if !hit { return None; }
+        if !hit {
+            return None;
+        }
         // TODO 计算 u, v考虑旋转
         let normal = (ray.at(ray.t_max) - self.center).normalize();
         let cos_theta = normal.y;
         let u = if normal.z.abs() < 1e-4 {
-            if normal.x > 0.0 { PI * 0.5 } else { PI * 1.5 }
+            if normal.x > 0.0 {
+                PI * 0.5
+            } else {
+                PI * 1.5
+            }
         } else {
             (normal.x / normal.z).atan() + if normal.z < 0.0 { PI } else { 0.0 }
         };
-        Some(
-            (0, u, cos_theta.acos())
-        )
+        Some((0, u, cos_theta.acos()))
     }
 
-    fn fill_intersection(&self, distance: f32, _prim_id: u64, u: f32, v: f32, intersection: &mut Intersection) {
+    fn fill_intersection(
+        &self,
+        distance: f32,
+        _prim_id: u64,
+        u: f32,
+        v: f32,
+        intersection: &mut Intersection,
+    ) {
         intersection.shape = Some(Rc::new(self.clone()));
         intersection.distance = distance;
         let normal = V3f::new(v.sin() * u.sin(), v.cos(), v.sin() * u.cos());
         intersection.normal = normal;
-        let normal = Vector3::from_vec(vec![normal.x, normal.y, normal.z]);
-        let position = self.center +  self.radius * normal;
+
+        let position = self.center + self.radius * normal;
         intersection.position = position;
         intersection.tex_coord = Vector2::new(u * INV_PI * 0.5, v * INV_PI);
 

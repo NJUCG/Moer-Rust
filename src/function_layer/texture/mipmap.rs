@@ -1,8 +1,8 @@
-use std::rc::Rc;
+use crate::function_layer::V3f;
+use cgmath::{num_traits::clamp, Vector2};
 use image::imageops::FilterType;
 use image::Rgb32FImage;
-use cgmath::{num_traits::clamp, Vector2};
-use crate::function_layer::V3f;
+use std::rc::Rc;
 
 pub struct MipMap {
     pub pyramid: Vec<Rc<Rgb32FImage>>,
@@ -20,13 +20,15 @@ impl MipMap {
         for _ in 1..n_levels {
             let previous = pyramid.last().unwrap();
             let p_size = previous.dimensions();
-            let current = image::imageops::resize(previous.as_ref(),
-                                                  p_size.0 / 2, p_size.1 / 2, FilterType::Nearest);
+            let current = image::imageops::resize(
+                previous.as_ref(),
+                p_size.0 / 2,
+                p_size.1 / 2,
+                FilterType::Nearest,
+            );
             pyramid.push(Rc::new(current));
         }
-        Self {
-            pyramid
-        }
+        Self { pyramid }
     }
 
     pub fn texel(&self, level: u32, x: i64, y: i64) -> V3f {
@@ -46,14 +48,18 @@ impl MipMap {
         let y0 = y.floor() as i64;
         let dx = x - x.floor();
         let dy = y - y.floor();
-        (1.0 - dx) * (1.0 - dy) * self.texel(level, x0, y0) +
-            (1.0 - dx) * dy * self.texel(level, x0, y0 + 1) +
-            dx * (1.0 - dy) * self.texel(level, x0 + 1, y0) +
-            dx * dy * self.texel(level, x0 + 1, y0 + 1)
+        (1.0 - dx) * (1.0 - dy) * self.texel(level, x0, y0)
+            + (1.0 - dx) * dy * self.texel(level, x0, y0 + 1)
+            + dx * (1.0 - dy) * self.texel(level, x0 + 1, y0)
+            + dx * dy * self.texel(level, x0 + 1, y0 + 1)
     }
 
     pub fn look_up(&self, uv: Vector2<f32>, duv0: Vector2<f32>, duv1: Vector2<f32>) -> V3f {
-        let width = duv0.x.abs().max(duv0.y.abs()).max(duv1.x.abs().max(duv1.y.abs()));
+        let width = duv0
+            .x
+            .abs()
+            .max(duv0.y.abs())
+            .max(duv1.x.abs().max(duv1.y.abs()));
 
         let level = self.pyramid.len() as f32 - 1.0 + width.max(1e-8).log2();
         // let x = uv.x * self.pyramid[0].dimensions().0 as f32;

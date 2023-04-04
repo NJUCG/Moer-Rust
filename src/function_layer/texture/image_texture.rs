@@ -1,12 +1,12 @@
-use std::rc::Rc;
-use cgmath::Vector2;
-use serde_json::Value;
+use super::mipmap::MipMap;
+use super::texture::TextureMapping;
+use super::texture::{Texture, TextureCoord, UVMapping};
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::Intersection;
 use crate::resource_layer::image_io::load_img;
-use super::texture::{Texture, TextureCoord, UVMapping};
-use super::mipmap::MipMap;
-use super::texture::TextureMapping;
+use cgmath::Vector2;
+use serde_json::Value;
+use std::rc::Rc;
 
 pub struct ImageTexture {
     size: Vector2<usize>,
@@ -44,7 +44,10 @@ impl Texture<SpectrumRGB> for ImageTexture {
     }
 
     fn evaluate_coord(&self, tex_coord: &TextureCoord) -> SpectrumRGB {
-        SpectrumRGB::from_rgb(
-            self.mipmap.look_up(tex_coord.coord, tex_coord.duv_dx, tex_coord.duv_dy))
+        SpectrumRGB::from_rgb(self.mipmap.look_up(
+            tex_coord.coord,
+            tex_coord.duv_dx,
+            tex_coord.duv_dy,
+        ))
     }
 }

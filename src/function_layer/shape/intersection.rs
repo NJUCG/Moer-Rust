@@ -1,8 +1,7 @@
-use std::rc::Rc;
-use cgmath::{InnerSpace, Zero};
-use nalgebra::{Point3, Vector3};
+use crate::function_layer::{Ray, Shape, V3f};
 use cgmath::Vector2;
-use crate::function_layer::{Shape, Ray, V3f};
+use cgmath::{EuclideanSpace, InnerSpace, Point3, Zero};
+use std::rc::Rc;
 
 pub struct Intersection {
     pub distance: f32,
@@ -29,7 +28,7 @@ impl Default for Intersection {
     fn default() -> Self {
         Self {
             distance: 0.0,
-            position: Default::default(),
+            position: Point3::origin(),
             normal: V3f::zero(),
             tangent: V3f::zero(),
             bitangent: V3f::zero(),
@@ -49,23 +48,27 @@ impl Default for Intersection {
 
 pub fn compute_ray_differentials(intersection: &mut Intersection, ray: &Ray) {
     loop {
-        if ray.differential.is_none() { break; }
+        if ray.differential.is_none() {
+            break;
+        }
         let p = intersection.position;
         let n = intersection.normal;
         let df = ray.differential.as_ref().unwrap();
-        let ox = V3f::from(df.origin_x.coords.data.0[0]);
-        let oy = V3f::from(df.origin_y.coords.data.0[0]);
-        let d = n.dot(V3f::from(p.coords.data.0[0]));
+        let ox = df.origin_x.to_vec();
+        let oy = df.origin_y.to_vec();
+        let d = n.dot(p.to_vec());
         let tx = -(n.dot(ox) - d) / n.dot(df.direction_x);
-        if tx.is_infinite() || tx.is_nan() { break; }
+        if tx.is_infinite() || tx.is_nan() {
+            break;
+        }
         let ty = -(n.dot(oy) - d) / n.dot(df.direction_y);
-        if ty.is_infinite() || ty.is_nan() { break; }
-        let dx = tx * df.direction_x;
-        let dy = ty * df.direction_y;
-        let px = ray.origin + Vector3::from_vec(vec![dx.x, dx.y, dx.z]);
-        let py = ray.origin + Vector3::from_vec(vec![dy.x, dy.y, dy.z]);
-        intersection.dp_dx = V3f::from((px - p).data.0[0]);
-        intersection.dp_dy = V3f::from((py - p).data.0[0]);
+        if ty.is_infinite() || ty.is_nan() {
+            break;
+        }
+        let px = ray.origin + tx * df.direction_x;
+        let py = ray.origin + ty * df.direction_y;
+        intersection.dp_dx = px - p;
+        intersection.dp_dy = py - p;
         let mut dim = [0; 2];
         if n.x > n.y && n.x > n.z {
             dim[0] = 1;
@@ -88,10 +91,16 @@ pub fn compute_ray_differentials(intersection: &mut Intersection, ray: &Ray) {
 
         let solve_linear_system2x2 = |a: [[f32; 2]; 2], b: [f32; 2]| -> Option<(f32, f32)> {
             let det = a[0][0] * a[1][1] - a[0][1] * a[1][0];
-            if det.abs() < 1e-10 { return None; }
+            if det.abs() < 1e-10 {
+                return None;
+            }
             let x0 = (a[1][1] * b[0] - a[0][1] * b[1]) / det;
             let x1 = (a[0][0] * b[1] - a[1][0] * b[0]) / det;
-            if x0.is_nan() || x1.is_nan() { None } else { Some((x0, x1)) }
+            if x0.is_nan() || x1.is_nan() {
+                None
+            } else {
+                Some((x0, x1))
+            }
         };
         let (du_dx, dv_dx) = solve_linear_system2x2(a, bx).unwrap_or((0.0, 0.0));
         let (du_dy, dv_dy) = solve_linear_system2x2(a, by).unwrap_or((0.0, 0.0));

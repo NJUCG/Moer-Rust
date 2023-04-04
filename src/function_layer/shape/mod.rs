@@ -1,12 +1,12 @@
-pub mod intersection;
-pub mod shape;
-mod triangle;
-mod sphere;
-mod parallelogram;
-mod disk;
-mod cylinder;
 mod cone;
 mod cube;
+mod cylinder;
+mod disk;
+pub mod intersection;
+mod parallelogram;
+pub mod shape;
+mod sphere;
+mod triangle;
 
-pub use shape::{Shape, fetch_v3f};
-pub use intersection::{Intersection, compute_ray_differentials};
+pub use intersection::{compute_ray_differentials, Intersection};
+pub use shape::{fetch_v3f, Shape};

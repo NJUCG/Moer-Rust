@@ -1,9 +1,12 @@
-use cgmath::InnerSpace;
-use cgmath::Vector2;
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::V3f;
+use cgmath::InnerSpace;
+use cgmath::Vector2;
 
-pub enum BSDFType {Diffuse, Specular}
+pub enum BSDFType {
+    Diffuse,
+    Specular,
+}
 
 pub struct BSDFSampleResult {
     pub weight: SpectrumRGB,

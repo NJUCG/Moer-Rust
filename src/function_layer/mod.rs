@@ -1,34 +1,39 @@
+use cgmath::Vector3;
+use image::Rgb32FImage;
 use std::cell::RefCell;
 use std::rc::Rc;
-use image::{Rgb32FImage};
-use cgmath::Vector3;
 
 pub type Image = Rgb32FImage;
 pub type V3f = Vector3<f32>;
 pub type RR<T> = Rc<RefCell<T>>;
 
+pub mod acceleration;
+mod bounds3;
 pub mod camera;
 pub mod film;
-mod ray;
-pub mod scene;
-pub mod acceleration;
+pub mod integrator;
 pub mod light;
-mod bounds3;
+pub mod material;
+mod ray;
+pub mod sampler;
+pub mod scene;
 mod shape;
 pub mod texture;
-pub mod material;
-pub mod integrator;
-pub mod sampler;
 
-pub use ray::Ray;
-pub use light::{Light, InfiniteLight, light::construct_light};
+pub use acceleration::{
+    acceleration::{create_acceleration, set_acc_type},
+    Acceleration,
+};
 pub use bounds3::Bounds3;
-pub use shape::{Shape, Intersection, fetch_v3f, compute_ray_differentials, shape::construct_shape};
-pub use texture::{Texture, texture::construct_texture};
-pub use material::{Material, material::construct_material};
-pub use integrator::{Integrator, integrator::construct_integrator};
-pub use sampler::{Sampler, sampler::construct_sampler};
-pub use camera::{Camera, construct_camera};
-pub use scene::Scene;
-pub use acceleration::{Acceleration, acceleration::{create_acceleration, set_acc_type}};
+pub use camera::{construct_camera, Camera};
 pub use film::Film;
+pub use integrator::{integrator::construct_integrator, Integrator};
+pub use light::{light::construct_light, InfiniteLight, Light};
+pub use material::{material::construct_material, Material};
+pub use ray::Ray;
+pub use sampler::{sampler::construct_sampler, Sampler};
+pub use scene::Scene;
+pub use shape::{
+    compute_ray_differentials, fetch_v3f, shape::construct_shape, Intersection, Shape,
+};
+pub use texture::{texture::construct_texture, Texture};

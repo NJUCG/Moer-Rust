@@ -1,8 +1,7 @@
-use cgmath::Vector2;
+use super::bsdf::{BSDFSampleResult, BSDFType, BSDF};
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::V3f;
-use super::bsdf::{BSDFSampleResult, BSDF, BSDFType};
-
+use cgmath::Vector2;
 
 pub struct SpecularReflection {
     pub normal: V3f,

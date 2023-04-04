@@ -1,8 +1,8 @@
-use cgmath::Vector2;
-use rand::Rng;
-use rand::rngs::ThreadRng;
-use serde_json::Value;
 use crate::function_layer::Sampler;
+use cgmath::Vector2;
+use rand::rngs::ThreadRng;
+use rand::Rng;
+use serde_json::Value;
 
 pub struct IndependentSampler {
     pub x_samples: usize,
@@ -37,6 +37,9 @@ impl Sampler for IndependentSampler {
     }
 
     fn next_2d(&mut self) -> Vector2<f32> {
-        Vector2::new(self.rng.gen::<f32>() + f32::EPSILON, self.rng.gen::<f32>() + f32::EPSILON)
+        Vector2::new(
+            self.rng.gen::<f32>() + f32::EPSILON,
+            self.rng.gen::<f32>() + f32::EPSILON,
+        )
     }
 }

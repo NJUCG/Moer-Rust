@@ -3,4 +3,4 @@ mod bvh;
 mod linear;
 mod octree;
 
-pub use acceleration::{Acceleration};
+pub use acceleration::Acceleration;

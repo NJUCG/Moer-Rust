@@ -1,16 +1,16 @@
-mod function_layer;
 mod core_layer;
+mod function_layer;
 mod resource_layer;
 
+use cgmath::{Vector2, Zero};
+use core_layer::colorspace::SpectrumRGB;
+use function_layer::camera::CameraSample;
+use function_layer::{construct_camera, construct_integrator, construct_sampler, Camera, Scene};
+use image::ImageFormat;
+use serde_json::Value;
 use std::env::{args, current_dir, set_current_dir};
 use std::error::Error;
 use std::io::{BufReader, Write};
-use image::ImageFormat;
-use cgmath::{Vector2, Zero};
-use serde_json::Value;
-use function_layer::{Camera, Scene, construct_integrator, construct_sampler, construct_camera};
-use function_layer::camera::CameraSample;
-use core_layer::colorspace::SpectrumRGB;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let scene_dir = args().nth(1).expect("No input scene!");
@@ -34,11 +34,17 @@ fn main() -> Result<(), Box<dyn Error>> {
             let mut li = SpectrumRGB::same(0.0);
             for _ in 0..spp {
                 let mut ray = camera.sample_ray_differentials(
-                    &CameraSample { xy: sampler.borrow_mut().next_2d(), lens: Vector2::zero(), time: 0.0 }, ndc,
+                    &CameraSample {
+                        xy: sampler.borrow_mut().next_2d(),
+                        lens: Vector2::zero(),
+                        time: 0.0,
+                    },
+                    ndc,
                 );
                 li += integrator.li(&mut ray, &scene, sampler.clone());
             }
-            film.borrow_mut().deposit(Vector2::new(x, y), &(li / spp as f32));
+            film.borrow_mut()
+                .deposit(Vector2::new(x, y), &(li / spp as f32));
         }
         update_progress(y as f64 / height as f64);
     }
@@ -66,7 +72,11 @@ fn update_progress(progress: f64) {
     for i in 0..bar_width {
         if i < pos as i32 {
             print!("=");
-        } else if i == pos as i32 { print!(">"); } else { print!(" "); }
+        } else if i == pos as i32 {
+            print!(">");
+        } else {
+            print!(" ");
+        }
     }
     print!("] {} %", (progress * 100.0) as i32);
     std::io::stdout().flush().unwrap();

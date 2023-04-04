@@ -1,9 +1,9 @@
-use std::cell::RefCell;
-use std::rc::Rc;
+use super::independent_sampler::IndependentSampler;
+use crate::function_layer::RR;
 use cgmath::Vector2;
 use serde_json::Value;
-use crate::function_layer::RR;
-use super::independent_sampler::IndependentSampler;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 pub trait Sampler {
     fn xsp(&self) -> usize;

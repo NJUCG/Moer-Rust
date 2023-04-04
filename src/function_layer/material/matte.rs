@@ -1,14 +1,12 @@
-use std::rc::Rc;
+use super::bxdf::{lambert::LambertReflection, BSDF};
+use crate::core_layer::colorspace::SpectrumRGB;
+use crate::function_layer::texture::{
+    constant_texture::ConstantTexture, normal_texture::NormalTexture, texture::construct_texture,
+};
+use crate::function_layer::{fetch_v3f, Intersection, Texture, V3f};
 use cgmath::Zero;
 use serde_json::Value;
-use crate::core_layer::colorspace::SpectrumRGB;
-use super::bxdf::{BSDF, lambert::LambertReflection};
-use crate::function_layer::texture::{
-    constant_texture::ConstantTexture,
-    normal_texture::NormalTexture,
-    texture::construct_texture,
-};
-use crate::function_layer::{Intersection, Texture, V3f, fetch_v3f};
+use std::rc::Rc;
 
 use super::Material;
 
@@ -20,7 +18,10 @@ pub struct MatteMaterial {
 impl MatteMaterial {
     pub fn new() -> Self {
         let albedo = Rc::new(ConstantTexture::new(&SpectrumRGB::same(0.5)));
-        Self { normal_map: None, albedo }
+        Self {
+            normal_map: None,
+            albedo,
+        }
     }
 
     pub fn from_json(json: &Value) -> Self {
@@ -38,10 +39,7 @@ impl MatteMaterial {
         } else {
             panic!("Error in albedo format!");
         };
-        Self {
-            normal_map,
-            albedo,
-        }
+        Self { normal_map, albedo }
     }
 }
 

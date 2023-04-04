@@ -1,13 +1,13 @@
+use super::light::{InfiniteLight, Light, LightSampleResult, LightType};
+use crate::core_layer::{colorspace::SpectrumRGB, constants::INV_PI, distribution::Distribution};
+use crate::function_layer::texture::TextureCoord;
+use crate::function_layer::{construct_texture, Intersection, Ray, Texture, V3f};
+use cgmath::Vector2;
+use cgmath::{InnerSpace, Zero};
+use serde_json::Value;
 use std::any::Any;
 use std::f32::consts::PI;
 use std::rc::Rc;
-use cgmath::{InnerSpace, Zero};
-use cgmath::Vector2;
-use serde_json::Value;
-use crate::core_layer::{colorspace::SpectrumRGB, constants::INV_PI, distribution::Distribution};
-use crate::function_layer::{Intersection, Texture, Ray, construct_texture, V3f};
-use crate::function_layer::texture::TextureCoord;
-use super::light::{InfiniteLight, Light, LightSampleResult, LightType};
 
 #[derive(Clone)]
 pub struct EnvironmentLight {
@@ -20,7 +20,11 @@ fn direction2uv(direction: V3f) -> Vector2<f32> {
     let cos_theta = direction[1];
     v = cos_theta.acos();
     if direction[2].abs() < 1e-8 {
-        u = if direction[0] > 0.0 { PI * 0.5 } else { PI * 1.5 }
+        u = if direction[0] > 0.0 {
+            PI * 0.5
+        } else {
+            PI * 1.5
+        }
     } else {
         let tan_phi = direction[0] / (direction[2] + 1e-8);
         u = tan_phi.atan();
@@ -43,7 +47,10 @@ impl EnvironmentLight {
             panic!("EnvironmentLight must specify texture!\n")
         }
         let environment_map = construct_texture::<SpectrumRGB>(&json["texture"]);
-        let Vector2 { x: width, y: height } = environment_map.size();
+        let Vector2 {
+            x: width,
+            y: height,
+        } = environment_map.size();
         let mut indices: Vec<Vector2<usize>> = Vec::with_capacity(width * height);
         for y in 0..height {
             for x in 0..width {
@@ -127,10 +134,12 @@ impl Light for EnvironmentLight {
     }
 
     fn do_equal(&self, rhs: &dyn Light) -> bool {
-        if rhs.light_type() != LightType::EnvironmentLight { return false; }
+        if rhs.light_type() != LightType::EnvironmentLight {
+            return false;
+        }
         let other = rhs.as_any().downcast_ref::<Self>().unwrap();
-        self.energy_distribution == other.energy_distribution &&
-            Rc::ptr_eq(&self.environment_map, &other.environment_map)
+        self.energy_distribution == other.energy_distribution
+            && Rc::ptr_eq(&self.environment_map, &other.environment_map)
     }
 }
 

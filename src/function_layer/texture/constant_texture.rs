@@ -1,8 +1,8 @@
-use std::rc::Rc;
-use cgmath::{Vector2, Zero};
-use crate::function_layer::Intersection;
 use super::texture::{TextureCoord, TextureMapping, UVMapping};
 use super::Texture;
+use crate::function_layer::Intersection;
+use cgmath::{Vector2, Zero};
+use std::rc::Rc;
 
 pub struct ConstantTexture<TReturn> {
     size: Vector2<usize>,
@@ -29,7 +29,9 @@ impl<TReturn: Copy> Texture<TReturn> for ConstantTexture<TReturn> {
         self.mapping.clone()
     }
 
-    fn evaluate(&self, _intersection: &Intersection) -> TReturn { self.data }
+    fn evaluate(&self, _intersection: &Intersection) -> TReturn {
+        self.data
+    }
 
     fn evaluate_coord(&self, _tex_coord: &TextureCoord) -> TReturn {
         self.data

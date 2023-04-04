@@ -1,13 +1,11 @@
-use std::f64::consts::PI;
-use std::rc::Rc;
-use cgmath::InnerSpace;
-use nalgebra::{Point3};
-use cgmath::Vector2;
-use serde_json::Value;
+use super::shape::ShapeBase;
 use crate::core_layer::function::solve_quadratic;
 use crate::core_layer::transform::{Transform, Transformable};
 use crate::function_layer::{Bounds3, Intersection, Ray, Shape, V3f};
-use super::shape::ShapeBase;
+use cgmath::{InnerSpace, Point3, Vector2};
+use serde_json::Value;
+use std::f64::consts::PI;
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct Cone {
@@ -26,7 +24,10 @@ impl Cone {
         let tan_theta = radius / height;
         let cos_theta = (1.0 / (1.0 + tan_theta * tan_theta)).sqrt();
         let mut shape = ShapeBase::from_json(json);
-        let bounds3 = Bounds3::new(V3f::new(-radius, -radius, 0.0), V3f::new(radius, radius, height));
+        let bounds3 = Bounds3::new(
+            V3f::new(-radius, -radius, 0.0),
+            V3f::new(radius, radius, height),
+        );
         shape.bounds3 = shape.transform.to_world_bounds3(bounds3);
         Self {
             shape,
@@ -57,9 +58,9 @@ impl Shape for Cone {
         let trans = self.transform();
         let local_ray = trans.local_ray(ray);
         let d = local_ray.direction;
-        let o = cgmath::Point3::from(local_ray.origin.coords.data.0[0]);
+        let o = local_ray.origin;
 
-        let cc = cgmath::Point3::new(0.0, 0.0, self.height);
+        let cc = Point3::new(0.0, 0.0, self.height);
         let co: V3f = o - cc;
         let pw2_cos = self.cos_theta * self.cos_theta;
         let a = -d.z * -d.z - pw2_cos; // (d . v)^2 - cos^2 theta.
@@ -67,21 +68,33 @@ impl Shape for Cone {
         let c = -co.z * -co.z - co.dot(co) * pw2_cos;
         let roots = solve_quadratic(a, b, c);
 
-        if roots.is_none() { return None; }
+        if roots.is_none() {
+            return None;
+        }
 
         let (t0, t1) = roots.unwrap(); // t0 <= t1
-        // check t0 first, if success, then skip t1
+                                       // check t0 first, if success, then skip t1
 
         for tt in [t0, t1] {
-            if tt <= local_ray.t_min || tt >= local_ray.t_max { continue; }
+            if tt <= local_ray.t_min || tt >= local_ray.t_max {
+                continue;
+            }
             let p = local_ray.at(tt);
-            if p.z < 0.0 || p.z > self.height { continue; }
+            if p.z < 0.0 || p.z > self.height {
+                continue;
+            }
 
             let mut its_phi = (p.y / p.x).atan();
-            if its_phi < 0.0 { its_phi += PI as f32; }
-            if p.y < 0.0 { its_phi += PI as f32; }
+            if its_phi < 0.0 {
+                its_phi += PI as f32;
+            }
+            if p.y < 0.0 {
+                its_phi += PI as f32;
+            }
 
-            if its_phi > self.phi_max { continue; }
+            if its_phi > self.phi_max {
+                continue;
+            }
 
             ray.t_max = tt;
             let u = its_phi / self.phi_max;
@@ -91,17 +104,32 @@ impl Shape for Cone {
         None
     }
 
-    fn fill_intersection(&self, distance: f32, _prim_id: u64, u: f32, v: f32, intersection: &mut Intersection) {
+    fn fill_intersection(
+        &self,
+        distance: f32,
+        _prim_id: u64,
+        u: f32,
+        v: f32,
+        intersection: &mut Intersection,
+    ) {
         let trans = self.transform();
         let phi = u * self.phi_max;
         let z = v * self.height;
         let ck_norm = (self.height - z) / (self.cos_theta * self.cos_theta);
         let k = cgmath::Point3::from([0.0, 0.0, self.height - ck_norm]);
 
-        let position = Point3::new(self.radius * (1.0 - v) * phi.cos(), self.radius * (1.0 - v) * phi.sin(), z);
+        let position = Point3::new(
+            self.radius * (1.0 - v) * phi.cos(),
+            self.radius * (1.0 - v) * phi.sin(),
+            z,
+        );
         intersection.position = trans.to_world_point(&position);
 
-        let position = cgmath::Point3::new(self.radius * (1.0 - v) * phi.cos(), self.radius * (1.0 - v) * phi.sin(), z);
+        let position = cgmath::Point3::new(
+            self.radius * (1.0 - v) * phi.cos(),
+            self.radius * (1.0 - v) * phi.sin(),
+            z,
+        );
         let normal: V3f = (position - k).normalize();
         intersection.normal = trans.to_world_vec(&normal);
 

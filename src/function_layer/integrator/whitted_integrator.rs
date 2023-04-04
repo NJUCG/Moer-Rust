@@ -1,8 +1,9 @@
-use crate::core_layer::colorspace::SpectrumRGB;
 use super::integrator::convert_pdf;
+use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::material::bxdf::BSDFType;
-use crate::function_layer::{Integrator, Light, InfiniteLight, Ray, RR, Sampler, Scene, compute_ray_differentials};
-
+use crate::function_layer::{
+    compute_ray_differentials, InfiniteLight, Integrator, Light, Ray, Sampler, Scene, RR,
+};
 
 pub struct WhittedIntegrator;
 
@@ -47,7 +48,9 @@ impl Integrator for WhittedIntegrator {
                     }
                     let mut pdf_light = 0.0;
                     let light = scene.sample_light(sampler.borrow_mut().next_1d(), &mut pdf_light);
-                    if light.is_none() || pdf_light == 0.0 { break; }
+                    if light.is_none() || pdf_light == 0.0 {
+                        break;
+                    }
                     let light = light.as_ref().unwrap().borrow();
                     let mut res = light.sample(&its, sampler.borrow_mut().next_2d());
                     let mut shadow_ray = Ray::new(its.position, res.direction);

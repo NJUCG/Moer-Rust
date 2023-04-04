@@ -1,6 +1,6 @@
 pub mod bsdf;
 pub mod lambert;
-mod warp;
 pub mod specular;
+mod warp;
 
-pub use bsdf::{BSDF, BSDFType};
+pub use bsdf::{BSDFType, BSDF};

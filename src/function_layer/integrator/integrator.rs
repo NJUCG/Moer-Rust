@@ -1,12 +1,14 @@
-use std::rc::Rc;
-use cgmath::InnerSpace;
-use serde_json::Value;
+use super::{
+    direct_integrator::{DirectIntegratorSampleBSDF, DirectIntegratorSampleLight},
+    normal_integrator::NormalIntegrator,
+    whitted_integrator::WhittedIntegrator,
+};
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::light::light::{LightSampleResult, LightType};
-use crate::function_layer::{Intersection, Scene, Sampler, RR, Ray};
-use super::{normal_integrator::NormalIntegrator, whitted_integrator::WhittedIntegrator,
-            direct_integrator::{DirectIntegratorSampleBSDF, DirectIntegratorSampleLight}};
-
+use crate::function_layer::{Intersection, Ray, Sampler, Scene, RR};
+use cgmath::InnerSpace;
+use serde_json::Value;
+use std::rc::Rc;
 
 pub trait Integrator {
     fn li(&self, ray: &mut Ray, scene: &Scene, sampler: RR<dyn Sampler>) -> SpectrumRGB;
@@ -16,13 +18,13 @@ pub fn convert_pdf(result: &LightSampleResult, _intersection: &Intersection) -> 
     let mut pdf = result.pdf;
     let distance = result.distance;
     match result.light_type {
-        LightType::SpotLight => { pdf *= distance * distance }
+        LightType::SpotLight => pdf *= distance * distance,
         LightType::AreaLight => {
             pdf *= distance * distance;
             pdf /= result.normal.dot(result.direction).abs();
         }
         // 环境光的pdf转换在采样时已经完成
-        LightType::EnvironmentLight => ()
+        LightType::EnvironmentLight => (),
     };
     pdf
 }

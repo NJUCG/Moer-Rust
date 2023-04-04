@@ -1,11 +1,9 @@
-use std::rc::Rc;
-use cgmath::{InnerSpace, Zero};
-use nalgebra::{Point3};
-use cgmath::Vector2;
-use serde_json::Value;
-use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Intersection, Ray, Shape, V3f, fetch_v3f};
 use super::shape::ShapeBase;
+use crate::core_layer::transform::{Transform, Transformable};
+use crate::function_layer::{fetch_v3f, Intersection, Ray, Shape, V3f};
+use cgmath::{EuclideanSpace, InnerSpace, Point3, Vector2, Zero};
+use serde_json::Value;
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct Parallelogram {
@@ -26,7 +24,7 @@ impl Parallelogram {
         let mut shape = ShapeBase::from_json(json);
         let trans = &shape.transform;
         let base = trans.to_world_point(&base);
-        let b = V3f::from(base.coords.data.0[0]);
+        let b = base.to_vec();
         let edge0 = trans.to_world_vec(&edge0);
         let edge1 = trans.to_world_vec(&edge1);
 
@@ -62,40 +60,56 @@ impl Shape for Parallelogram {
     }
 
     fn ray_intersect_shape(&self, ray: &mut Ray) -> Option<(u64, f32, f32)> {
-        let origin = V3f::from(ray.origin.coords.data.0[0]);
+        let origin = ray.origin;
         let dir = ray.direction;
         let normal = self.edge0.cross(self.edge1).normalize();
-        let d = -normal.dot(V3f::from(self.base.coords.data.0[0]));
-        let a = normal.dot(origin) + d;
+        let d = -normal.dot(self.base.to_vec());
+        let a = normal.dot(origin.to_vec()) + d;
         let b = normal.dot(dir);
-        if b == 0.0 { return None; }
+        if b == 0.0 {
+            return None;
+        }
         let t = -a / b;
-        if t < ray.t_min || t > ray.t_max { return None; }
+        if t < ray.t_min || t > ray.t_max {
+            return None;
+        }
         let (edge0, edge1) = (self.edge0, self.edge1);
         let hit = origin + t * dir;
-        let v1 = (hit - V3f::from(self.base.coords.data.0[0])).cross(edge1);
+        let v1 = (hit - self.base).cross(edge1);
         let v2 = edge0.cross(edge1);
         let mut u = v1.magnitude() / v2.magnitude();
-        if v1.dot(v2) < 0.0 { u *= -1.0; }
+        if v1.dot(v2) < 0.0 {
+            u *= -1.0;
+        }
 
-        let v1 = (hit - V3f::from(self.base.coords.data.0[0])).cross(edge0);
+        let v1 = (hit - self.base).cross(edge0);
         let v2 = -v2; //cross(edge1, edge0)
         let mut v = v1.magnitude() / v2.magnitude();
-        if v1.dot(v2) < 0.0 { v *= -1.0; }
+        if v1.dot(v2) < 0.0 {
+            v *= -1.0;
+        }
 
         if 0.0 <= u && u <= 1.0 && 0.0 <= v && v <= 1.0 {
             ray.t_max = t;
             Some((0, u, v))
-        } else { None }
+        } else {
+            None
+        }
     }
 
-    fn fill_intersection(&self, distance: f32, _prim_id: u64, u: f32, v: f32, intersection: &mut Intersection) {
+    fn fill_intersection(
+        &self,
+        distance: f32,
+        _prim_id: u64,
+        u: f32,
+        v: f32,
+        intersection: &mut Intersection,
+    ) {
         intersection.distance = distance;
         intersection.shape = Some(Rc::new(self.clone()));
         intersection.normal = self.edge0.cross(self.edge1).normalize();
         intersection.tex_coord = Vector2::new(u, v);
-        let pos = V3f::from(self.base.coords.data.0[0]) + u * self.edge0 + v * self.edge1;
-        intersection.position = Point3::from([pos.x, pos.y, pos.z]);
+        intersection.position = self.base + u * self.edge0 + v * self.edge1;
         intersection.dp_du = self.edge0;
         intersection.dp_dv = self.edge1;
         intersection.tangent = self.edge0.normalize();

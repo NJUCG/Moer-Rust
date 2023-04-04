@@ -1,9 +1,9 @@
-use std::rc::Rc;
-use image::Rgb32FImage;
-use cgmath::{num_traits::clamp, Vector2};
-use serde_json::Value;
-use crate::function_layer::{Intersection, V3f};
 use super::texture::{Texture, TextureCoord, TextureMapping, UVMapping};
+use crate::function_layer::{Intersection, V3f};
+use cgmath::{num_traits::clamp, Vector2};
+use image::Rgb32FImage;
+use serde_json::Value;
+use std::rc::Rc;
 
 pub struct NormalTexture {
     size: Vector2<usize>,
@@ -14,8 +14,11 @@ pub struct NormalTexture {
 impl NormalTexture {
     pub fn from_json(json: &Value) -> Self {
         let relative_path = json["file"].as_str().unwrap();
-        let normal_map = image::io::Reader::open(relative_path).expect("Open image error!")
-            .decode().expect("Decode error!").to_rgb32f();
+        let normal_map = image::io::Reader::open(relative_path)
+            .expect("Open image error!")
+            .decode()
+            .expect("Decode error!")
+            .to_rgb32f();
         let size = normal_map.dimensions();
         let mapping = Rc::new(UVMapping {});
         Self {
