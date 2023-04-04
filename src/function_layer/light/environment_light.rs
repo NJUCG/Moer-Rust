@@ -1,6 +1,7 @@
 use std::any::Any;
 use std::f32::consts::PI;
 use std::rc::Rc;
+use cgmath::{InnerSpace, Zero};
 use nalgebra::{Vector2, Vector3};
 use serde_json::Value;
 use crate::core_layer::{colorspace::SpectrumRGB, constants::INV_PI, distribution::Distribution};
@@ -14,7 +15,7 @@ pub struct EnvironmentLight {
     energy_distribution: Distribution<Vector2<usize>>,
 }
 
-fn direction2uv(direction: Vector3<f32>) -> Vector2<f32> {
+fn direction2uv(direction: V3f) -> Vector2<f32> {
     let (mut u, mut v): (f32, f32);
     let cos_theta = direction[1];
     v = cos_theta.acos();
@@ -62,7 +63,7 @@ impl EnvironmentLight {
                 duv_dy: Vector2::zeros(),
             };
             let s = environment_map.evaluate_coord(&tex_coord);
-            s.rgb().dot(&Vector3::new(0.212671, 0.715160, 0.072169)) * sin_theta
+            s.rgb().dot(V3f::new(0.212671, 0.715160, 0.072169)) * sin_theta
         };
         let energy_distribution = Distribution::new(indices, weight_func);
         Self {
@@ -104,9 +105,9 @@ impl Light for EnvironmentLight {
         pdf *= (sz[0] * sz[1]) as f32 * INV_PI * INV_PI * 0.5 / sin_theta;
         LightSampleResult {
             energy,
-            direction: Vector3::new(x, y, z),
+            direction: V3f::new(x, y, z),
             distance: f32::INFINITY,
-            normal: Vector3::zeros(),
+            normal: V3f::zero(),
             pdf,
             is_delta: false,
             light_type: LightType::EnvironmentLight,

@@ -1,4 +1,5 @@
 use std::mem::swap;
+use cgmath::ElementWise;
 use crate::function_layer::V3f;
 use super::ray::Ray;
 
@@ -14,8 +15,8 @@ pub enum Axis { X, Y, Z }
 
 impl Bounds3 {
     pub fn new(p1: V3f, p2: V3f) -> Self {
-        let p_min = p1.inf(&p2);
-        let p_max = p1.sup(&p2);
+        let p_min = ele_wise_min(p1, p2);
+        let p_max = ele_wise_max(p1, p2);
         Self { p_min, p_max }
     }
 
@@ -36,15 +37,15 @@ impl Bounds3 {
         2.0 * (d.x * d.y + d.y * d.z + d.z * d.x)
     }
     pub fn centroid(&self) -> V3f { 0.5 * &self.p_min + 0.5 * &self.p_max }
-    pub fn expand(&mut self, p: &V3f) {
-        self.p_min = self.p_min.inf(p);
-        self.p_max = self.p_max.sup(p);
+    pub fn expand(&mut self, p: V3f) {
+        self.p_min = ele_wise_min(self.p_min, p);
+        self.p_max = ele_wise_max(self.p_max, p);
     }
     #[allow(dead_code)]
     pub fn intersect(&self, b: &Bounds3) -> Bounds3 {
         Bounds3 {
-            p_min: self.p_min.sup(&b.p_min),
-            p_max: self.p_max.inf(&b.p_max),
+            p_min: ele_wise_max(self.p_min, b.p_min),
+            p_max: ele_wise_min(self.p_max, b.p_max),
         }
     }
     #[allow(dead_code)]
@@ -73,28 +74,28 @@ impl Bounds3 {
         t_near <= t_far
     }
     pub fn intersect_t(&self, ray: &Ray) -> (f32, f32) {
-        let inv_dir = &ray.inv_dir;
+        let inv_dir = ray.inv_dir;
         let neg_dir = ray.neg_dir;
-        let mut t_min = (self.p_min - ray.origin.coords).component_mul(inv_dir);
-        let mut t_max = (self.p_max - ray.origin.coords).component_mul(inv_dir);
+        let mut t_min = (self.p_min - V3f::from(ray.origin.coords.data.0[0])).mul_element_wise(inv_dir);
+        let mut t_max = (self.p_max - V3f::from(ray.origin.coords.data.0[0])).mul_element_wise(inv_dir);
         for i in 0..3 {
             if neg_dir[i] { swap(&mut t_min[i], &mut t_max[i]); }
         }
-        let t_near = ray.t_min.max(t_min.max());
-        let t_far = ray.t_max.min(t_max.min());
+        let t_near = ray.t_min.max(t_min.x.max(t_min.y.max(t_min.z)));
+        let t_far = ray.t_max.min(t_max.x.min(t_max.y.min(t_max.z)));
         (t_near, t_far)
     }
     pub fn union_bounds(b1: &Bounds3, b2: &Bounds3) -> Bounds3 {
         Bounds3 {
-            p_min: b1.p_min.inf(&b2.p_min),
-            p_max: b1.p_max.sup(&b2.p_max),
+            p_min: ele_wise_min(b1.p_min, b2.p_min),
+            p_max: ele_wise_max(b1.p_max, b2.p_max),
         }
     }
     #[allow(dead_code)]
-    pub fn union_point(b: &Bounds3, p: &V3f) -> Bounds3 {
+    pub fn union_point(b: &Bounds3, p: V3f) -> Bounds3 {
         Bounds3 {
-            p_min: b.p_min.inf(p),
-            p_max: b.p_max.sup(p),
+            p_min: ele_wise_min(b.p_min, p),
+            p_max: ele_wise_max(b.p_max, p),
         }
     }
     pub fn centroid_axis(&self, a: Axis) -> f32 {
@@ -126,6 +127,14 @@ impl Bounds3 {
         }
         arr.try_into().unwrap()
     }
+}
+
+fn ele_wise_min(v1: V3f, v2: V3f) -> V3f {
+    V3f::new(v1.x.min(v2.x), v1.y.min(v2.y), v1.z.min(v2.z))
+}
+
+fn ele_wise_max(v1: V3f, v2: V3f) -> V3f {
+    V3f::new(v1.x.max(v2.x), v1.y.max(v2.y), v1.z.max(v2.z))
 }
 
 

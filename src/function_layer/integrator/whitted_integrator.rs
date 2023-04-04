@@ -26,7 +26,7 @@ impl Integrator for WhittedIntegrator {
             compute_ray_differentials(&mut its, ray);
             let shape = its.shape.as_ref().unwrap();
             let bsdf = shape.material().unwrap().compute_bsdf(&its);
-            let bsdf_sample_result = bsdf.sample(&-ray.direction, &sampler.borrow_mut().next_2d());
+            let bsdf_sample_result = bsdf.sample(-ray.direction, sampler.borrow_mut().next_2d());
             match bsdf_sample_result.tp {
                 BSDFType::Specular => {
                     ray.origin = its.position;
@@ -40,7 +40,7 @@ impl Integrator for WhittedIntegrator {
                         let res = light.sample(&its, sampler.borrow_mut().next_2d());
                         let mut shadow_ray = Ray::new(its.position, res.direction);
                         if scene.ray_intersect(&mut shadow_ray).is_none() {
-                            let f = bsdf.f(&-ray.direction, &shadow_ray.direction);
+                            let f = bsdf.f(-ray.direction, shadow_ray.direction);
                             let pdf = convert_pdf(&res, &its);
                             spectrum += beta * res.energy * f / pdf;
                         }
@@ -53,7 +53,7 @@ impl Integrator for WhittedIntegrator {
                     let mut shadow_ray = Ray::new(its.position, res.direction);
                     shadow_ray.t_max = res.distance;
                     if scene.ray_intersect(&mut shadow_ray).is_none() {
-                        let f = bsdf.f(&-ray.direction, &shadow_ray.direction);
+                        let f = bsdf.f(-ray.direction, shadow_ray.direction);
                         res.pdf *= pdf_light;
                         let pdf = convert_pdf(&res, &its);
                         spectrum += beta * res.energy * f / pdf;

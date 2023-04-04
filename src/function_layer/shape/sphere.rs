@@ -1,6 +1,7 @@
 use std::f32::consts::PI;
 use std::rc::Rc;
-use nalgebra::{Point3, Vector2};
+use cgmath::{InnerSpace, Zero};
+use nalgebra::{Point3, Vector2, Vector3};
 use serde_json::Value;
 use crate::core_layer::constants::INV_PI;
 use crate::core_layer::transform::{Transform, Transformable};
@@ -17,16 +18,15 @@ pub struct Sphere {
 impl Sphere {
     pub fn from_json(json: &Value) -> Self {
         let mut shape = ShapeBase::from_json(json);
-        let center = fetch_v3f(json, "center", V3f::default());
-        let center = Point3::from(center.unwrap());
+        let center = fetch_v3f(json, "center", V3f::zero()).unwrap();
         let radius = json["radius"].as_f64().unwrap() as f32;
         shape.bounds3 = Bounds3::new(
-            (center - V3f::from([radius; 3])).coords,
-            (center + V3f::from([radius; 3])).coords,
+            (center - V3f::from([radius; 3])),
+            (center + V3f::from([radius; 3])),
         );
         Sphere {
             shape,
-            center,
+            center: Point3::from([center.x, center.y, center.z]),
             radius,
         }
     }
@@ -49,10 +49,10 @@ impl Shape for Sphere {
 
     fn ray_intersect_shape(&self, ray: &mut Ray) -> Option<(u64, f32, f32)> {
         let origin = &ray.origin;
-        let dir = &ray.direction;
-        let o2c = self.center - origin;
+        let dir = ray.direction;
+        let o2c = V3f::from((self.center - origin).data.0[0]);
         let b = o2c.dot(dir);
-        let c = o2c.dot(&o2c) - self.radius * self.radius;
+        let c = o2c.dot(o2c) - self.radius * self.radius;
         let delta = b * b - c;
         if delta <= 0.0 { return None; }
         let sqrt_delta = delta.sqrt();
@@ -87,17 +87,18 @@ impl Shape for Sphere {
         intersection.distance = distance;
         let normal = V3f::new(v.sin() * u.sin(), v.cos(), v.sin() * u.cos());
         intersection.normal = normal;
-        let position = self.center + self.radius * normal;
+        let normal = Vector3::from_vec(vec![normal.x, normal.y, normal.z]);
+        let position = self.center +  self.radius * normal;
         intersection.position = position;
         intersection.tex_coord = Vector2::new(u * INV_PI * 0.5, v * INV_PI);
 
         // TODO 计算交点的切线和副切线
         let mut tangent = V3f::new(1.0, 0.0, 0.0);
-        if tangent.dot(&intersection.normal).abs() > 0.9 {
+        if tangent.dot(intersection.normal).abs() > 0.9 {
             tangent = V3f::new(0.0, 1.0, 0.0);
         }
-        let bitangent = tangent.cross(&intersection.normal).normalize();
-        tangent = intersection.normal.cross(&bitangent).normalize();
+        let bitangent = tangent.cross(intersection.normal).normalize();
+        tangent = intersection.normal.cross(bitangent).normalize();
         intersection.tangent = tangent;
         intersection.bitangent = bitangent;
     }

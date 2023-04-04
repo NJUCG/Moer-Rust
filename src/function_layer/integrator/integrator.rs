@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use cgmath::InnerSpace;
 use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::light::light::{LightSampleResult, LightType};
@@ -18,7 +19,7 @@ pub fn convert_pdf(result: &LightSampleResult, _intersection: &Intersection) -> 
         LightType::SpotLight => { pdf *= distance * distance }
         LightType::AreaLight => {
             pdf *= distance * distance;
-            pdf /= result.normal.dot(&result.direction).abs();
+            pdf /= result.normal.dot(result.direction).abs();
         }
         // 环境光的pdf转换在采样时已经完成
         LightType::EnvironmentLight => ()

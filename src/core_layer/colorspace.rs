@@ -1,4 +1,5 @@
 use std::ops::{AddAssign, Div, Mul, MulAssign};
+use cgmath::{ElementWise, Zero};
 use nalgebra::Vector3;
 use crate::function_layer::V3f;
 
@@ -27,7 +28,7 @@ impl Div<f32> for SpectrumRGB {
 
 impl Default for SpectrumRGB {
     fn default() -> Self {
-        Self { rgb: Vector3::zeros() }
+        Self { rgb: V3f::zero() }
     }
 }
 
@@ -43,7 +44,7 @@ impl Mul<SpectrumRGB> for SpectrumRGB {
     type Output = SpectrumRGB;
 
     fn mul(self, rhs: SpectrumRGB) -> Self::Output {
-        SpectrumRGB::from_rgb(self.rgb.component_mul(&rhs.rgb))
+        SpectrumRGB::from_rgb(self.rgb.mul_element_wise(rhs.rgb))
     }
 }
 
@@ -57,20 +58,20 @@ impl MulAssign<&SpectrumRGB> for SpectrumRGB {
 
 impl SpectrumRGB {
     pub fn same(f: f32) -> Self {
-        Self { rgb: Vector3::from([f; 3]) }
+        Self { rgb: V3f::from([f; 3]) }
     }
 
     #[allow(dead_code)]
     pub fn new(r: f32, g: f32, b: f32) -> Self {
-        Self { rgb: Vector3::new(r, g, b) }
+        Self { rgb: V3f::new(r, g, b) }
     }
 
     pub fn from_rgb(rgb: V3f) -> Self {
         Self { rgb }
     }
 
-    #[allow(dead_code)]
-    pub fn to_slice(&self) -> [f32; 3] {
-        self.rgb.as_ref().clone()
-    }
+    // #[allow(dead_code)]
+    // pub fn to_slice(&self) -> [f32; 3] {
+    //     self.rgb.as_ref().clone()
+    // }
 }

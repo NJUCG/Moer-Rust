@@ -2,7 +2,7 @@ use std::rc::Rc;
 use image::Rgb32FImage;
 use nalgebra::{clamp, Vector2, Vector3};
 use serde_json::Value;
-use crate::function_layer::Intersection;
+use crate::function_layer::{Intersection, V3f};
 use super::texture::{Texture, TextureCoord, TextureMapping, UVMapping};
 
 pub struct NormalTexture {
@@ -26,7 +26,7 @@ impl NormalTexture {
     }
 }
 
-impl Texture<Vector3<f32>> for NormalTexture {
+impl Texture<V3f> for NormalTexture {
     fn size(&self) -> Vector2<usize> {
         self.size
     }
@@ -35,17 +35,17 @@ impl Texture<Vector3<f32>> for NormalTexture {
         self.mapping.clone()
     }
 
-    fn evaluate(&self, intersection: &Intersection) -> Vector3<f32> {
+    fn evaluate(&self, intersection: &Intersection) -> V3f {
         let tex_coord = self.mapping.map(intersection);
         self.evaluate_coord(&tex_coord)
     }
 
-    fn evaluate_coord(&self, tex_coord: &TextureCoord) -> Vector3<f32> {
+    fn evaluate_coord(&self, tex_coord: &TextureCoord) -> V3f {
         let x = tex_coord.coord.x * self.size.x as f32;
         let y = tex_coord.coord.y * self.size.y as f32;
         let x = clamp(x, 0.0, self.size.x as f32 - 1.0) as u32;
         let y = clamp(y, 0.0, self.size.y as f32 - 1.0) as u32;
         let xyz = self.normal_map.get_pixel(x, y);
-        Vector3::from(xyz.0) * 2.0 - Vector3::from([1.0; 3])
+        V3f::from(xyz.0) * 2.0 - V3f::from([1.0; 3])
     }
 }

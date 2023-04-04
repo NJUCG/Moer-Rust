@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
+use cgmath::InnerSpace;
 use nalgebra::{Point3, Vector2, Vector3};
 use serde_json::Value;
 use crate::core_layer::transform::{Transform, Transformable};
@@ -72,7 +73,7 @@ impl Shape for TriangleMesh {
         let (pw, pu, pv) = (pwuv[0], pwuv[1], pwuv[2]);
         intersection.position = Point3::from(pw.coords * w + pu.coords * u + pv.coords * v);
 
-        let nwuv: Vec<Vector3<f32>> = (0..3).map(|i: usize| self.transform().to_world_vec(&self.mesh.normal_buffer[face_info[i].normal_index])).collect();
+        let nwuv: Vec<V3f> = (0..3).map(|i: usize| self.transform().to_world_vec(&self.mesh.normal_buffer[face_info[i].normal_index])).collect();
         let (nw, nu, nv) = (nwuv[0], nwuv[1], nwuv[2]);
         intersection.normal = (w * nw + u * nu + v * nv).normalize();
 
@@ -81,11 +82,11 @@ impl Shape for TriangleMesh {
         intersection.tex_coord = w * tw + u * tu + v * tv;
         // TODO 计算交点的切线和副切线
         let mut tangent = V3f::new(1.0, 0.0, 0.0);
-        if tangent.dot(&intersection.normal).abs() > 0.9 {
+        if tangent.dot(intersection.normal).abs() > 0.9 {
             tangent = V3f::new(0.0, 1.0, 0.0);
         }
-        let bitangent = tangent.cross(&intersection.normal).normalize();
-        tangent = intersection.normal.cross(&bitangent).normalize();
+        let bitangent = tangent.cross(intersection.normal).normalize();
+        tangent = intersection.normal.cross(bitangent).normalize();
         intersection.tangent = tangent;
         intersection.bitangent = bitangent;
     }
@@ -140,12 +141,12 @@ impl Triangle {
         let v0 = t.to_world_point(&v0);
         let v1 = t.to_world_point(&v1);
         let v2 = t.to_world_point(&v2);
-        let e0 = v1 - v0;
-        let e1 = v2 - v0;
+        let e0 = V3f::from((v1 - v0).data.0[0]);
+        let e1 = V3f::from((v2 - v0).data.0[0]);
 
-        shape.bounds3.expand(&v0.coords);
-        shape.bounds3.expand(&v1.coords);
-        shape.bounds3.expand(&v2.coords);
+        shape.bounds3.expand(V3f::from(v0.coords.data.0[0]));
+        shape.bounds3.expand(V3f::from(v1.coords.data.0[0]));
+        shape.bounds3.expand(V3f::from(v2.coords.data.0[0]));
 
         Self { prim_id, v0, e0, e1, shape }
     }
@@ -168,17 +169,17 @@ impl Shape for Triangle {
 
     fn ray_intersect_shape(&self, ray: &mut Ray) -> Option<(u64, f32, f32)> {
         let (u, v, t_tmp): (f32, f32, f32);
-        let pvec: V3f = ray.direction.cross(&self.e1);
-        let det = self.e0.dot(&pvec);
+        let pvec: V3f = ray.direction.cross(self.e1);
+        let det = self.e0.dot(pvec);
         if det.abs() < 0.00001 { return None; }
         let det_inv = 1.0 / det;
-        let tvec: V3f = &ray.origin - &self.v0;
-        let qvec: V3f = tvec.cross(&self.e0);
-        t_tmp = self.e1.dot(&qvec) * det_inv;
+        let tvec: V3f = V3f::from((ray.origin - self.v0).data.0[0]);
+        let qvec: V3f = tvec.cross(self.e0);
+        t_tmp = self.e1.dot(qvec) * det_inv;
         if t_tmp < ray.t_min || t_tmp > ray.t_max { return None; }
-        u = tvec.dot(&pvec) * det_inv;
+        u = tvec.dot(pvec) * det_inv;
         if u < 0.0 || u > 1.0 { return None; }
-        v = ray.direction.dot(&qvec) * det_inv;
+        v = ray.direction.dot(qvec) * det_inv;
         if v < 0.0 || u + v > 1.0 { return None; }
         ray.t_max = t_tmp;
         Some((self.prim_id as u64, u, v))

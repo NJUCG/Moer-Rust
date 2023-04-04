@@ -1,5 +1,6 @@
 use std::f64::consts::PI;
 use std::rc::Rc;
+use cgmath::InnerSpace;
 use nalgebra::{Point3, Vector2};
 use serde_json::Value;
 use crate::core_layer::transform::{Transform, Transformable};
@@ -86,11 +87,11 @@ impl Shape for Disk {
 
         // 计算交点的切线和副切线
         let mut tangent = V3f::new(1.0, 0.0, 0.0);
-        if tangent.dot(&intersection.normal).abs() > 0.9 {
+        if tangent.dot(intersection.normal).abs() > 0.9 {
             tangent = V3f::new(0.0, 1.0, 0.0);
         }
-        let bitangent = tangent.cross(&intersection.normal).normalize();
-        tangent = intersection.normal.cross(&bitangent).normalize();
+        let bitangent = tangent.cross(intersection.normal).normalize();
+        tangent = intersection.normal.cross(bitangent).normalize();
         intersection.tangent = tangent;
         intersection.bitangent = bitangent;
     }

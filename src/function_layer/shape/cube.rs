@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use cgmath::{InnerSpace, Zero};
 use nalgebra::{Point3, Vector2};
 use serde_json::Value;
 use crate::core_layer::transform::{Transform, Transformable};
@@ -53,8 +54,8 @@ impl Shape for Cube {
     fn ray_intersect_shape(&self, ray: &mut Ray) -> Option<(u64, f32, f32)> {
         let trans = self.transform();
         let lr = trans.local_ray(ray);
-        let b = Bounds3::new(self.box_max.coords.clone(),
-                             self.box_min.coords.clone());
+        let b = Bounds3::new(V3f::from(self.box_max.coords.data.0[0]),
+                             V3f::from(self.box_min.coords.data.0[0]));
         let (t0, t1) = b.intersect_t(&lr);
         if t0 > t1 { return None; }
         let min = self.box_min;
@@ -88,7 +89,7 @@ impl Shape for Cube {
     fn fill_intersection(&self, distance: f32, prim_id: u64, u: f32, v: f32, intersection: &mut Intersection) {
         let p_id = prim_id as usize;
         let trans = self.transform();
-        let mut normal = V3f::zeros();
+        let mut normal = V3f::zero();
         normal[p_id / 2] = if prim_id % 2 == 1 { 1.0 } else { -1.0 };
         intersection.normal = trans.to_world_vec(&normal).normalize();
 
@@ -107,11 +108,11 @@ impl Shape for Cube {
         intersection.tex_coord = Vector2::new(u, v);
         // 计算交点的切线和副切线
         let mut tangent = V3f::new(1.0, 0.0, 0.0);
-        if tangent.dot(&intersection.normal).abs() > 0.9 {
+        if tangent.dot(intersection.normal).abs() > 0.9 {
             tangent = V3f::new(0.0, 1.0, 0.0);
         }
-        let bitangent = tangent.cross(&intersection.normal).normalize();
-        tangent = intersection.normal.cross(&bitangent).normalize();
+        let bitangent = tangent.cross(intersection.normal).normalize();
+        tangent = intersection.normal.cross(bitangent).normalize();
         intersection.tangent = tangent;
         intersection.bitangent = bitangent;
     }

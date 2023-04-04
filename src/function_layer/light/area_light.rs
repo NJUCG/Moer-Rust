@@ -1,5 +1,6 @@
 use std::any::Any;
 use std::rc::Rc;
+use cgmath::Zero;
 use nalgebra::Vector2;
 use serde_json::Value;
 use crate::core_layer::{colorspace::SpectrumRGB, constants::EPSILON};
@@ -15,7 +16,7 @@ pub struct AreaLight {
 impl AreaLight {
     pub fn from_json(json: &Value) -> Self {
         let shape = construct_shape(&json["shape"]);
-        let energy = fetch_v3f(json, "energy", V3f::default());
+        let energy = fetch_v3f(json, "energy", V3f::zero());
         let energy = SpectrumRGB::from_rgb(match energy { Ok(i) | Err(i) => i });
         Self {
             shape: Some(shape),
@@ -34,7 +35,7 @@ impl Light for AreaLight {
         let shading_point2sample = sample_result.position - shading_point.position;
         LightSampleResult {
             energy: self.energy,
-            direction: shading_point2sample.normalize(),
+            direction: V3f::from(shading_point2sample.normalize().data.0[0]),
             distance: shading_point2sample.norm() - EPSILON,
             normal: sample_result.normal,
             pdf,

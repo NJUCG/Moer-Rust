@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
+use cgmath::Zero;
 use nalgebra::{Matrix4, Vector2, Vector3};
 use serde_json::Value;
 use crate::core_layer::transform::{Transform, Transformable};
@@ -45,10 +46,10 @@ pub struct ShapeBase {
     pub bounds3: Bounds3,
 }
 
-pub fn fetch_v3f(json: &Value, field: &str, dft: Vector3<f32>) -> Result<V3f, V3f> {
+pub fn fetch_v3f(json: &Value, field: &str, dft: V3f) -> Result<V3f, V3f> {
     match json.get(field) {
         None => Err(dft),
-        Some(val) => Ok(Vector3::<f32>::from_vec(serde_json::from_value(val.clone()).unwrap()))
+        Some(val) => Ok(V3f::from(serde_json::from_value::<[f32; 3]>(val.clone()).unwrap()))
     }
 }
 
@@ -60,13 +61,13 @@ impl ShapeBase {
             Some(mat) => construct_material(mat),
         };
         let transform = if let Some(transform) = json.get("transform") {
-            let translate = fetch_v3f(transform, "translate", Vector3::zeros());
-            let scale = fetch_v3f(transform, "scale", Vector3::from([1.0; 3]));
+            let translate = fetch_v3f(transform, "translate", V3f::zero());
+            let scale = fetch_v3f(transform, "scale", V3f::from([1.0; 3]));
 
             let translate_mat = Transform::translation(&match translate { Ok(i) | Err(i) => i });
             let scale_mat = Transform::scalation(&match scale { Ok(i) | Err(i) => i });
             let rotate_mat = if !transform["rotate"].is_null() {
-                let axis = fetch_v3f(&transform["rotate"], "axis", Vector3::from([1.0; 3]));
+                let axis = fetch_v3f(&transform["rotate"], "axis", V3f::from([1.0; 3]));
                 let radian = transform["rotate"]["radian"].as_f64().unwrap_or(0.0);
                 Transform::rotation(&axis.unwrap(), radian as f32)
             } else { Matrix4::identity() };

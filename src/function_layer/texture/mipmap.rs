@@ -2,6 +2,7 @@ use std::rc::Rc;
 use image::imageops::FilterType;
 use image::Rgb32FImage;
 use nalgebra::{clamp, Vector2, Vector3};
+use crate::function_layer::V3f;
 
 pub struct MipMap {
     pub pyramid: Vec<Rc<Rgb32FImage>>,
@@ -28,15 +29,15 @@ impl MipMap {
         }
     }
 
-    pub fn texel(&self, level: u32, x: i64, y: i64) -> Vector3<f32> {
+    pub fn texel(&self, level: u32, x: i64, y: i64) -> V3f {
         let image = &self.pyramid[level as usize];
         let x = clamp(x, 0, image.dimensions().0 as i64);
         let y = clamp(y, 0, image.dimensions().1 as i64);
         let rbg = image.get_pixel(x as u32, y as u32).0;
-        Vector3::from(rbg)
+        V3f::from(rbg)
     }
 
-    pub fn bilinear(&self, level: u32, uv: Vector2<f32>) -> Vector3<f32> {
+    pub fn bilinear(&self, level: u32, uv: Vector2<f32>) -> V3f {
         let level = clamp(level, 0, self.pyramid.len() as u32 - 1);
         let (x, y) = self.pyramid[level as usize].dimensions();
         let x = uv.x * x as f32 - 0.5;
@@ -51,7 +52,7 @@ impl MipMap {
             dx * dy * self.texel(level, x0 + 1, y0 + 1)
     }
 
-    pub fn look_up(&self, uv: Vector2<f32>, duv0: Vector2<f32>, duv1: Vector2<f32>) -> Vector3<f32> {
+    pub fn look_up(&self, uv: Vector2<f32>, duv0: Vector2<f32>, duv1: Vector2<f32>) -> V3f {
         let width = duv0.amax().max(duv1.amax());
 
         let level = self.pyramid.len() as f32 - 1.0 + width.max(1e-8).log2();

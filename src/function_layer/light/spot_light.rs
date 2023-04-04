@@ -1,4 +1,5 @@
 use std::any::Any;
+use cgmath::Zero;
 use nalgebra::{Point3, Vector2, Vector3};
 use serde_json::Value;
 use crate::core_layer::{colorspace::SpectrumRGB, constants::EPSILON};
@@ -12,10 +13,10 @@ pub struct SpotLight {
 
 impl SpotLight {
     pub fn from_json(json: &Value) -> Self {
-        let position = fetch_v3f(json, "position", V3f::default()).unwrap();
-        let energy = fetch_v3f(json, "energy", V3f::default()).unwrap();
+        let position = fetch_v3f(json, "position", V3f::zero()).unwrap();
+        let energy = fetch_v3f(json, "energy", V3f::zero()).unwrap();
         Self {
-            position: Point3::from(position),
+            position: Point3::from([position.x, position.y, position.z]),
             energy: SpectrumRGB::from_rgb(energy),
         }
     }
@@ -31,9 +32,9 @@ impl Light for SpotLight {
         let shading_point2sample = self.position - shading_point.position;
         LightSampleResult {
             energy: self.energy,
-            direction: shading_point2sample.normalize(),
+            direction: V3f::from(shading_point2sample.normalize().data.0[0]),
             distance: shading_point2sample.norm() - EPSILON,
-            normal: Vector3::zeros(),
+            normal: V3f::zero(),
             pdf: 1.0,
             is_delta: true,
             light_type: LightType::SpotLight,

@@ -19,7 +19,7 @@ impl LambertReflection {
 }
 
 impl BSDF for LambertReflection {
-    fn f(&self, wo: &V3f, wi: &V3f) -> SpectrumRGB {
+    fn f(&self, wo: V3f, wi: V3f) -> SpectrumRGB {
         let _wo_local = self.to_local(wo);
         let wi_local = self.to_local(wi);
         // if wo_local[1] <= 0.0 || wi_local[1] <= 0.0 {
@@ -28,7 +28,7 @@ impl BSDF for LambertReflection {
         self.albedo * (INV_PI * wi_local[1])
     }
 
-    fn sample(&self, _wo: &V3f, sample: &Vector2<f32>) -> BSDFSampleResult {
+    fn sample(&self, _wo: V3f, sample: Vector2<f32>) -> BSDFSampleResult {
         let weight = self.albedo;
         let wi = square_to_cosine_hemisphere(sample.clone());
         let pdf = square_to_cosine_hemisphere_pdf(wi);

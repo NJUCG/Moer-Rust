@@ -1,8 +1,8 @@
 use std::rc::Rc;
-use nalgebra::{Point3, Vector2};
+use cgmath::{InnerSpace, Zero};
+use nalgebra::{Point3, Vector2, Vector3};
 use crate::function_layer::{Shape, Ray, V3f};
 
-#[derive(Default)]
 pub struct Intersection {
     pub distance: f32,
     pub position: Point3<f32>,
@@ -24,29 +24,52 @@ pub struct Intersection {
     pub dp_dy: V3f,
 }
 
+impl Default for Intersection {
+    fn default() -> Self {
+        Self {
+            distance: 0.0,
+            position: Default::default(),
+            normal: V3f::zero(),
+            tangent: V3f::zero(),
+            bitangent: V3f::zero(),
+            tex_coord: Default::default(),
+            shape: None,
+            dp_du: V3f::zero(),
+            dp_dv: V3f::zero(),
+            du_dx: 0.0,
+            dv_dx: 0.0,
+            du_dy: 0.0,
+            dv_dy: 0.0,
+            dp_dx: V3f::zero(),
+            dp_dy: V3f::zero(),
+        }
+    }
+}
+
 pub fn compute_ray_differentials(intersection: &mut Intersection, ray: &Ray) {
     loop {
         if ray.differential.is_none() { break; }
         let p = intersection.position;
         let n = intersection.normal;
         let df = ray.differential.as_ref().unwrap();
-        let ox = V3f::from(df.origin_x.coords);
-        let oy = V3f::from(df.origin_y.coords);
-        let d = n.dot(&p.coords);
-        let tx = -(n.dot(&ox) - d) / n.dot(&df.direction_x);
+        let ox = V3f::from(df.origin_x.coords.data.0[0]);
+        let oy = V3f::from(df.origin_y.coords.data.0[0]);
+        let d = n.dot(V3f::from(p.coords.data.0[0]));
+        let tx = -(n.dot(ox) - d) / n.dot(df.direction_x);
         if tx.is_infinite() || tx.is_nan() { break; }
-        let ty = -(n.dot(&oy) - d) / n.dot(&df.direction_y);
+        let ty = -(n.dot(oy) - d) / n.dot(df.direction_y);
         if ty.is_infinite() || ty.is_nan() { break; }
-        let px = ray.origin + tx * df.direction_x;
-        let py = ray.origin + ty * df.direction_y;
-        intersection.dp_dx = px - p;
-        intersection.dp_dy = py - p;
+        let dx = tx * df.direction_x;
+        let dy = ty * df.direction_y;
+        let px = ray.origin + Vector3::from_vec(vec![dx.x, dx.y, dx.z]);
+        let py = ray.origin + Vector3::from_vec(vec![dy.x, dy.y, dy.z]);
+        intersection.dp_dx = V3f::from((px - p).data.0[0]);
+        intersection.dp_dy = V3f::from((py - p).data.0[0]);
         let mut dim = [0; 2];
-        let idx = n.iamax();
-        if idx == 0 {
+        if n.x > n.y && n.x > n.z {
             dim[0] = 1;
             dim[1] = 2;
-        } else if idx == 1 {
+        } else if n.y > n.z {
             dim[0] = 0;
             dim[1] = 2;
         } else {
@@ -81,7 +104,7 @@ pub fn compute_ray_differentials(intersection: &mut Intersection, ray: &Ray) {
     intersection.dv_dx = 0.0;
     intersection.du_dy = 0.0;
     intersection.dv_dy = 0.0;
-    intersection.dp_dx = V3f::zeros();
-    intersection.dp_dy = V3f::zeros();
+    intersection.dp_dx = V3f::zero();
+    intersection.dp_dy = V3f::zero();
     return;
 }

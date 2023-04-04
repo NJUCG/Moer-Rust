@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::f32::consts::PI;
 use std::rc::Rc;
+use cgmath::{InnerSpace, Zero};
 use nalgebra::{Matrix4, Point3, Vector2};
 use serde_json::Value;
 use crate::core_layer::transform::Transform;
@@ -62,15 +63,15 @@ impl PerspectiveCamera {
         let position = fetch_point(&json["transform"], &"position");
         let look_at = fetch_point(&json["transform"], "lookAt");
         let up = fetch_point(&json["transform"], "up");
-        let up = V3f::from_data(up.coords.data);
+        let up = V3f::from(up.coords.data.0[0]);
         let vertical_fov = json["verticalFov"].as_f64().unwrap() as f32 / 180.0 * PI;
         let aspect_ratio = c.film.as_ref().unwrap().borrow().size[0] as f32 /
             c.film.as_ref().unwrap().borrow().size[1] as f32;
-        let forward = (look_at - position).normalize();
-        let right = (forward.cross(&up)).normalize();
-        let up = (right.cross(&forward)).normalize();
+        let forward = V3f::from((look_at - position).normalize().data.0[0]);
+        let right = (forward.cross(up)).normalize();
+        let up = (right.cross(forward)).normalize();
 
-        let translation = Transform::translation(&V3f::from_data(position.coords.data));
+        let translation = Transform::translation(&V3f::from(position.coords.data.0[0]));
         let mut rotation = Matrix4::identity();
         rotation[(0, 0)] = right[0];
         rotation[(1, 0)] = right[1];
@@ -93,8 +94,8 @@ impl PerspectiveCamera {
 }
 
 fn fetch_point(json: &Value, field: &str) -> Point3<f32> {
-    let arr= fetch_v3f(json, field, V3f::default());
-    let res = Point3::from(arr.unwrap());
+    let arr = fetch_v3f(json, field, V3f::zero()).unwrap();
+    let res = Point3::from([arr.x, arr.y, arr.z]);
     res
 }
 

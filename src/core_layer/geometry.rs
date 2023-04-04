@@ -29,11 +29,11 @@ impl Add<&V3f> for Point3f {
     }
 }
 
-impl AddAssign<&V3f> for Point3f {
-    fn add_assign(&mut self, rhs: &V3f) {
-        self.xyz += rhs;
-    }
-}
+// impl AddAssign<&V3f> for Point3f {
+//     fn add_assign(&mut self, rhs: &V3f) {
+//         self.xyz += rhs;
+//     }
+// }
 
 impl Sub<&V3f> for Point3f {
     type Output = Point3f;
@@ -43,11 +43,11 @@ impl Sub<&V3f> for Point3f {
     }
 }
 
-impl SubAssign<&V3f> for Point3f {
-    fn sub_assign(&mut self, rhs: &V3f) {
-        self.xyz -= rhs;
-    }
-}
+// impl SubAssign<&V3f> for Point3f {
+//     fn sub_assign(&mut self, rhs: &V3f) {
+//         self.xyz -= rhs;
+//     }
+// }
 
 impl Sub<&Point3f> for Point3f {
     type Output = Point3f;

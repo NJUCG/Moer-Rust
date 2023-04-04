@@ -11,11 +11,11 @@ pub struct SpecularReflection {
 }
 
 impl BSDF for SpecularReflection {
-    fn f(&self, _wo: &V3f, _wi: &V3f) -> SpectrumRGB {
+    fn f(&self, _wo: V3f, _wi: V3f) -> SpectrumRGB {
         SpectrumRGB::same(0.0)
     }
 
-    fn sample(&self, wo: &V3f, _sample: &Vector2<f32>) -> BSDFSampleResult {
+    fn sample(&self, wo: V3f, _sample: Vector2<f32>) -> BSDFSampleResult {
         let wo_local = self.to_local(wo);
         let wi_local = V3f::new(-wo_local.x, wo_local.y, -wo_local.z);
         BSDFSampleResult {

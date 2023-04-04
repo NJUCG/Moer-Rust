@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use cgmath::Zero;
 use nalgebra::Vector3;
 use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
@@ -32,7 +33,7 @@ impl MatteMaterial {
         let albedo = if json["albedo"].is_object() {
             construct_texture::<SpectrumRGB>(json)
         } else if json["albedo"].is_array() {
-            let rgb = fetch_v3f(json, "albedo", V3f::default());
+            let rgb = fetch_v3f(json, "albedo", V3f::zero());
             let s = SpectrumRGB::from_rgb(rgb.unwrap());
             Rc::new(ConstantTexture::new(&s))
         } else {
@@ -51,7 +52,7 @@ impl Material for MatteMaterial {
     }
 
     fn compute_bsdf(&self, intersection: &Intersection) -> Rc<dyn BSDF> {
-        let [mut normal, mut tangent, mut bitangent] = [Vector3::<f32>::zeros(); 3];
+        let [mut normal, mut tangent, mut bitangent] = [V3f::zero(); 3];
         self.compute_shading_geometry(intersection, &mut normal, &mut tangent, &mut bitangent);
         let s = self.albedo.evaluate(intersection);
         Rc::new(LambertReflection::new(s, normal, tangent, bitangent))

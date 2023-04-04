@@ -1,5 +1,6 @@
 use std::f64::consts::PI;
 use std::rc::Rc;
+use cgmath::InnerSpace;
 use nalgebra::{Point3, Vector2};
 use serde_json::Value;
 use crate::core_layer::function::solve_quadratic;
@@ -54,15 +55,15 @@ impl Shape for Cone {
     fn ray_intersect_shape(&self, ray: &mut Ray) -> Option<(u64, f32, f32)> {
         let trans = self.transform();
         let local_ray = trans.local_ray(ray);
-        let d = &local_ray.direction;
-        let o = &local_ray.origin;
+        let d = local_ray.direction;
+        let o = cgmath::Point3::from(local_ray.origin.coords.data.0[0]);
 
-        let cc = Point3::new(0.0, 0.0, self.height);
+        let cc = cgmath::Point3::new(0.0, 0.0, self.height);
         let co: V3f = o - cc;
         let pw2_cos = self.cos_theta * self.cos_theta;
         let a = -d.z * -d.z - pw2_cos; // (d . v)^2 - cos^2 theta.
-        let b = 2.0 * (-d.z * -co.z - d.dot(&co) * pw2_cos);
-        let c = -co.z * -co.z - co.dot(&co) * pw2_cos;
+        let b = 2.0 * (-d.z * -co.z - d.dot(co) * pw2_cos);
+        let c = -co.z * -co.z - co.dot(co) * pw2_cos;
         let roots = solve_quadratic(a, b, c);
 
         if roots.is_none() { return None; }
@@ -94,11 +95,12 @@ impl Shape for Cone {
         let phi = u * self.phi_max;
         let z = v * self.height;
         let ck_norm = (self.height - z) / (self.cos_theta * self.cos_theta);
-        let k = Point3::from([0.0, 0.0, self.height - ck_norm]);
+        let k = cgmath::Point3::from([0.0, 0.0, self.height - ck_norm]);
 
         let position = Point3::new(self.radius * (1.0 - v) * phi.cos(), self.radius * (1.0 - v) * phi.sin(), z);
         intersection.position = trans.to_world_point(&position);
 
+        let position = cgmath::Point3::new(self.radius * (1.0 - v) * phi.cos(), self.radius * (1.0 - v) * phi.sin(), z);
         let normal: V3f = (position - k).normalize();
         intersection.normal = trans.to_world_vec(&normal);
 
@@ -107,11 +109,11 @@ impl Shape for Cone {
         intersection.tex_coord = Vector2::new(u, v);
         // 计算交点的切线和副切线
         let mut tangent = V3f::new(1.0, 0.0, 0.0);
-        if tangent.dot(&intersection.normal).abs() > 0.9 {
+        if tangent.dot(intersection.normal).abs() > 0.9 {
             tangent = V3f::new(0.0, 1.0, 0.0);
         }
-        let bitangent = tangent.cross(&intersection.normal).normalize();
-        tangent = intersection.normal.cross(&bitangent).normalize();
+        let bitangent = tangent.cross(intersection.normal).normalize();
+        tangent = intersection.normal.cross(bitangent).normalize();
         intersection.tangent = tangent;
         intersection.bitangent = bitangent;
     }
