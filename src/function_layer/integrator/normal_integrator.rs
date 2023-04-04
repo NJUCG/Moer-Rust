@@ -1,4 +1,3 @@
-use nalgebra::Vector3;
 use crate::core_layer::colorspace::SpectrumRGB;
 use super::integrator::Integrator;
 use crate::function_layer::{Scene, Sampler, RR, Ray, V3f};

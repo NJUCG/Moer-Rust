@@ -1,5 +1,6 @@
 use std::rc::Rc;
-use nalgebra::{Point3, Vector2};
+use nalgebra::{Point3};
+use cgmath::Vector2;
 use crate::function_layer::V3f;
 
 #[derive(Default, Copy, Clone)]

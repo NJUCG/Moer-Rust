@@ -1,4 +1,4 @@
-use nalgebra::Vector2;
+use cgmath::Vector2;
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::V3f;
 use super::bsdf::{BSDFSampleResult, BSDF, BSDFType};

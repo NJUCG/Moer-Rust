@@ -1,6 +1,7 @@
 use std::any::Any;
 use cgmath::Zero;
-use nalgebra::{Point3, Vector2, Vector3};
+use nalgebra::{Point3};
+use cgmath::Vector2;
 use serde_json::Value;
 use crate::core_layer::{colorspace::SpectrumRGB, constants::EPSILON};
 use crate::function_layer::{Intersection, Light, V3f, fetch_v3f};

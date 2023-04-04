@@ -1,7 +1,8 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 use cgmath::InnerSpace;
-use nalgebra::{Point3, Vector2, Vector3};
+use nalgebra::{Point3};
+use cgmath::Vector2;
 use serde_json::Value;
 use crate::core_layer::transform::{Transform, Transformable};
 use crate::function_layer::{Acceleration, create_acceleration, Intersection, Ray, V3f};

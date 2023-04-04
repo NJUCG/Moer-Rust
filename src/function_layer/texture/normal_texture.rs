@@ -1,6 +1,6 @@
 use std::rc::Rc;
 use image::Rgb32FImage;
-use nalgebra::{clamp, Vector2, Vector3};
+use cgmath::{num_traits::clamp, Vector2};
 use serde_json::Value;
 use crate::function_layer::{Intersection, V3f};
 use super::texture::{Texture, TextureCoord, TextureMapping, UVMapping};

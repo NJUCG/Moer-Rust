@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
-use nalgebra::Vector2;
+use cgmath::Vector2;
 use serde_json::Value;
 use crate::function_layer::RR;
 use super::independent_sampler::IndependentSampler;

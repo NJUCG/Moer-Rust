@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use nalgebra::Vector2;
+use cgmath::{Vector2, Zero};
 use crate::function_layer::Intersection;
 use super::texture::{TextureCoord, TextureMapping, UVMapping};
 use super::Texture;
@@ -13,7 +13,7 @@ pub struct ConstantTexture<TReturn> {
 impl<TReturn: Copy> ConstantTexture<TReturn> {
     pub fn new(data: &TReturn) -> Self {
         Self {
-            size: Vector2::zeros(),
+            size: Vector2::zero(),
             mapping: Rc::new(UVMapping {}),
             data: data.clone(),
         }

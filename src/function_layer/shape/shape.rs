@@ -1,7 +1,8 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 use cgmath::Zero;
-use nalgebra::{Matrix4, Vector2, Vector3};
+use nalgebra::{Matrix4};
+use cgmath::Vector2;
 use serde_json::Value;
 use crate::core_layer::transform::{Transform, Transformable};
 use crate::function_layer::{Bounds3, Light, Material, Ray, Intersection,

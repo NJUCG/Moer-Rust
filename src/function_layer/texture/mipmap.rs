@@ -1,7 +1,7 @@
 use std::rc::Rc;
 use image::imageops::FilterType;
 use image::Rgb32FImage;
-use nalgebra::{clamp, Vector2, Vector3};
+use cgmath::{num_traits::clamp, Vector2};
 use crate::function_layer::V3f;
 
 pub struct MipMap {
@@ -53,7 +53,7 @@ impl MipMap {
     }
 
     pub fn look_up(&self, uv: Vector2<f32>, duv0: Vector2<f32>, duv1: Vector2<f32>) -> V3f {
-        let width = duv0.amax().max(duv1.amax());
+        let width = duv0.x.abs().max(duv0.y.abs()).max(duv1.x.abs().max(duv1.y.abs()));
 
         let level = self.pyramid.len() as f32 - 1.0 + width.max(1e-8).log2();
         // let x = uv.x * self.pyramid[0].dimensions().0 as f32;

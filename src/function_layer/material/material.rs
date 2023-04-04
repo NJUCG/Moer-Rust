@@ -1,6 +1,5 @@
 use std::rc::Rc;
 use cgmath::InnerSpace;
-use nalgebra::Vector3;
 use serde_json::Value;
 use crate::function_layer::{Intersection, Texture, V3f};
 use crate::function_layer::texture::normal_texture::NormalTexture;

@@ -2,7 +2,7 @@ use std::any::Any;
 use std::f32::consts::PI;
 use std::rc::Rc;
 use cgmath::{InnerSpace, Zero};
-use nalgebra::{Vector2, Vector3};
+use cgmath::Vector2;
 use serde_json::Value;
 use crate::core_layer::{colorspace::SpectrumRGB, constants::INV_PI, distribution::Distribution};
 use crate::function_layer::{Intersection, Texture, Ray, construct_texture, V3f};
@@ -43,7 +43,7 @@ impl EnvironmentLight {
             panic!("EnvironmentLight must specify texture!\n")
         }
         let environment_map = construct_texture::<SpectrumRGB>(&json["texture"]);
-        let [[width, height]] = environment_map.size().data.0;
+        let Vector2 { x: width, y: height } = environment_map.size();
         let mut indices: Vec<Vector2<usize>> = Vec::with_capacity(width * height);
         for y in 0..height {
             for x in 0..width {
@@ -59,8 +59,8 @@ impl EnvironmentLight {
             let sin_theta = (PI * (index.y as f32 + 0.5) * inv_height).sin();
             let tex_coord = TextureCoord {
                 coord: Vector2::new(u, v),
-                duv_dx: Vector2::zeros(),
-                duv_dy: Vector2::zeros(),
+                duv_dx: Vector2::zero(),
+                duv_dy: Vector2::zero(),
             };
             let s = environment_map.evaluate_coord(&tex_coord);
             s.rgb().dot(V3f::new(0.212671, 0.715160, 0.072169)) * sin_theta
@@ -98,8 +98,8 @@ impl Light for EnvironmentLight {
         let z = sin_theta * cos_phi;
         let tex_coord = TextureCoord {
             coord: Vector2::new(u, v),
-            duv_dx: Vector2::zeros(),
-            duv_dy: Vector2::zeros(),
+            duv_dx: Vector2::zero(),
+            duv_dy: Vector2::zero(),
         };
         let energy = self.environment_map.evaluate_coord(&tex_coord);
         pdf *= (sz[0] * sz[1]) as f32 * INV_PI * INV_PI * 0.5 / sin_theta;
@@ -139,8 +139,8 @@ impl InfiniteLight for EnvironmentLight {
         let uv = direction2uv(ray.direction);
         self.environment_map.evaluate_coord(&TextureCoord {
             coord: uv,
-            duv_dx: Vector2::zeros(),
-            duv_dy: Vector2::zeros(),
+            duv_dx: Vector2::zero(),
+            duv_dy: Vector2::zero(),
         })
     }
 }

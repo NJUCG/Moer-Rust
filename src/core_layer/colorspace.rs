@@ -1,6 +1,5 @@
 use std::ops::{AddAssign, Div, Mul, MulAssign};
 use cgmath::{ElementWise, Zero};
-use nalgebra::Vector3;
 use crate::function_layer::V3f;
 
 #[derive(Copy, Clone, PartialEq)]

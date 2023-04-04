@@ -1,4 +1,4 @@
-use nalgebra::Vector2;
+use cgmath::Vector2;
 use rand::Rng;
 use rand::rngs::ThreadRng;
 use serde_json::Value;

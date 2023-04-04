@@ -1,7 +1,7 @@
 use std::any::Any;
 use std::rc::Rc;
 use cgmath::Zero;
-use nalgebra::Vector2;
+use cgmath::Vector2;
 use serde_json::Value;
 use crate::core_layer::{colorspace::SpectrumRGB, constants::EPSILON};
 use crate::function_layer::{Intersection, RR, Shape, V3f, construct_shape, fetch_v3f};

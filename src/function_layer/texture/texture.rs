@@ -1,16 +1,25 @@
 use std::rc::Rc;
-use nalgebra::Vector2;
+use cgmath::{Vector2, Zero};
 use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::shape::intersection::Intersection;
 use super::image_texture::ImageTexture;
 
 
-#[derive(Default)]
 pub struct TextureCoord {
     pub coord: Vector2<f32>,
     pub duv_dx: Vector2<f32>,
     pub duv_dy: Vector2<f32>,
+}
+
+impl Default for TextureCoord {
+    fn default() -> Self {
+        Self {
+            coord: Vector2::zero(),
+            duv_dx: Vector2::zero(),
+            duv_dy: Vector2::zero(),
+        }
+    }
 }
 
 pub trait TextureMapping {

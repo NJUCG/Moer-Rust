@@ -1,15 +1,16 @@
 #![allow(dead_code)]
 use std::f32::consts::PI;
-use nalgebra::{Vector2, Vector3};
+use nalgebra::{Vector3};
+use cgmath::{InnerSpace, Vector2};
 use crate::core_layer::constants::INV_PI;
 use crate::function_layer::V3f;
 
 #[inline]
-pub fn square_to_uniform_hemisphere(sample: Vector2<f32>) -> Vector3<f32> {
+pub fn square_to_uniform_hemisphere(sample: Vector2<f32>) -> V3f {
     let y = 1.0 * 2.0 * sample.x;
     let r = (1.0 - y * y).max(0.0).sqrt();
     let phi = 2.0 * PI * sample.y;
-    let dir = Vector3::new(r * phi.sin(), y.abs(), r * phi.cos());
+    let dir = V3f::new(r * phi.sin(), y.abs(), r * phi.cos());
     dir.normalize()
 }
 

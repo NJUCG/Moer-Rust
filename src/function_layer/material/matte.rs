@@ -1,6 +1,5 @@
 use std::rc::Rc;
 use cgmath::Zero;
-use nalgebra::Vector3;
 use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
 use super::bxdf::{BSDF, lambert::LambertReflection};

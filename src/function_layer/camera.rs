@@ -1,8 +1,8 @@
 use std::cell::RefCell;
 use std::f32::consts::PI;
 use std::rc::Rc;
-use cgmath::{InnerSpace, Zero};
-use nalgebra::{Matrix4, Point3, Vector2};
+use cgmath::{InnerSpace, Zero, Vector2};
+use nalgebra::{Matrix4, Point3};
 use serde_json::Value;
 use crate::core_layer::transform::Transform;
 use crate::function_layer::{V3f, Ray, Film, ray::RayDifferential, RR, fetch_v3f};

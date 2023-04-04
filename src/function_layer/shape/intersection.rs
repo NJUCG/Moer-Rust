@@ -1,6 +1,7 @@
 use std::rc::Rc;
 use cgmath::{InnerSpace, Zero};
-use nalgebra::{Point3, Vector2, Vector3};
+use nalgebra::{Point3, Vector3};
+use cgmath::Vector2;
 use crate::function_layer::{Shape, Ray, V3f};
 
 pub struct Intersection {
@@ -32,7 +33,7 @@ impl Default for Intersection {
             normal: V3f::zero(),
             tangent: V3f::zero(),
             bitangent: V3f::zero(),
-            tex_coord: Default::default(),
+            tex_coord: Vector2::zero(),
             shape: None,
             dp_du: V3f::zero(),
             dp_dv: V3f::zero(),

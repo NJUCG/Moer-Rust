@@ -1,7 +1,8 @@
 use std::f32::consts::PI;
 use std::rc::Rc;
 use cgmath::{InnerSpace, Zero};
-use nalgebra::{Point3, Vector2, Vector3};
+use nalgebra::{Point3, Vector3};
+use cgmath::Vector2;
 use serde_json::Value;
 use crate::core_layer::constants::INV_PI;
 use crate::core_layer::transform::{Transform, Transformable};
@@ -21,8 +22,8 @@ impl Sphere {
         let center = fetch_v3f(json, "center", V3f::zero()).unwrap();
         let radius = json["radius"].as_f64().unwrap() as f32;
         shape.bounds3 = Bounds3::new(
-            (center - V3f::from([radius; 3])),
-            (center + V3f::from([radius; 3])),
+            center - V3f::from([radius; 3]),
+            center + V3f::from([radius; 3]),
         );
         Sphere {
             shape,

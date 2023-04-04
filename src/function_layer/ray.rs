@@ -1,4 +1,3 @@
-use cgmath::Vector3;
 use nalgebra::Point3;
 use crate::function_layer::V3f;
 

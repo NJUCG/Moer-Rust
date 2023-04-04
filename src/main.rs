@@ -6,7 +6,7 @@ use std::env::{args, current_dir, set_current_dir};
 use std::error::Error;
 use std::io::{BufReader, Write};
 use image::ImageFormat;
-use nalgebra::Vector2;
+use cgmath::{Vector2, Zero};
 use serde_json::Value;
 use function_layer::{Camera, Scene, construct_integrator, construct_sampler, construct_camera};
 use function_layer::camera::CameraSample;
@@ -34,7 +34,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             let mut li = SpectrumRGB::same(0.0);
             for _ in 0..spp {
                 let mut ray = camera.sample_ray_differentials(
-                    &CameraSample { xy: sampler.borrow_mut().next_2d(), lens: Vector2::zeros(), time: 0.0 }, ndc,
+                    &CameraSample { xy: sampler.borrow_mut().next_2d(), lens: Vector2::zero(), time: 0.0 }, ndc,
                 );
                 li += integrator.li(&mut ray, &scene, sampler.clone());
             }

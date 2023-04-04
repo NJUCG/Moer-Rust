@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::fs::File;
 use std::rc::Rc;
 use image::{ImageBuffer, ImageFormat, ImageResult, Rgb};
-use nalgebra::Vector2;
+use cgmath::Vector2;
 use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::{Image, RR};
