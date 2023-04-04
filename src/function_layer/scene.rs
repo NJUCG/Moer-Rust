@@ -1,10 +1,13 @@
-use std::rc::Rc;
-use serde_json::Value;
 use crate::core_layer::distribution::Distribution;
-use crate::function_layer::light::{light::LightType,
-                                   environment_light::EnvironmentLight,
-                                   area_light::AreaLight};
-use crate::function_layer::{Ray, Light, Intersection, Acceleration, construct_shape, construct_light, RR, create_acceleration, set_acc_type};
+use crate::function_layer::light::{
+    area_light::AreaLight, environment_light::EnvironmentLight, light::LightType,
+};
+use crate::function_layer::{
+    construct_light, construct_shape, create_acceleration, set_acc_type, Acceleration,
+    Intersection, Light, Ray, RR,
+};
+use serde_json::Value;
+use std::rc::Rc;
 
 pub struct Scene {
     pub infinite_lights: Vec<Rc<EnvironmentLight>>,
@@ -35,7 +38,12 @@ impl Scene {
             match ltp {
                 // 如果是环境光源，不加入光源分布
                 LightType::EnvironmentLight => {
-                    let light = light.borrow().as_any().downcast_ref::<EnvironmentLight>().unwrap().clone();
+                    let light = light
+                        .borrow()
+                        .as_any()
+                        .downcast_ref::<EnvironmentLight>()
+                        .unwrap()
+                        .clone();
                     infinite_lights.push(Rc::new(light));
                     continue;
                 }
@@ -50,12 +58,11 @@ impl Scene {
                     geom_id += 1;
                     acceleration.attach_shape(al.shape.as_ref().unwrap().clone());
                 }
-                LightType::SpotLight => ()
+                LightType::SpotLight => (),
             }
             light_v.push(light);
         }
-        let light_distribution = Distribution::new(light_v,
-                                                   |_light| 1.0);
+        let light_distribution = Distribution::new(light_v, |_light| 1.0);
         acceleration.build();
         Self {
             infinite_lights,

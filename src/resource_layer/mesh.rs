@@ -1,7 +1,7 @@
-use std::rc::Rc;
-use nalgebra::{Point3};
-use cgmath::Vector2;
 use crate::function_layer::V3f;
+use cgmath::Point3;
+use cgmath::Vector2;
+use std::rc::Rc;
 
 #[derive(Default, Copy, Clone)]
 pub struct DataIndex {
@@ -28,8 +28,7 @@ impl MeshData {
         // }
         let mut config = tobj::LoadOptions::default();
         config.triangulate = true;
-        let (models, _) = tobj::load_obj(file_path, &config).
-            expect("Error in parsing obj file");
+        let (models, _) = tobj::load_obj(file_path, &config).expect("Error in parsing obj file");
         if models.len() != 1 {
             panic!("目前只支持每个.obj文件中包含一个Mesh");
         }
@@ -44,7 +43,11 @@ impl MeshData {
                 let vertex_index = mesh.indices[i * 3 + v] as usize;
                 let normal_index = mesh.normal_indices[i * 3 + v] as usize;
                 let tex_coord_index = mesh.texcoord_indices[i * 3 + v] as usize;
-                triangle_info[v] = DataIndex { vertex_index, normal_index, tex_coord_index }
+                triangle_info[v] = DataIndex {
+                    vertex_index,
+                    normal_index,
+                    tex_coord_index,
+                }
             }
             face_buffer.push(triangle_info);
         }
@@ -74,15 +77,13 @@ impl MeshData {
                 tex_coord_buffer.push(Vector2::new(uv[0], uv[1]));
             }
         }
-        Rc::new(
-            Self {
-                face_count,
-                vertex_count,
-                vertex_buffer,
-                normal_buffer,
-                tex_coord_buffer,
-                face_buffer,
-            }
-        )
+        Rc::new(Self {
+            face_count,
+            vertex_count,
+            vertex_buffer,
+            normal_buffer,
+            tex_coord_buffer,
+            face_buffer,
+        })
     }
 }

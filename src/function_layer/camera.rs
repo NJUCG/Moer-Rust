@@ -1,11 +1,10 @@
+use crate::core_layer::transform::Transform;
+use crate::function_layer::{fetch_v3f, ray::RayDifferential, Film, Ray, V3f, RR};
+use cgmath::{EuclideanSpace, InnerSpace, Matrix4, Point3, SquareMatrix, Vector2, Zero};
+use serde_json::Value;
 use std::cell::RefCell;
 use std::f32::consts::PI;
 use std::rc::Rc;
-use cgmath::{InnerSpace, Zero, Vector2};
-use nalgebra::{Matrix4, Point3};
-use serde_json::Value;
-use crate::core_layer::transform::Transform;
-use crate::function_layer::{V3f, Ray, Film, ray::RayDifferential, RR, fetch_v3f};
 
 type V2f = Vector2<f32>;
 
@@ -63,27 +62,27 @@ impl PerspectiveCamera {
         let position = fetch_point(&json["transform"], &"position");
         let look_at = fetch_point(&json["transform"], "lookAt");
         let up = fetch_point(&json["transform"], "up");
-        let up = V3f::from(up.coords.data.0[0]);
+        let up = up.to_vec();
         let vertical_fov = json["verticalFov"].as_f64().unwrap() as f32 / 180.0 * PI;
-        let aspect_ratio = c.film.as_ref().unwrap().borrow().size[0] as f32 /
-            c.film.as_ref().unwrap().borrow().size[1] as f32;
-        let forward = V3f::from((look_at - position).normalize().data.0[0]);
-        let right = (forward.cross(up)).normalize();
-        let up = (right.cross(forward)).normalize();
+        let aspect_ratio = c.film.as_ref().unwrap().borrow().size[0] as f32
+            / c.film.as_ref().unwrap().borrow().size[1] as f32;
+        let forward = (look_at - position).normalize();
+        let right = forward.cross(up).normalize();
+        let up = right.cross(forward).normalize();
 
-        let translation = Transform::translation(&V3f::from(position.coords.data.0[0]));
+        let translation = Transform::translation(&position.to_vec());
         let mut rotation = Matrix4::identity();
-        rotation[(0, 0)] = right[0];
-        rotation[(1, 0)] = right[1];
-        rotation[(2, 0)] = right[2];
+        rotation[0][0] = right[0];
+        rotation[0][1] = right[1];
+        rotation[0][2] = right[2];
 
-        rotation[(0, 1)] = up[0];
-        rotation[(1, 1)] = up[1];
-        rotation[(2, 1)] = up[2];
+        rotation[1][0] = up[0];
+        rotation[1][1] = up[1];
+        rotation[1][2] = up[2];
 
-        rotation[(0, 2)] = -forward[0];
-        rotation[(1, 2)] = -forward[1];
-        rotation[(2, 2)] = -forward[2];
+        rotation[2][0] = -forward[0];
+        rotation[2][1] = -forward[1];
+        rotation[2][2] = -forward[2];
         c.transform = Transform::new(translation, rotation, Matrix4::identity());
         Self {
             c,
@@ -105,7 +104,9 @@ pub struct PinholeCamera {
 
 impl PinholeCamera {
     pub fn from_json(json: &Value) -> Self {
-        Self { c: PerspectiveCamera::from_json(json) }
+        Self {
+            c: PerspectiveCamera::from_json(json),
+        }
     }
 
     pub fn transform(&self) -> &Transform {
@@ -139,9 +140,18 @@ impl Camera for PinholeCamera {
         let y = (0.5 - ndc[1]) * film.size[1] as f32 + sample.xy[1];
         let tan_half_fov = (self.c.vertical_fov * 0.5).tan();
         let z = film.size[1] as f32 * -0.5 / tan_half_fov;
-        let direction = self.transform().to_world_vec(&V3f::new(x, y, z)).normalize();
-        let direction_x = self.transform().to_world_vec(&V3f::new(x + 1.0, y, z)).normalize();
-        let direction_y = self.transform().to_world_vec(&V3f::new(x, y + 1.0, z)).normalize();
+        let direction = self
+            .transform()
+            .to_world_vec(&V3f::new(x, y, z))
+            .normalize();
+        let direction_x = self
+            .transform()
+            .to_world_vec(&V3f::new(x + 1.0, y, z))
+            .normalize();
+        let direction_y = self
+            .transform()
+            .to_world_vec(&V3f::new(x, y + 1.0, z))
+            .normalize();
         let origin = self.transform().to_world_point(&Point3::origin());
 
         let mut ray = Ray::new(origin, direction);
@@ -161,7 +171,7 @@ impl Camera for PinholeCamera {
     fn film(&self) -> Option<RR<Film>> {
         match &self.c.c.film {
             None => None,
-            Some(f) => Some(f.clone())
+            Some(f) => Some(f.clone()),
         }
     }
 

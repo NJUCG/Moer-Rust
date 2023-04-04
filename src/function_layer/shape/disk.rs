@@ -1,12 +1,10 @@
-use std::f64::consts::PI;
-use std::rc::Rc;
-use cgmath::InnerSpace;
-use nalgebra::{Point3};
-use cgmath::Vector2;
-use serde_json::Value;
+use super::shape::ShapeBase;
 use crate::core_layer::transform::{Transform, Transformable};
 use crate::function_layer::{Bounds3, Intersection, Ray, Shape, V3f};
-use super::shape::ShapeBase;
+use cgmath::{EuclideanSpace, InnerSpace, Point3, Vector2};
+use serde_json::Value;
+use std::f64::consts::PI;
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct Disk {
@@ -22,7 +20,10 @@ impl Disk {
         let inner_radius = json["inner_radius"].as_f64().unwrap_or(0.0) as f32;
         let phi_max = json["phi_max"].as_f64().unwrap_or(2.0 * PI) as f32;
         let mut shape = ShapeBase::from_json(json);
-        let bounds3 = Bounds3::new(V3f::new(-radius, -radius, 0.0), V3f::new(radius, radius, 0.0));
+        let bounds3 = Bounds3::new(
+            V3f::new(-radius, -radius, 0.0),
+            V3f::new(radius, radius, 0.0),
+        );
         shape.bounds3 = shape.transform.to_world_bounds3(bounds3);
 
         Self {
@@ -52,19 +53,31 @@ impl Shape for Disk {
     fn ray_intersect_shape(&self, ray: &mut Ray) -> Option<(u64, f32, f32)> {
         let trans = self.transform();
         let local_ray = trans.local_ray(ray);
-        if local_ray.direction.z == 0.0 { return None; }
+        if local_ray.direction.z == 0.0 {
+            return None;
+        }
         let t0 = -local_ray.origin.z / local_ray.direction.z;
-        if t0 <= local_ray.t_min || t0 >= local_ray.t_max { return None; }
+        if t0 <= local_ray.t_min || t0 >= local_ray.t_max {
+            return None;
+        }
 
         let p = local_ray.at(t0);
-        let r = p.coords.norm();
-        if r < self.inner_radius || r > self.radius { return None; }
+        let r = p.to_vec().magnitude();
+        if r < self.inner_radius || r > self.radius {
+            return None;
+        }
 
         let mut its_phi = (p.y / p.x).atan();
-        if its_phi < 0.0 { its_phi += PI as f32; }
-        if p.y < 0.0 { its_phi += PI as f32; }
+        if its_phi < 0.0 {
+            its_phi += PI as f32;
+        }
+        if p.y < 0.0 {
+            its_phi += PI as f32;
+        }
 
-        if its_phi > self.phi_max { return None; }
+        if its_phi > self.phi_max {
+            return None;
+        }
 
         ray.t_max = t0;
         let u = its_phi / self.phi_max;
@@ -72,7 +85,14 @@ impl Shape for Disk {
         Some((self.geometry_id(), u, v))
     }
 
-    fn fill_intersection(&self, distance: f32, _prim_id: u64, u: f32, v: f32, intersection: &mut Intersection) {
+    fn fill_intersection(
+        &self,
+        distance: f32,
+        _prim_id: u64,
+        u: f32,
+        v: f32,
+        intersection: &mut Intersection,
+    ) {
         let trans = self.transform();
         let normal = V3f::new(0.0, 0.0, 1.0);
         intersection.normal = trans.to_world_vec(&normal);

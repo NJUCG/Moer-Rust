@@ -1,14 +1,16 @@
+use super::{
+    cone::Cone, cube::Cube, cylinder::Cylinder, disk::Disk, parallelogram::Parallelogram,
+    sphere::Sphere, triangle::TriangleMesh,
+};
+use crate::core_layer::transform::{Transform, Transformable};
+use crate::function_layer::{
+    construct_material, material::matte::MatteMaterial, Bounds3, Intersection, Light, Material,
+    Ray, V3f, RR,
+};
+use cgmath::{Matrix4, SquareMatrix, Vector2, Zero};
+use serde_json::Value;
 use std::cell::RefCell;
 use std::rc::Rc;
-use cgmath::Zero;
-use nalgebra::{Matrix4};
-use cgmath::Vector2;
-use serde_json::Value;
-use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Bounds3, Light, Material, Ray, Intersection,
-                            RR, V3f, material::matte::MatteMaterial, construct_material};
-use super::{cone::Cone, cylinder::Cylinder, disk::Disk, cube::Cube,
-            parallelogram::Parallelogram, sphere::Sphere, triangle::TriangleMesh};
 
 pub trait Shape: Transformable {
     fn shape(&self) -> &ShapeBase;
@@ -32,10 +34,19 @@ pub trait Shape: Transformable {
         self.shape_mut().geometry_id = id;
     }
     fn ray_intersect_shape(&self, ray: &mut Ray) -> Option<(u64, f32, f32)>;
-    fn fill_intersection(&self, distance: f32, prim_id: u64, u: f32, v: f32, intersection: &mut Intersection);
+    fn fill_intersection(
+        &self,
+        distance: f32,
+        prim_id: u64,
+        u: f32,
+        v: f32,
+        intersection: &mut Intersection,
+    );
     fn uniform_sample_on_surface(&self, sample: Vector2<f32>) -> (Intersection, f32);
     fn init_internal_acceleration(&mut self) {}
-    fn shape_type(&self) -> String { "".to_owned() }
+    fn shape_type(&self) -> String {
+        "".to_owned()
+    }
 }
 
 #[derive(Clone, Default)]
@@ -50,12 +61,16 @@ pub struct ShapeBase {
 pub fn fetch_v3f(json: &Value, field: &str, dft: V3f) -> Result<V3f, V3f> {
     match json.get(field) {
         None => Err(dft),
-        Some(val) => Ok(V3f::from(serde_json::from_value::<[f32; 3]>(val.clone()).unwrap()))
+        Some(val) => Ok(V3f::from(
+            serde_json::from_value::<[f32; 3]>(val.clone()).unwrap(),
+        )),
     }
 }
 
 impl ShapeBase {
-    pub fn set_bounds(&mut self, b: Bounds3) { self.bounds3 = b; }
+    pub fn set_bounds(&mut self, b: Bounds3) {
+        self.bounds3 = b;
+    }
     pub fn from_json(json: &Value) -> Self {
         let material: Rc<dyn Material> = match json.get("material") {
             None => Rc::new(MatteMaterial::new()),
@@ -65,13 +80,19 @@ impl ShapeBase {
             let translate = fetch_v3f(transform, "translate", V3f::zero());
             let scale = fetch_v3f(transform, "scale", V3f::from([1.0; 3]));
 
-            let translate_mat = Transform::translation(&match translate { Ok(i) | Err(i) => i });
-            let scale_mat = Transform::scalation(&match scale { Ok(i) | Err(i) => i });
+            let translate_mat = Transform::translation(&match translate {
+                Ok(i) | Err(i) => i,
+            });
+            let scale_mat = Transform::scalation(&match scale {
+                Ok(i) | Err(i) => i,
+            });
             let rotate_mat = if !transform["rotate"].is_null() {
                 let axis = fetch_v3f(&transform["rotate"], "axis", V3f::from([1.0; 3]));
                 let radian = transform["rotate"]["radian"].as_f64().unwrap_or(0.0);
                 Transform::rotation(&axis.unwrap(), radian as f32)
-            } else { Matrix4::identity() };
+            } else {
+                Matrix4::identity()
+            };
             Transform::new(translate_mat, rotate_mat, scale_mat)
         } else {
             Transform::identity()
@@ -99,6 +120,6 @@ pub fn construct_shape(json: &Value) -> RR<dyn Shape> {
         "cylinder" => Rc::new(RefCell::new(Cylinder::from_json(json))),
         "cone" => Rc::new(RefCell::new(Cone::from_json(json))),
         "cube" => Rc::new(RefCell::new(Cube::from_json(json))),
-        t => panic!("Invalid shape type: {}", t)
+        t => panic!("Invalid shape type: {}", t),
     }
 }

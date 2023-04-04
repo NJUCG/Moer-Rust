@@ -1,11 +1,9 @@
-use std::rc::Rc;
-use cgmath::{InnerSpace, Zero};
-use nalgebra::{Point3};
-use cgmath::Vector2;
-use serde_json::Value;
+use super::shape::ShapeBase;
 use crate::core_layer::transform::{Transform, Transformable};
 use crate::function_layer::{Bounds3, Intersection, Ray, Shape, V3f};
-use super::shape::ShapeBase;
+use cgmath::{EuclideanSpace, InnerSpace, Point3, Vector2, Zero};
+use serde_json::Value;
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct Cube {
@@ -17,18 +15,11 @@ pub struct Cube {
 impl Cube {
     pub fn from_json(json: &Value) -> Self {
         let mut shape = ShapeBase::from_json(json);
-        let bounds = Bounds3::new(
-            V3f::new(-1.0, -1.0, -1.0),
-            V3f::new(1.0, 1.0, 1.0),
-        );
+        let bounds = Bounds3::new(V3f::new(-1.0, -1.0, -1.0), V3f::new(1.0, 1.0, 1.0));
         shape.bounds3 = shape.transform.to_world_bounds3(bounds);
         let scale = shape.transform.scale;
-        let box_min = Point3::from_homogeneous(
-            scale * Point3::new(-1.0, -1.0, -1.0).to_homogeneous()
-        ).unwrap();
-        let box_max = Point3::from_homogeneous(
-            scale * Point3::new(1.0, 1.0, 1.0).to_homogeneous()
-        ).unwrap();
+        let box_min = Point3::from_homogeneous(scale * Point3::from([-1.0; 3]).to_homogeneous());
+        let box_max = Point3::from_homogeneous(scale * Point3::from([1.0; 3]).to_homogeneous());
         Self {
             shape,
             box_min,
@@ -55,10 +46,11 @@ impl Shape for Cube {
     fn ray_intersect_shape(&self, ray: &mut Ray) -> Option<(u64, f32, f32)> {
         let trans = self.transform();
         let lr = trans.local_ray(ray);
-        let b = Bounds3::new(V3f::from(self.box_max.coords.data.0[0]),
-                             V3f::from(self.box_min.coords.data.0[0]));
+        let b = Bounds3::new(self.box_max.to_vec(), self.box_min.to_vec());
         let (t0, t1) = b.intersect_t(&lr);
-        if t0 > t1 { return None; }
+        if t0 > t1 {
+            return None;
+        }
         let min = self.box_min;
         let max = self.box_max;
         let compute = |hit_point: Point3<f32>| -> (u64, f32, f32) {
@@ -67,8 +59,12 @@ impl Shape for Cube {
                 biases.push((hit_point[i] - min[i]).abs());
                 biases.push((hit_point[i] - max[i]).abs());
             }
-            let p_id: usize = biases.iter().enumerate().
-                min_by(|(_, a), (_, b)| a.total_cmp(b)).map(|(i, _)| i).unwrap();
+            let p_id: usize = biases
+                .iter()
+                .enumerate()
+                .min_by(|(_, a), (_, b)| a.total_cmp(b))
+                .map(|(i, _)| i)
+                .unwrap();
             let axis = (p_id / 2 + 1) % 3;
             let u = (hit_point[axis] - min[axis]) / (max[axis] - min[axis]);
             let axis = (axis + 1) % 3;
@@ -87,7 +83,14 @@ impl Shape for Cube {
         None
     }
 
-    fn fill_intersection(&self, distance: f32, prim_id: u64, u: f32, v: f32, intersection: &mut Intersection) {
+    fn fill_intersection(
+        &self,
+        distance: f32,
+        prim_id: u64,
+        u: f32,
+        v: f32,
+        intersection: &mut Intersection,
+    ) {
         let p_id = prim_id as usize;
         let trans = self.transform();
         let mut normal = V3f::zero();
@@ -95,14 +98,17 @@ impl Shape for Cube {
         intersection.normal = trans.to_world_vec(&normal).normalize();
 
         let mut hit_point = Point3::from([0.0; 3]);
-        hit_point[p_id / 2] = if prim_id % 2 == 1 { self.box_max[p_id / 2] } else { self.box_min[p_id / 2] };
+        hit_point[p_id / 2] = if prim_id % 2 == 1 {
+            self.box_max[p_id / 2]
+        } else {
+            self.box_min[p_id / 2]
+        };
         let axis = (p_id / 2 + 1) % 3;
         hit_point[axis] = self.box_min[axis] + u * (self.box_max[axis] - self.box_min[axis]);
         let axis = (axis + 1) % 3;
         hit_point[axis] = self.box_min[axis] + v * (self.box_max[axis] - self.box_min[axis]);
-        intersection.position = Point3::from_homogeneous(
-            trans.translate * trans.rotate * hit_point.to_homogeneous()
-        ).unwrap();
+        intersection.position =
+            Point3::from_homogeneous(trans.translate * trans.rotate * hit_point.to_homogeneous());
 
         intersection.shape = Some(Rc::new(self.clone()));
         intersection.distance = distance;

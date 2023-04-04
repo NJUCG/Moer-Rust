@@ -1,5 +1,5 @@
-use nalgebra::Point3;
 use crate::function_layer::V3f;
+use cgmath::{InnerSpace, Point3};
 
 #[derive(Debug, Clone)]
 pub struct RayDifferential {
@@ -29,13 +29,18 @@ impl Ray {
         let t = 0.0;
         let t_min = 1e-4;
         let t_max = f32::INFINITY;
-        let inv_dir = V3f::new(
-            1.0 / direction.x,
-            1.0 / direction.y,
-            1.0 / direction.z,
-        );
+        let inv_dir = V3f::new(1.0 / direction.x, 1.0 / direction.y, 1.0 / direction.z);
         let neg_dir = [inv_dir.x < 0.0, inv_dir.y < 0.0, inv_dir.z < 0.0];
-        Self { origin, direction, inv_dir, neg_dir, t, t_min, t_max, differential: None }
+        Self {
+            origin,
+            direction,
+            inv_dir,
+            neg_dir,
+            t,
+            t_min,
+            t_max,
+            differential: None,
+        }
     }
 
     #[allow(dead_code)]
@@ -43,16 +48,21 @@ impl Ray {
         let o2d = destination - origin;
         let t = 0.0;
         let t_min = 1e-4;
-        let t_max = o2d.norm() - 1e-4;
-        let direction = V3f::from(o2d.normalize().data.0[0]);
+        let t_max = o2d.magnitude() - 1e-4;
+        let direction = o2d.normalize();
 
-        let inv_dir = V3f::new(
-            1.0 / direction.x,
-            1.0 / direction.y,
-            1.0 / direction.z,
-        );
+        let inv_dir = V3f::new(1.0 / direction.x, 1.0 / direction.y, 1.0 / direction.z);
         let neg_dir = [inv_dir.x < 0.0, inv_dir.y < 0.0, inv_dir.z < 0.0];
-        Self { origin, inv_dir, neg_dir, direction, t, t_min, t_max, differential: None }
+        Self {
+            origin,
+            inv_dir,
+            neg_dir,
+            direction,
+            t,
+            t_min,
+            t_max,
+            differential: None,
+        }
     }
 
     pub fn at(&self, t: f32) -> Point3<f32> {
@@ -62,11 +72,7 @@ impl Ray {
     }
 
     pub fn change_dir(&mut self, dir: V3f) {
-        let inv_dir = V3f::new(
-            1.0 / dir.x,
-            1.0 / dir.y,
-            1.0 / dir.z,
-        );
+        let inv_dir = V3f::new(1.0 / dir.x, 1.0 / dir.y, 1.0 / dir.z);
         self.neg_dir = [inv_dir.x < 0.0, inv_dir.y < 0.0, inv_dir.z < 0.0];
         self.inv_dir = inv_dir;
         self.direction = dir;
