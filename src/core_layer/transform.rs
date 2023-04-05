@@ -109,7 +109,7 @@ impl Transform {
             for j in 0..2 {
                 for k in 0..2 {
                     let p = Point3::new(ps[i].x, ps[j].y, ps[k].z);
-                    res.expand(V3f::from(self.to_world_point(&p).to_vec()));
+                    res.expand(self.to_world_point(&p).to_vec());
                 }
             }
         }

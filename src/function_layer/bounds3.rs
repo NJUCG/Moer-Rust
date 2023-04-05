@@ -57,42 +57,11 @@ impl Bounds3 {
         self.p_min = ele_wise_min(self.p_min, p);
         self.p_max = ele_wise_max(self.p_max, p);
     }
-    #[allow(dead_code)]
-    pub fn intersect(&self, b: &Bounds3) -> Bounds3 {
-        Bounds3 {
-            p_min: ele_wise_max(self.p_min, b.p_min),
-            p_max: ele_wise_min(self.p_max, b.p_max),
-        }
-    }
-    #[allow(dead_code)]
-    pub fn offset(&self, p: &V3f) -> V3f {
-        let mut o = p - &self.p_min;
-        if self.p_max.x > self.p_min.x {
-            o.x /= self.p_max.x - self.p_min.x;
-        }
-        if self.p_max.y > self.p_min.y {
-            o.y /= self.p_max.y - self.p_min.y;
-        }
-        if self.p_max.z > self.p_min.z {
-            o.z /= self.p_max.z - self.p_min.z;
-        }
-        o
-    }
-
     pub fn overlaps(b1: &Bounds3, b2: &Bounds3) -> bool {
         let x = b1.p_max.x >= b2.p_min.x && b1.p_min.x <= b2.p_max.x;
         let y = b1.p_max.y >= b2.p_min.y && b1.p_min.y <= b2.p_max.y;
         let z = b1.p_max.z >= b2.p_min.z && b1.p_min.z <= b2.p_max.z;
         x && y && z
-    }
-    #[allow(dead_code)]
-    pub fn inside(p: &V3f, b: &Bounds3) -> bool {
-        p.x >= b.p_min.x
-            && p.x <= b.p_max.x
-            && p.y >= b.p_min.y
-            && p.y <= b.p_max.y
-            && p.z >= b.p_min.z
-            && p.z <= b.p_max.z
     }
     pub fn intersect_p(&self, ray: &Ray) -> bool {
         let (t_near, t_far) = self.intersect_t(ray);
@@ -133,12 +102,10 @@ impl Bounds3 {
             Axis::Z => self.centroid().z,
         }
     }
-
     pub fn arr_bounds(v: Vec<Bounds3>) -> Bounds3 {
         v.into_iter()
             .fold(Bounds3::default(), |b1, b2| Bounds3::union_bounds(&b1, &b2))
     }
-
     pub fn sub_bounds(b: &Bounds3) -> [Bounds3; 8] {
         let diff = (b.p_max - b.p_min) / 2.0;
         let mut arr = Vec::with_capacity(8);

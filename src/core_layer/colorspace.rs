@@ -77,8 +77,8 @@ impl SpectrumRGB {
         Self { rgb }
     }
 
-    // #[allow(dead_code)]
-    // pub fn to_slice(&self) -> [f32; 3] {
-    //     self.rgb.as_ref().clone()
-    // }
+    #[allow(dead_code)]
+    pub fn to_slice(&self) -> [f32; 3] {
+        [self.rgb.x, self.rgb.y, self.rgb.z]
+    }
 }
