@@ -3,10 +3,10 @@ use cgmath::Zero;
 use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::{construct_texture, fetch_v3f, Intersection, Material, Texture, V3f};
-use crate::function_layer::texture::constant_texture::ConstantTexture;
+use crate::function_layer::texture::{constant_texture::ConstantTexture, normal_texture::NormalTexture};
 use super::material::fetch_normal_map;
 use super::bxdf::{BSDF, bsdf::BSDFBase, phong::PhongReflection};
-use crate::function_layer::texture::normal_texture::NormalTexture;
+
 
 pub struct PhongMaterial {
     albedo: Rc<dyn Texture<SpectrumRGB>>,
