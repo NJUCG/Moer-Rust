@@ -1,12 +1,10 @@
-use super::bsdf::{BSDFSampleResult, BSDFType, BSDF};
+use super::bsdf::{BSDFSampleResult, BSDFType, BSDF, BSDFBase};
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::V3f;
 use cgmath::Vector2;
 
 pub struct SpecularReflection {
-    pub normal: V3f,
-    pub tangent: V3f,
-    pub bitangent: V3f,
+    pub(crate) bsdf: BSDFBase,
 }
 
 impl BSDF for SpecularReflection {
@@ -19,21 +17,13 @@ impl BSDF for SpecularReflection {
         let wi_local = V3f::new(-wo_local.x, wo_local.y, -wo_local.z);
         BSDFSampleResult {
             weight: SpectrumRGB::same(1.0),
-            wi: self.to_world(&wi_local),
+            wi: self.to_world(wi_local),
             pdf: 1.0,
             tp: BSDFType::Specular,
         }
     }
 
-    fn normal(&self) -> V3f {
-        self.normal
-    }
-
-    fn tangent(&self) -> V3f {
-        self.tangent
-    }
-
-    fn bitangent(&self) -> V3f {
-        self.bitangent
+    fn bsdf(&self) -> &BSDFBase {
+        &self.bsdf
     }
 }

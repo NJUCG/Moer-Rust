@@ -1,4 +1,4 @@
-use super::bsdf::{BSDFSampleResult, BSDFType, BSDF};
+use super::bsdf::{BSDFSampleResult, BSDFType, BSDF, BSDFBase};
 use super::warp::{square_to_cosine_hemisphere, square_to_cosine_hemisphere_pdf};
 use crate::core_layer::{colorspace::SpectrumRGB, constants::INV_PI};
 use crate::function_layer::V3f;
@@ -6,18 +6,15 @@ use cgmath::Vector2;
 
 pub struct LambertReflection {
     albedo: SpectrumRGB,
-    pub normal: V3f,
-    pub tangent: V3f,
-    pub bitangent: V3f,
+    bsdf: BSDFBase,
 }
 
 impl LambertReflection {
     pub fn new(albedo: SpectrumRGB, normal: V3f, tangent: V3f, bitangent: V3f) -> Self {
+        let bsdf = BSDFBase { normal, tangent, bitangent };
         Self {
             albedo,
-            normal,
-            tangent,
-            bitangent,
+            bsdf,
         }
     }
 }
@@ -38,21 +35,13 @@ impl BSDF for LambertReflection {
         let pdf = square_to_cosine_hemisphere_pdf(wi);
         BSDFSampleResult {
             weight,
-            wi: self.to_world(&wi),
+            wi: self.to_world(wi),
             pdf,
             tp: BSDFType::Diffuse,
         }
     }
 
-    fn normal(&self) -> V3f {
-        self.normal
-    }
-
-    fn tangent(&self) -> V3f {
-        self.tangent
-    }
-
-    fn bitangent(&self) -> V3f {
-        self.bitangent
+    fn bsdf(&self) -> &BSDFBase {
+        &self.bsdf
     }
 }

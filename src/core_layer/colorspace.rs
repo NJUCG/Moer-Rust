@@ -1,6 +1,6 @@
 use crate::function_layer::V3f;
 use cgmath::{ElementWise, Zero};
-use std::ops::{AddAssign, Div, Mul, MulAssign};
+use std::ops::{Add, AddAssign, Div, Mul, MulAssign};
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct SpectrumRGB {
@@ -13,6 +13,13 @@ impl SpectrumRGB {
     }
 }
 
+impl Add<SpectrumRGB> for SpectrumRGB {
+    type Output = SpectrumRGB;
+
+    fn add(self, rhs: SpectrumRGB) -> Self::Output {
+        SpectrumRGB{ rgb: self.rgb + rhs.rgb }
+    }
+}
 impl AddAssign<SpectrumRGB> for SpectrumRGB {
     fn add_assign(&mut self, rhs: SpectrumRGB) {
         self.rgb += rhs.rgb;

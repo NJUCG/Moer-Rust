@@ -7,6 +7,7 @@ use crate::function_layer::{fetch_v3f, Intersection, Texture, V3f};
 use cgmath::Zero;
 use serde_json::Value;
 use std::rc::Rc;
+use super::material::fetch_normal_map;
 
 use super::Material;
 
@@ -25,11 +26,7 @@ impl MatteMaterial {
     }
 
     pub fn from_json(json: &Value) -> Self {
-        let normal_map = if json["normalmap"].is_null() {
-            None
-        } else {
-            Some(Rc::new(NormalTexture::from_json(&json["normalmap"])))
-        };
+        let normal_map = fetch_normal_map(json);
         let albedo = if json["albedo"].is_object() {
             construct_texture::<SpectrumRGB>(json)
         } else if json["albedo"].is_array() {
@@ -48,10 +45,10 @@ impl Material for MatteMaterial {
         self.normal_map.clone()
     }
 
-    fn compute_bsdf(&self, intersection: &Intersection) -> Rc<dyn BSDF> {
+    fn compute_bsdf(&self, intersection: &Intersection) -> Box<dyn BSDF> {
         let [mut normal, mut tangent, mut bitangent] = [V3f::zero(); 3];
         self.compute_shading_geometry(intersection, &mut normal, &mut tangent, &mut bitangent);
         let s = self.albedo.evaluate(intersection);
-        Rc::new(LambertReflection::new(s, normal, tangent, bitangent))
+        Box::new(LambertReflection::new(s, normal, tangent, bitangent))
     }
 }

@@ -4,10 +4,11 @@ use crate::function_layer::{Intersection, Texture, V3f};
 use cgmath::InnerSpace;
 use serde_json::Value;
 use std::rc::Rc;
+use crate::function_layer::material::phong_material::PhongMaterial;
 
 pub trait Material {
-    fn normal_map(&self) -> Option<Rc<NormalTexture>>;
-    fn compute_bsdf(&self, intersection: &Intersection) -> Rc<dyn BSDF>;
+    fn normal_map(&self) -> Option<Rc<NormalTexture>>; // self.normal_map.clone()
+    fn compute_bsdf(&self, intersection: &Intersection) -> Box<dyn BSDF>;
     fn compute_shading_geometry(
         &self,
         intersection: &Intersection,
@@ -33,11 +34,18 @@ pub trait Material {
         }
     }
 }
-
+pub fn fetch_normal_map(json: &Value) -> Option<Rc<NormalTexture>> {
+    if json["normalmap"].is_null() {
+        None
+    } else {
+        Some(Rc::new(NormalTexture::from_json(&json["normalmap"])))
+    }
+}
 pub fn construct_material(json: &Value) -> Rc<dyn Material> {
     match json["type"].as_str().expect("No material type annotation!") {
         "matte" => Rc::new(MatteMaterial::from_json(json)),
         "mirror" => Rc::new(MirrorMaterial::from_json(json)),
+        "phong" => Rc::new(PhongMaterial::from_json(json)),
         tp => panic!("Invalid type: {}", tp),
     }
 }
