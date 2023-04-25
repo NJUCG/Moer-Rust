@@ -41,13 +41,6 @@ impl RoughDielectricBSDF {
 
 impl BSDF for RoughDielectricBSDF {
     fn f(&self, wo: V3f, wi: V3f) -> SpectrumRGB {
-        // TODO
-        // 1. 转换坐标系到局部坐标
-        // 2. 根据公式计算 Fr, D, G
-        // 3. return albedo * D * G * Fr / (4 * \cos\theta_o);
-        // tips:
-        // 不考虑多重介质，如果光线从真空射入介质，其eta即配置中填写的eta；
-        // 如果光线从介质射出，则eta = 1/eta
         let wo_local = self.to_local(wo);
         let wi_local = self.to_local(wi);
         let wh_local = (wo_local + wi_local).normalize();

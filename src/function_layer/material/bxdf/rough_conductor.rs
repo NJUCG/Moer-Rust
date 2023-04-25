@@ -45,12 +45,6 @@ impl RoughConductorBSDF {
 
 impl BSDF for RoughConductorBSDF {
     fn f(&self, wo: V3f, wi: V3f) -> SpectrumRGB {
-        // TODO
-        // 1. 转换坐标系到局部坐标
-        // 2. 根据公式计算 Fr, D, G
-        // 3. return albedo * D * G * Fr / (4 * \cos\theta_o);
-        // tips: brdf
-        // 中分母的\cos\theta_i项被渲染方程中的cos项消去，因此分母只有4*\cos\theta_o
         let wo_local = self.to_local(wo);
         let wi_local = self.to_local(wi);
         let wh_local = (wo_local + wi_local).normalize();
