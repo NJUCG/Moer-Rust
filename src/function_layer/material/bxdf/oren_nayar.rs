@@ -1,5 +1,6 @@
 use cgmath::Vector2;
 use crate::core_layer::colorspace::SpectrumRGB;
+use crate::core_layer::constants::INV_PI;
 use crate::function_layer::V3f;
 use super::{BSDF, BSDFType};
 use super::bsdf::{BSDFBase, BSDFSampleResult};
@@ -33,11 +34,11 @@ impl BSDF for OrenNayarBSDF {
         let tan_beta = (1.0 / (wo_local.y * wo_local.y) - 1.0).sqrt().
             min((1.0 / (wi_local.y * wi_local.y) - 1.0).sqrt());
 
-        let cos_dphi = (wo_local.x * wi_local.x + wo_local.y + wi_local.y) /
-            (wo_local.x * wo_local.x + wo_local.y + wo_local.y).sqrt() /
-            (wi_local.x * wi_local.x + wi_local.y + wi_local.y).sqrt();
+        let cos_dphi = (wo_local.x * wi_local.x + wo_local.z * wi_local.z) /
+            (wo_local.x * wo_local.x + wo_local.z * wo_local.z).sqrt() /
+            (wi_local.x * wi_local.x + wi_local.z * wi_local.z).sqrt();
 
-        self.albedo * (a + b * cos_dphi.max(0.0) * sin_alpha * tan_beta)
+        self.albedo * INV_PI * (a + b * cos_dphi.max(0.0) * sin_alpha * tan_beta)
     }
 
     fn sample(&self, _wo: V3f, sample: Vector2<f32>) -> BSDFSampleResult {
