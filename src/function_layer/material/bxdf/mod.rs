@@ -2,7 +2,9 @@ pub mod bsdf;
 pub mod lambert;
 pub mod specular;
 pub mod phong;
-mod oren_nayar;
+pub mod oren_nayar;
+pub mod rough_conductor;
+pub mod rough_dielectric;
 mod warp;
 
 

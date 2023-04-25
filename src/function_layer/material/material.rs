@@ -1,11 +1,13 @@
-use super::{bxdf::bsdf::BSDF, matte::MatteMaterial, mirror::MirrorMaterial, phong::PhongMaterial};
-use crate::function_layer::texture::normal_texture::NormalTexture;
-use crate::function_layer::{construct_texture, fetch_v3f, Intersection, Texture, V3f};
-use cgmath::{InnerSpace, Zero};
+use cgmath::{InnerSpace, Vector2, Zero};
 use serde_json::Value;
 use std::rc::Rc;
+use super::{bxdf::bsdf::BSDF, matte::MatteMaterial, mirror::MirrorMaterial, phong::PhongMaterial,
+            dielectric::DielectricMaterial, oren_nayar::OrenNayarMaterial};
+use super::ndf::{ggx::GGXDistribution, beckmann::BeckmannDistribution};
+use crate::function_layer::texture::normal_texture::NormalTexture;
+use crate::function_layer::{construct_texture, fetch_v3f, Intersection, NDF, Texture, V3f};
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::material::oren_nayar::OrenNayarMaterial;
+use crate::function_layer::material::conductor::ConductorMaterial;
 use crate::function_layer::texture::constant_texture::ConstantTexture;
 
 pub trait Material {
@@ -57,12 +59,35 @@ pub fn fetch_albedo(json: &Value) -> Rc<dyn Texture<SpectrumRGB>> {
     }
 }
 
+pub fn fetch_roughness(json: &Value) -> Vector2<f32> {
+    let rn = &json["roughness"];
+    let roughness = if rn.is_number() {
+        let r = rn.as_f64().unwrap() as f32;
+        Vector2::new(r, r)
+    } else if rn.is_array() {
+        Vector2::from(serde_json::from_value::<[f32; 2]>(rn.clone()).unwrap())
+    } else {
+        panic!("Error in roughness format!");
+    };
+    roughness
+}
+
+pub fn fetch_ndf(json: &Value) -> Rc<dyn NDF> {
+    if !json["ndf"].is_null() && json["ndf"].as_str().unwrap() == "ggx" {
+        Rc::new(GGXDistribution {})
+    } else {
+        Rc::new(BeckmannDistribution {})
+    }
+}
+
 pub fn construct_material(json: &Value) -> Rc<dyn Material> {
     match json["type"].as_str().expect("No material type annotation!") {
         "matte" => Rc::new(MatteMaterial::from_json(json)),
         "mirror" => Rc::new(MirrorMaterial::from_json(json)),
         "phong" => Rc::new(PhongMaterial::from_json(json)),
         "oren-nayar" => Rc::new(OrenNayarMaterial::from_json(json)),
+        "dielectric" => Rc::new(DielectricMaterial::from_json(json)),
+        "conductor" => Rc::new(ConductorMaterial::from_json(json)),
         tp => panic!("Invalid type: {}", tp),
     }
 }

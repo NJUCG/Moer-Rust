@@ -49,7 +49,13 @@ impl Mul<f32> for SpectrumRGB {
         SpectrumRGB::from_rgb(self.rgb * rhs)
     }
 }
+impl Mul<V3f> for SpectrumRGB {
+    type Output = SpectrumRGB;
 
+    fn mul(self, rhs: V3f) -> Self::Output {
+        SpectrumRGB::from_rgb(self.rgb.mul_element_wise(rhs))
+    }
+}
 impl Mul<SpectrumRGB> for SpectrumRGB {
     type Output = SpectrumRGB;
 
