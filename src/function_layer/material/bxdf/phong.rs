@@ -10,15 +10,15 @@ use super::bsdf::{BSDFSampleResult, BSDFBase};
 pub struct PhongReflection {
     albedo: SpectrumRGB,
     specular_reflectance: SpectrumRGB,
-    kd: f32,
-    ks: f32,
+    kd: SpectrumRGB,
+    ks: SpectrumRGB,
     p: f32,
     bsdf: BSDFBase,
 }
 
 impl PhongReflection {
     pub fn new(albedo: SpectrumRGB,
-               kd: f32, ks: f32, p: f32, bsdf: BSDFBase) -> Self {
+               kd: SpectrumRGB, ks: SpectrumRGB, p: f32, bsdf: BSDFBase) -> Self {
         Self {
             albedo,
             specular_reflectance: SpectrumRGB::same(1.0),
@@ -31,7 +31,7 @@ impl PhongReflection {
     fn pdf(&self, _wo: V3f, wi: V3f) -> f32 {
         // let wo_local = self.to_local(wo);
         let wi_local = self.to_local(wi);
-        self.ks + self.kd * square_to_cosine_hemisphere_pdf(wi_local)
+        square_to_cosine_hemisphere_pdf(wi_local)
     }
 }
 
@@ -45,7 +45,7 @@ impl BSDF for PhongReflection {
         let diffuse = self.kd * wi_local.y; // self.kd * n.dot(wi_local)
         let specular = self.ks * wo_local.dot(l_r).min(0.0).pow(self.p);
 
-        self.albedo * self.specular_reflectance * specular + self.albedo * diffuse
+        self.specular_reflectance * specular + self.albedo * diffuse
     }
 
     fn sample(&self, wo: V3f, sample: Vector2<f32>) -> BSDFSampleResult {

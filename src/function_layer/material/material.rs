@@ -49,14 +49,7 @@ pub fn fetch_normal_map(json: &Value) -> Option<Rc<NormalTexture>> {
 }
 
 pub fn fetch_albedo(json: &Value) -> Rc<dyn Texture<SpectrumRGB>> {
-    if json["albedo"].is_object() {
-        construct_texture::<SpectrumRGB>(json)
-    } else if json["albedo"].is_array() {
-        let s = fetch_v3f(json, "albedo", V3f::zero()).unwrap();
-        Rc::new(ConstantTexture::new(&SpectrumRGB::from_rgb(s)))
-    } else {
-        panic!("Error in albedo format!")
-    }
+    fetch_spectrum(json, "albedo")
 }
 
 pub fn fetch_roughness(json: &Value) -> Vector2<f32> {
@@ -77,6 +70,15 @@ pub fn fetch_ndf(json: &Value) -> Rc<dyn NDF> {
         Rc::new(GGXDistribution {})
     } else {
         Rc::new(BeckmannDistribution {})
+    }
+}
+
+pub fn fetch_spectrum(json: &Value, field: &str) -> Rc<dyn Texture<SpectrumRGB>> {
+    if json[field].is_object() {
+        construct_texture::<SpectrumRGB>(&json[field])
+    } else {
+        let s = fetch_v3f(json, field, V3f::zero()).unwrap();
+        Rc::new(ConstantTexture::new(&SpectrumRGB::from_rgb(s)))
     }
 }
 
