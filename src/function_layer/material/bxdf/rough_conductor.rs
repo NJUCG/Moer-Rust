@@ -12,8 +12,7 @@ pub struct RoughConductorBSDF {
     bsdf: BSDFBase,
     albedo: SpectrumRGB,
     alpha: Vector2<f32>,
-    eta: V3f,
-    k: V3f,
+    r0: V3f,
     ndf: Option<Rc<dyn NDF>>,
 }
 
@@ -21,12 +20,12 @@ impl RoughConductorBSDF {
     pub fn new(bsdf: BSDFBase,
                albedo: SpectrumRGB, alpha: Vector2<f32>, eta: V3f, k: V3f,
                ndf: Option<Rc<dyn NDF>>) -> Self {
+        let r0 = Self::get_r0(eta, k);
         Self {
             bsdf,
             albedo,
             alpha,
-            eta,
-            k,
+            r0,
             ndf,
         }
     }
@@ -37,9 +36,8 @@ impl RoughConductorBSDF {
             (eta + ones).mul_element_wise(eta + ones) + k.mul_element_wise(k))
     }
 
-    fn get_fr(eta: V3f, k: V3f, cos_theta: f32) -> V3f {
-        let r0 = Self::get_r0(eta, k);
-        r0 + (V3f::from([1.0; 3]) - r0) * (1.0 - cos_theta).powf(5.0)
+    fn get_fr(r0: V3f, cos_theta: f32) -> V3f {
+        r0 + (V3f::from([1.0; 3]) - r0) * (1.0 - cos_theta).powi(5)
     }
 }
 
@@ -48,16 +46,12 @@ impl BSDF for RoughConductorBSDF {
         let wo_local = self.to_local(wo);
         let wi_local = self.to_local(wi);
         let wh_local = (wo_local + wi_local).normalize();
-
-        let fr = Self::get_fr(self.eta, self.k, wi_local.y);
-        let cos_iv = wo_local.dot(wi_local);
-        let cos_ov = wo_local.dot(wi_local);
+        let cj = wh_local.dot(wi_local);
+        let fr = Self::get_fr(self.r0, cj);
 
         let d = self.ndf.as_ref().unwrap().get_d(wh_local, self.alpha);
-        let g = self.ndf.as_ref().unwrap().get_g(V3f::new(0.0, cos_ov, 0.0),
-                                                 V3f::new(0.0, cos_iv, 0.0), self.alpha);
-
-        self.albedo * fr * d * g / (4.0 * wo_local.y * wi_local.y)
+        let g = self.ndf.as_ref().unwrap().get_g(wo_local, wi_local, self.alpha);
+        self.albedo * fr * (d * g / (4.0 * wo_local.y))
     }
 
     fn sample(&self, wo: V3f, sample: Vector2<f32>) -> BSDFSampleResult {

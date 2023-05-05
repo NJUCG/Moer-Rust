@@ -23,11 +23,12 @@ impl DielectricMaterial {
         let normal_map = fetch_normal_map(json);
         let roughness = fetch_roughness(json);
         let ndf: Rc<dyn NDF> = fetch_ndf(json);
+        let eta = json["eta"].as_f64().unwrap() as f32;
         Self {
             normal_map,
             albedo,
             ndf,
-            eta: 0.0,
+            eta,
             roughness,
         }
     }

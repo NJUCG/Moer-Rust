@@ -8,7 +8,7 @@ pub struct BeckmannDistribution;
 impl BeckmannDistribution {
     fn get_g1(w_local: V3f, alpha: f32) -> f32 {
         let cos_jv = w_local.y;
-        let tan_jv = (1.0 - cos_jv * cos_jv).sqrt() / cos_jv;
+        let tan_jv = (1.0 / (cos_jv * cos_jv) - 1.0).sqrt();
         let inv_a = alpha * tan_jv;
         let a = 1.0 / inv_a;
         if a < 1.6 {
@@ -21,11 +21,10 @@ impl BeckmannDistribution {
 
 impl NDF for BeckmannDistribution {
     fn get_d(&self, wh_local: V3f, alpha: Vector2<f32>) -> f32 {
-        let cos_j = wh_local.y;
-        let cos_j2 = cos_j * cos_j;
-        let tan_j = (1.0 - cos_j * cos_j).sqrt() / cos_j;
-        (-tan_j * tan_j / (alpha.x * alpha.x)).exp() * INV_PI /
-            (alpha.x * alpha.x * cos_j2 * cos_j2)
+        let cos_j2 = wh_local.y * wh_local.y;
+        let tan_j2 = 1.0 / cos_j2 - 1.0;
+        let alpha2 = alpha.x * alpha.x;
+        (-tan_j2 / alpha2).exp() * INV_PI / (alpha2 * cos_j2 * cos_j2)
     }
 
     fn get_g(&self, wo_local: V3f, wi_local: V3f, alpha: Vector2<f32>) -> f32 {

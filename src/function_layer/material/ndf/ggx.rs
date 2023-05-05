@@ -7,18 +7,16 @@ pub struct GGXDistribution;
 
 impl GGXDistribution {
     fn get_g1(w_local: V3f, alpha: f32) -> f32 {
-        let cos_jv = w_local.y;
-        let tan_jv = (1.0 - cos_jv * cos_jv).sqrt() / cos_jv;
-        let inv_a = alpha * tan_jv;
-        2.0 / (1.0 + (1.0 + inv_a * inv_a).sqrt())
+        let tan_jv2 = 1.0 / (w_local.y * w_local.y) - 1.0;
+        let inv_a2 = alpha * alpha * tan_jv2;
+        2.0 / (1.0 + (1.0 + inv_a2).sqrt())
     }
 }
 
 impl NDF for GGXDistribution {
     fn get_d(&self, wh_local: V3f, alpha: Vector2<f32>) -> f32 {
-        let cos_j = wh_local.y;
-        let tan_j = (1.0 - cos_j * cos_j).sqrt() / cos_j;
-        let d_sqrt = alpha.x / (cos_j * cos_j * (alpha.x + tan_j * tan_j));
+        let cos_j2 = wh_local.y * wh_local.y;
+        let d_sqrt = alpha.x / (alpha.x * alpha.x * cos_j2 + 1.0 - cos_j2);
         d_sqrt * d_sqrt * INV_PI
     }
 

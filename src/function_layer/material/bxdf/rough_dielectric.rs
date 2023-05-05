@@ -35,7 +35,7 @@ impl RoughDielectricBSDF {
 
     fn get_fr(eta_o: f32, cos_theta: f32) -> f32 {
         let r0 = Self::get_r0(eta_o);
-        r0 + (1.0 - r0) * (1.0 - cos_theta).powf(5.0)
+        r0 + (1.0 - r0) * (1.0 - cos_theta).powi(5)
     }
 }
 
@@ -44,19 +44,17 @@ impl BSDF for RoughDielectricBSDF {
         let wo_local = self.to_local(wo);
         let wi_local = self.to_local(wi);
         let wh_local = (wo_local + wi_local).normalize();
+        let cj = wh_local.dot(wi_local);
         let fr = if wi_local.y > 0.0 {
-            RoughDielectricBSDF::get_fr(self.eta, wi_local.y)
+            RoughDielectricBSDF::get_fr(self.eta, cj)
         } else {
-            RoughDielectricBSDF::get_fr(1.0 / self.eta, wi_local.y)
+            RoughDielectricBSDF::get_fr(1.0 / self.eta, cj)
         };
-        let cos_iv = wo_local.dot(wi_local);
-        let cos_ov = wo_local.dot(wi_local);
 
         let d = self.ndf.as_ref().unwrap().get_d(wh_local, self.alpha);
-        let g = self.ndf.as_ref().unwrap().get_g(V3f::new(0.0, cos_ov, 0.0),
-                                                 V3f::new(0.0,cos_iv, 0.0), self.alpha);
+        let g = self.ndf.as_ref().unwrap().get_g(wo_local, wi_local, self.alpha);
 
-        self.albedo * fr * d * g / (4.0 * wo_local.y * wi_local.y)
+        self.albedo * fr * d * g / (4.0 * wo_local.y)
     }
 
     fn sample(&self, wo: V3f, sample: Vector2<f32>) -> BSDFSampleResult {
