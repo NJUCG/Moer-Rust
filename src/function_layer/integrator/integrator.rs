@@ -2,6 +2,7 @@ use super::{
     direct_integrator::{DirectIntegratorSampleBSDF, DirectIntegratorSampleLight},
     normal_integrator::NormalIntegrator,
     whitted_integrator::WhittedIntegrator,
+    path_integrator::PathIntegrator
 };
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::light::light::{LightSampleResult, LightType};
@@ -35,6 +36,7 @@ pub fn construct_integrator(json: &Value) -> Rc<dyn Integrator> {
         "directSampleBSDF" => Rc::new(DirectIntegratorSampleBSDF {}),
         "normal" => Rc::new(NormalIntegrator {}),
         "whitted" => Rc::new(WhittedIntegrator {}),
+        "path" => Rc::new(PathIntegrator::from_json(json)),
         tp => panic!("Invalid integrator type: {}!", tp),
     }
 }

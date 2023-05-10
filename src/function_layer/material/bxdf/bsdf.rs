@@ -3,6 +3,7 @@ use crate::function_layer::V3f;
 use cgmath::InnerSpace;
 use cgmath::Vector2;
 
+#[derive(PartialEq)]
 pub enum BSDFType {
     Diffuse,
     Specular,
