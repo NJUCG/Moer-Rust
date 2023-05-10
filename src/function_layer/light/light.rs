@@ -8,7 +8,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 pub trait Light {
-    fn evaluate_emission(&self, intersection: &Intersection, wo: &V3f) -> SpectrumRGB;
+    fn evaluate_emission(&self, intersection: &Intersection, wo: V3f) -> SpectrumRGB;
     fn sample(&self, shading_point: &Intersection, sample: Vector2<f32>) -> LightSampleResult;
     fn light_type(&self) -> LightType;
     fn as_any(&self) -> &dyn Any;

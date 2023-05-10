@@ -81,7 +81,7 @@ impl EnvironmentLight {
 }
 
 impl Light for EnvironmentLight {
-    fn evaluate_emission(&self, _intersection: &Intersection, _wo: &V3f) -> SpectrumRGB {
+    fn evaluate_emission(&self, _intersection: &Intersection, _wo: V3f) -> SpectrumRGB {
         panic!("This shouldn't be invoked!\n");
     }
 

@@ -22,7 +22,7 @@ impl Integrator for WhittedIntegrator {
             }
             let mut its = its_opt.unwrap();
             if let Some(l) = its.shape.as_ref().unwrap().get_light() {
-                spectrum += beta * l.borrow().evaluate_emission(&its, &-ray.direction);
+                spectrum += beta * l.borrow().evaluate_emission(&its, -ray.direction);
             }
             compute_ray_differentials(&mut its, ray);
             let shape = its.shape.as_ref().unwrap();

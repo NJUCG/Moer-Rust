@@ -23,7 +23,7 @@ impl Integrator for DirectIntegratorSampleLight {
         if let Some(light) = shape.get_light() {
             spectrum += light
                 .borrow()
-                .evaluate_emission(&intersection, &(-ray.direction));
+                .evaluate_emission(&intersection, -ray.direction);
         }
         for inf_lights in &scene.infinite_lights {
             let res = inf_lights.sample(&intersection, sampler.borrow_mut().next_2d());
@@ -84,7 +84,7 @@ impl Integrator for DirectIntegratorSampleBSDF {
         let shape = intersection.shape.as_ref().unwrap();
         if let Some(light) = shape.get_light() {
             spectrum += light.borrow()
-                .evaluate_emission(&intersection, &-ray.direction);
+                .evaluate_emission(&intersection, -ray.direction);
         }
         let material = shape.material();
         let bsdf = material.unwrap().compute_bsdf(&intersection);
@@ -103,7 +103,7 @@ impl Integrator for DirectIntegratorSampleBSDF {
                 if let Some(light) = shape.get_light() {
                     spectrum += bsdf_sample_result.weight
                         * light.borrow()
-                        .evaluate_emission(&fl, &-shadow_ray.direction);
+                        .evaluate_emission(&fl, -shadow_ray.direction);
                 }
             }
         }

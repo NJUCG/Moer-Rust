@@ -25,7 +25,7 @@ impl SpotLight {
 
 impl Light for SpotLight {
     //! 由于点光源不会与光线发生相交，故该函数实际上不会被调用
-    fn evaluate_emission(&self, _intersection: &Intersection, _wo: &V3f) -> SpectrumRGB {
+    fn evaluate_emission(&self, _intersection: &Intersection, _wo: V3f) -> SpectrumRGB {
         SpectrumRGB::same(0.0)
     }
 

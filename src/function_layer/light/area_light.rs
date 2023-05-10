@@ -27,7 +27,7 @@ impl AreaLight {
 }
 
 impl Light for AreaLight {
-    fn evaluate_emission(&self, _intersection: &Intersection, _wo: &V3f) -> SpectrumRGB {
+    fn evaluate_emission(&self, _intersection: &Intersection, _wo: V3f) -> SpectrumRGB {
         self.energy
     }
 
