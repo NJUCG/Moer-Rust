@@ -19,6 +19,7 @@ pub mod sampler;
 pub mod scene;
 mod shape;
 pub mod texture;
+mod medium;
 
 pub use acceleration::{
     acceleration::{create_acceleration, set_acc_type},
@@ -37,3 +38,4 @@ pub use shape::{
     compute_ray_differentials, fetch_v3f, shape::construct_shape, Intersection, Shape,
 };
 pub use texture::{texture::construct_texture, Texture};
+pub use medium::medium::{Medium, MediumInterface};

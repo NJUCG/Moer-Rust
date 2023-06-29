@@ -1,4 +1,5 @@
-use crate::function_layer::V3f;
+use std::rc::Rc;
+use crate::function_layer::{Medium, V3f};
 use cgmath::{InnerSpace, Point3};
 
 #[derive(Debug, Clone)]
@@ -9,7 +10,7 @@ pub struct RayDifferential {
     pub direction_y: V3f,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Ray {
     pub origin: Point3<f32>,
     pub direction: V3f,
@@ -19,7 +20,7 @@ pub struct Ray {
     pub t: f32,
     pub t_min: f32,
     pub t_max: f32,
-
+    pub medium: Option<Rc<dyn Medium>>,
     // Ray differential
     pub differential: Option<RayDifferential>,
 }
@@ -39,6 +40,7 @@ impl Ray {
             t,
             t_min,
             t_max,
+            medium: None,
             differential: None,
         }
     }
@@ -61,6 +63,7 @@ impl Ray {
             t,
             t_min,
             t_max,
+            medium: None,
             differential: None,
         }
     }

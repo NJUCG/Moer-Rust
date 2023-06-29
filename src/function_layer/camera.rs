@@ -1,5 +1,5 @@
 use crate::core_layer::transform::Transform;
-use crate::function_layer::{fetch_v3f, ray::RayDifferential, Film, Ray, V3f, RR};
+use crate::function_layer::{fetch_v3f, ray::RayDifferential, Film, Ray, V3f, RR, Medium};
 use cgmath::{EuclideanSpace, InnerSpace, Matrix4, Point3, SquareMatrix, Vector2, Zero};
 use serde_json::Value;
 use std::cell::RefCell;
@@ -29,6 +29,7 @@ pub struct CameraBase {
     pub film: Option<RR<Film>>,
 
     pub transform: Transform,
+    pub medium: Option<Rc<dyn Medium>>,
 }
 
 impl CameraBase {
@@ -46,6 +47,7 @@ impl CameraBase {
             time_end,
             film,
             transform,
+            medium: None,
         }
     }
 }
@@ -130,6 +132,7 @@ impl Camera for PinholeCamera {
         ray.t_min = c.t_min;
         ray.t_max = c.t_max;
         ray.t = c.time_start;
+        ray.medium = self.c.c.medium.clone();
         ray
     }
 
@@ -159,6 +162,7 @@ impl Camera for PinholeCamera {
         ray.t_min = c.t_min;
         ray.t_max = c.t_max;
         ray.t = c.time_start;
+        ray.medium = self.c.c.medium.clone();
         ray.differential = Some(RayDifferential {
             origin_x: origin,
             origin_y: origin,
