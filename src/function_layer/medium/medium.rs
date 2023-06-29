@@ -37,6 +37,21 @@ impl Default for MediumInteraction {
     }
 }
 
+impl MediumInteraction {
+    pub fn new(p: Point3<f32>, time: f32, wo: V3f,
+               medium_interface: Rc<dyn Medium>, phase: Option<Box<dyn PhaseFunction>>) -> Self {
+        Self {
+            p,
+            time,
+            p_error: V3f::from([0.0; 3]),
+            wo,
+            normal: V3f::from([0.0; 3]),
+            medium_interface: MediumInterface::new(Some(medium_interface), None),
+            phase,
+        }
+    }
+}
+
 pub trait PhaseFunction {
     fn p(&self, wo: V3f, wi: V3f) -> f32;
     fn sample_p(&self, wo: V3f, wi: &mut V3f, u: Point2<f32>) -> f32;

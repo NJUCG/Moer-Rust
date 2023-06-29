@@ -6,9 +6,10 @@ use cgmath::{Point3, Vector3};
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::core_layer::function::lerp;
 use crate::core_layer::transform::Transform;
-use crate::function_layer::{Ray, Sampler};
-use crate::function_layer::medium::medium::{Medium, MediumInteraction};
+use crate::function_layer::{Bounds3, Ray, Sampler, V3f};
+use crate::function_layer::medium::medium::{HenyeyGreenstein, Medium, MediumInteraction};
 
+#[derive(Clone)]
 pub struct GridDensityMedium {
     sigma_a: SpectrumRGB,
     sigma_s: SpectrumRGB,
@@ -68,6 +69,26 @@ impl Medium for GridDensityMedium {
     }
 
     fn sample(&self, ray: &Ray, sampler: Rc<RefCell<dyn Sampler>>, mi: &mut MediumInteraction) -> SpectrumRGB {
-        todo!()
+        let local_ray = self.medium2world.local_ray(ray);
+        let b = Bounds3::new(V3f::from([0.0; 3]), V3f::from([1.0; 3]));
+        let (t_near, t_far) = b.intersect_t(ray);
+        if t_near > t_far { return SpectrumRGB::same(1.0); }
+        let mut t = t_near;
+        loop {
+            t -= (1.0 - sampler.borrow_mut().next_1d()).ln() * self.inv_max_density / self.sigma_t;
+            if t >= t_far { break; }
+            if self.density(local_ray.at(t)) * self.inv_max_density > sampler.borrow_mut().next_1d() {
+                let phase = HenyeyGreenstein::new(self.g);
+                *mi = MediumInteraction::new(
+                    ray.at(t),
+                    ray.t,
+                    -ray.direction,
+                    Rc::new(self.clone()),
+                    Some(Box::new(phase)),
+                );
+                return self.sigma_s / self.sigma_t;
+            }
+        }
+        SpectrumRGB::same(1.0)
     }
 }
