@@ -1,7 +1,7 @@
 use super::shape::ShapeBase;
 use crate::core_layer::constants::INV_PI;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{fetch_v3f, Bounds3, SurfaceInteraction, Ray, Shape, V3f};
+use crate::function_layer::{fetch_v3f, Bounds3, SurfaceInteraction, Ray, Shape, V3f, Medium};
 use cgmath::{InnerSpace, Point3, Vector2, Zero};
 use serde_json::Value;
 use std::f32::consts::PI;
@@ -92,7 +92,7 @@ impl Shape for Sphere {
         distance: f32,
         _prim_id: u64,
         u: f32,
-        v: f32,
+        v: f32, medium: Option<Rc<dyn Medium>>,
         intersection: &mut SurfaceInteraction,
     ) {
         let normal = V3f::new(v.sin() * u.sin(), v.cos(), v.sin() * u.cos());
@@ -104,7 +104,7 @@ impl Shape for Sphere {
 
         // TODO 计算交点的切线和副切线
         intersection.shape = Some(Rc::new(self.clone()));
-        self._fill_intersection(distance, intersection);
+        self._fill_intersection(distance, medium, intersection);
     }
 
     fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (SurfaceInteraction, f32) {

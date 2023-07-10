@@ -1,6 +1,6 @@
 use super::shape::ShapeBase;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{fetch_v3f, SurfaceInteraction, Ray, Shape, V3f};
+use crate::function_layer::{fetch_v3f, SurfaceInteraction, Ray, Shape, V3f, Medium, MediumInterface};
 use cgmath::{EuclideanSpace, InnerSpace, Point3, Vector2, Zero};
 use serde_json::Value;
 use std::rc::Rc;
@@ -102,7 +102,7 @@ impl Shape for Parallelogram {
         distance: f32,
         _prim_id: u64,
         u: f32,
-        v: f32,
+        v: f32, medium: Option<Rc<dyn Medium>>,
         intersection: &mut SurfaceInteraction,
     ) {
         intersection.shape = Some(Rc::new(self.clone()));
@@ -116,13 +116,17 @@ impl Shape for Parallelogram {
         intersection.tangent = self.edge0.normalize();
         intersection.bitangent = intersection.tangent.cross(intersection.normal).normalize();
         if let Some(mi) = &self.shape.medium_interface {
-            intersection.medium_interface = mi.clone();
+            intersection.medium_interface = if mi.is_medium_transition() {
+                mi.clone()
+            } else {
+                MediumInterface::new(medium.clone(), medium.clone())
+            }
         }
     }
 
     fn uniform_sample_on_surface(&self, sample: Vector2<f32>) -> (SurfaceInteraction, f32) {
         let mut its = SurfaceInteraction::default();
-        self.fill_intersection(0.0, 0, sample.x, sample.y, &mut its);
+        self.fill_intersection(0.0, 0, sample.x, sample.y, None, &mut its);
         (its, self.pdf)
     }
 

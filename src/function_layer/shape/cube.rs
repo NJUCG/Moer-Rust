@@ -1,6 +1,6 @@
 use super::shape::ShapeBase;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Bounds3, SurfaceInteraction, Ray, Shape, V3f};
+use crate::function_layer::{Bounds3, SurfaceInteraction, Ray, Shape, V3f, Medium};
 use cgmath::{EuclideanSpace, InnerSpace, Point3, Vector2, Zero};
 use serde_json::Value;
 use std::rc::Rc;
@@ -88,7 +88,7 @@ impl Shape for Cube {
         distance: f32,
         prim_id: u64,
         u: f32,
-        v: f32,
+        v: f32, medium: Option<Rc<dyn Medium>>,
         intersection: &mut SurfaceInteraction,
     ) {
         let p_id = prim_id as usize;
@@ -112,7 +112,7 @@ impl Shape for Cube {
         intersection.tex_coord = Vector2::new(u, v);
 
         intersection.shape = Some(Rc::new(self.clone()));
-        self._fill_intersection(distance, intersection);
+        self._fill_intersection(distance, medium, intersection);
     }
 
     fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (SurfaceInteraction, f32) {
