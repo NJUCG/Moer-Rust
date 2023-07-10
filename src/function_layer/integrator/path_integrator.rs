@@ -4,10 +4,10 @@ use cgmath::Zero;
 use serde_json::Value;
 
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{compute_ray_differentials, InfiniteLight, Integrator, Light, Ray, RR, Sampler, Scene};
+use crate::function_layer::{compute_ray_differentials, InfiniteLight, Integrator,  Ray, RR, Sampler, Scene};
 use crate::function_layer::material::bxdf::BSDFType;
 
-use super::integrator::convert_pdf;
+use super::integrator::sample_illumination;
 
 pub struct PathIntegrator {
     max_depth: u32,
@@ -44,40 +44,7 @@ impl Integrator for PathIntegrator {
             }
             depth += 1;
             if depth >= self.max_depth { break; }
-
-            for light in &scene.infinite_lights {
-                let res = light.sample(&inter, sampler.borrow_mut().next_2d());
-                let mut shadow_ray =
-                    Ray::new(inter.position + res.direction * 1e-4, res.direction);
-                shadow_ray.t_max = res.distance;
-                let occlude = scene.ray_intersect(&mut shadow_ray);
-                if occlude.is_none() {
-                    let material = inter.shape.as_ref().unwrap().material();
-                    let bsdf = material.unwrap().compute_bsdf(&inter);
-                    let f = bsdf.f(-ray.direction, shadow_ray.direction);
-                    let pdf = convert_pdf(&res, &inter);
-                    spectrum += res.energy * f / pdf;
-                }
-            }
-            let mut pdf_light = 0.0;
-            let light_opt = scene.sample_light(sampler.borrow_mut().next_1d(), &mut pdf_light);
-            if light_opt.is_some() && pdf_light != 0.0 {
-                let light = light_opt.unwrap();
-                let mut light_sample_result = light
-                    .borrow()
-                    .sample(&inter, sampler.borrow_mut().next_2d());
-                let mut shadow_ray = Ray::new(inter.position, light_sample_result.direction);
-                shadow_ray.t_max = light_sample_result.distance;
-                let occlude = scene.ray_intersect(&mut shadow_ray);
-                if occlude.is_none() {
-                    let material = inter.shape.as_ref().unwrap().material();
-                    let bsdf = material.unwrap().compute_bsdf(&inter);
-                    let f = bsdf.f(-ray.direction, shadow_ray.direction);
-                    light_sample_result.pdf *= pdf_light;
-                    let pdf = convert_pdf(&light_sample_result, &inter);
-                    spectrum += light_sample_result.energy * f / pdf;
-                }
-            }
+            spectrum = sample_illumination(scene, ray, &inter, spectrum, sampler.clone(), throughput);
             if depth > 2 && sampler.borrow_mut().next_1d() > 0.95 {
                 break;
             }
