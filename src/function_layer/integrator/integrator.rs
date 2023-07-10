@@ -30,11 +30,11 @@ pub fn convert_pdf(result: &LightSampleResult, _intersection: &Intersection) -> 
     pdf
 }
 
-pub fn sample_illumination(scene: &Scene, ray: &Ray,
-                           inter: &Intersection,
-                           mut spectrum: SpectrumRGB,
-                           sampler: RR<dyn Sampler>,
-                           throughput: SpectrumRGB) -> SpectrumRGB {
+pub fn sample_surface_illumination(scene: &Scene, ray: &Ray,
+                                   inter: &Intersection,
+                                   mut spectrum: SpectrumRGB,
+                                   sampler: RR<dyn Sampler>,
+                                   throughput: SpectrumRGB) -> SpectrumRGB {
     for light in &scene.infinite_lights {
         let res = light.sample(&inter, sampler.borrow_mut().next_2d());
         let mut shadow_ray =

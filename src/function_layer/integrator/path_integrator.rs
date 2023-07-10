@@ -7,7 +7,7 @@ use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::{compute_ray_differentials, InfiniteLight, Integrator,  Ray, RR, Sampler, Scene};
 use crate::function_layer::material::bxdf::BSDFType;
 
-use super::integrator::sample_illumination;
+use super::integrator::sample_surface_illumination;
 
 pub struct PathIntegrator {
     max_depth: u32,
@@ -44,7 +44,7 @@ impl Integrator for PathIntegrator {
             }
             depth += 1;
             if depth >= self.max_depth { break; }
-            spectrum = sample_illumination(scene, ray, &inter, spectrum, sampler.clone(), throughput);
+            spectrum = sample_surface_illumination(scene, ray, &inter, spectrum, sampler.clone(), throughput);
             if depth > 2 && sampler.borrow_mut().next_1d() > 0.95 {
                 break;
             }

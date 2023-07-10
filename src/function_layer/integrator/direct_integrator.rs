@@ -1,4 +1,4 @@
-use super::integrator::sample_illumination;
+use super::integrator::sample_surface_illumination;
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::{
     compute_ray_differentials, InfiniteLight, Light, Ray, Sampler, Scene, RR, Integrator,
@@ -25,7 +25,7 @@ impl Integrator for DirectIntegratorSampleLight {
                 .borrow()
                 .evaluate_emission(&inter, -ray.direction);
         }
-        spectrum = sample_illumination(scene, ray, &inter, spectrum, sampler.clone(), SpectrumRGB::same(1.0));
+        spectrum = sample_surface_illumination(scene, ray, &inter, spectrum, sampler.clone(), SpectrumRGB::same(1.0));
         spectrum
     }
 }
