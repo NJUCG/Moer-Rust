@@ -1,5 +1,5 @@
 use crate::core_layer::transform::Transform;
-use crate::function_layer::{fetch_v3f, ray::RayDifferential, Film, Ray, V3f, RR, Medium};
+use crate::function_layer::{fetch_v3f, ray::RayDifferential, Film, Medium, Ray, V3f, RR};
 use cgmath::{EuclideanSpace, InnerSpace, Matrix4, Point3, SquareMatrix, Vector2, Zero};
 use serde_json::Value;
 use std::cell::RefCell;

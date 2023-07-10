@@ -1,13 +1,13 @@
 use super::{
     direct_integrator::{DirectIntegratorSampleBSDF, DirectIntegratorSampleLight},
     normal_integrator::NormalIntegrator,
-    whitted_integrator::WhittedIntegrator,
     path_integrator::PathIntegrator,
     volpath::VolPathIntegrator,
+    whitted_integrator::WhittedIntegrator,
 };
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::light::light::{LightSampleResult, LightType};
-use crate::function_layer::{Ray, Sampler, Scene, RR, Light, V3f, Interaction};
+use crate::function_layer::{Interaction, Light, Ray, Sampler, Scene, V3f, RR};
 use cgmath::InnerSpace;
 use serde_json::Value;
 
@@ -31,13 +31,19 @@ pub fn convert_pdf(result: &LightSampleResult, _intersection: &dyn Interaction) 
 }
 
 pub fn sample_interaction_illumination<T>(
-    scene: &Scene, wo: V3f, inter: &T, mut spectrum: SpectrumRGB,
-    sampler: RR<dyn Sampler>, throughput: SpectrumRGB) -> SpectrumRGB
-    where T: Interaction {
+    scene: &Scene,
+    wo: V3f,
+    inter: &T,
+    mut spectrum: SpectrumRGB,
+    sampler: RR<dyn Sampler>,
+    throughput: SpectrumRGB,
+) -> SpectrumRGB
+where
+    T: Interaction,
+{
     for light in &scene.infinite_lights {
         let res = light.sample(inter, sampler.borrow_mut().next_2d());
-        let mut shadow_ray =
-            Ray::new(inter.p() + res.direction * 1e-4, res.direction);
+        let mut shadow_ray = Ray::new(inter.p() + res.direction * 1e-4, res.direction);
         shadow_ray.t_max = res.distance;
         let occlude = scene.ray_intersect(&mut shadow_ray);
         if occlude.is_none() {
@@ -50,8 +56,7 @@ pub fn sample_interaction_illumination<T>(
     let light_opt = scene.sample_light(sampler.borrow_mut().next_1d(), &mut pdf_light);
     if light_opt.is_some() && pdf_light != 0.0 {
         let light = light_opt.unwrap();
-        let mut res = light.borrow()
-            .sample(inter, sampler.borrow_mut().next_2d());
+        let mut res = light.borrow().sample(inter, sampler.borrow_mut().next_2d());
         let mut shadow_ray = Ray::new(inter.p(), res.direction);
         shadow_ray.t_max = res.distance;
         let occlude = scene.ray_intersect(&mut shadow_ray);

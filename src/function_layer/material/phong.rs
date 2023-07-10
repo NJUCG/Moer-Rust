@@ -1,13 +1,14 @@
-use std::rc::Rc;
+use super::bxdf::{bsdf::BSDFBase, phong::PhongReflection, BSDF};
+use super::material::{fetch_albedo, fetch_normal_map};
+use crate::core_layer::colorspace::SpectrumRGB;
+use crate::function_layer::material::material::fetch_spectrum;
+use crate::function_layer::texture::{
+    constant_texture::ConstantTexture, normal_texture::NormalTexture,
+};
+use crate::function_layer::{Material, SurfaceInteraction, Texture, V3f};
 use cgmath::Zero;
 use serde_json::Value;
-use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{SurfaceInteraction, Material, Texture, V3f};
-use crate::function_layer::material::material::fetch_spectrum;
-use crate::function_layer::texture::{constant_texture::ConstantTexture, normal_texture::NormalTexture};
-use super::material::{fetch_normal_map, fetch_albedo};
-use super::bxdf::{BSDF, bsdf::BSDFBase, phong::PhongReflection};
-
+use std::rc::Rc;
 
 pub struct PhongMaterial {
     normal_map: Option<Rc<NormalTexture>>,
@@ -25,7 +26,13 @@ impl PhongMaterial {
         let ks = fetch_spectrum(json, "ks");
         let p = json["p"].as_f64().unwrap() as f32;
 
-        Self { albedo, normal_map, kd, ks, p }
+        Self {
+            albedo,
+            normal_map,
+            kd,
+            ks,
+            p,
+        }
     }
 }
 

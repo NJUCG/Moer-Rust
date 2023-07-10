@@ -1,6 +1,8 @@
 use super::shape::{Shape, ShapeBase};
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{create_acceleration, Acceleration, SurfaceInteraction, Ray, V3f, Medium};
+use crate::function_layer::{
+    create_acceleration, Acceleration, Medium, Ray, SurfaceInteraction, V3f,
+};
 use crate::resource_layer::MeshData;
 use cgmath::{EuclideanSpace, InnerSpace, Point3, Vector2};
 use serde_json::Value;
@@ -70,7 +72,8 @@ impl Shape for TriangleMesh {
         distance: f32,
         prim_id: u64,
         u: f32,
-        v: f32, medium: Option<Rc<dyn Medium>>,
+        v: f32,
+        medium: Option<Rc<dyn Medium>>,
         intersection: &mut SurfaceInteraction,
     ) {
         let face_info = &self.mesh.face_buffer[prim_id as usize];
@@ -232,7 +235,8 @@ impl Shape for Triangle {
         _distance: f32,
         _prim_id: u64,
         _u: f32,
-        _v: f32, _medium: Option<Rc<dyn Medium>>,
+        _v: f32,
+        _medium: Option<Rc<dyn Medium>>,
         _intersection: &mut SurfaceInteraction,
     ) {
         // 该函数实际上不会被调用

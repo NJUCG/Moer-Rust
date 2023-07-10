@@ -1,3 +1,3 @@
-pub mod medium;
-mod homogeneous;
 mod grid_density;
+mod homogeneous;
+pub mod medium;

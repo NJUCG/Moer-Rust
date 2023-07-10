@@ -1,10 +1,12 @@
+use super::integrator::sample_interaction_illumination;
+use crate::core_layer::colorspace::SpectrumRGB;
+use crate::function_layer::material::bxdf::BSDFType;
+use crate::function_layer::{
+    compute_ray_differentials, InfiniteLight, Integrator, MediumInteraction, Ray, Sampler, Scene,
+    V3f, RR,
+};
 use cgmath::Zero;
 use serde_json::Value;
-use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{compute_ray_differentials, InfiniteLight, Integrator, Ray, RR, Sampler, Scene, V3f, MediumInteraction};
-use crate::function_layer::material::bxdf::BSDFType;
-use super::integrator::sample_interaction_illumination;
-
 
 pub struct VolPathIntegrator {
     max_depth: u32,
@@ -30,15 +32,31 @@ impl Integrator for VolPathIntegrator {
             if let Some(medium) = &ray.medium {
                 throughput *= &medium.sample(ray, sampler.clone(), &mut mi);
             }
-            if throughput.rgb().is_zero() { break; }
+            if throughput.rgb().is_zero() {
+                break;
+            }
 
-            if mi.is_valid() { // has phase function
-                if depth >= self.max_depth { break; }
+            if mi.is_valid() {
+                // has phase function
+                if depth >= self.max_depth {
+                    break;
+                }
                 // sample medium illumination
-                spectrum = sample_interaction_illumination(scene, -ray.direction, &mi, spectrum, sampler.clone(), throughput);
+                spectrum = sample_interaction_illumination(
+                    scene,
+                    -ray.direction,
+                    &mi,
+                    spectrum,
+                    sampler.clone(),
+                    throughput,
+                );
                 // sample out ray through the medium
                 let mut wi = V3f::zero();
-                mi.phase.as_ref().unwrap().sample_p(-ray.direction, &mut wi, sampler.borrow_mut().next_2d());
+                mi.phase.as_ref().unwrap().sample_p(
+                    -ray.direction,
+                    &mut wi,
+                    sampler.borrow_mut().next_2d(),
+                );
                 ray.origin = mi.position;
                 ray.change_dir(wi);
                 ray.reset();
@@ -60,13 +78,32 @@ impl Integrator for VolPathIntegrator {
                     }
                 }
                 depth += 1;
-                if depth >= self.max_depth { break; }
-                spectrum = sample_interaction_illumination(scene, -ray.direction, &inter, spectrum, sampler.clone(), throughput);
+                if depth >= self.max_depth {
+                    break;
+                }
+                spectrum = sample_interaction_illumination(
+                    scene,
+                    -ray.direction,
+                    &inter,
+                    spectrum,
+                    sampler.clone(),
+                    throughput,
+                );
 
                 // sample bsdf
-                let bsdf = inter.shape.as_ref().unwrap().material().as_ref().unwrap().compute_bsdf(&inter);
-                let bsdf_sample_result = bsdf.sample(-ray.direction, sampler.borrow_mut().next_2d());
-                if bsdf_sample_result.weight.rgb().is_zero() { break; }
+                let bsdf = inter
+                    .shape
+                    .as_ref()
+                    .unwrap()
+                    .material()
+                    .as_ref()
+                    .unwrap()
+                    .compute_bsdf(&inter);
+                let bsdf_sample_result =
+                    bsdf.sample(-ray.direction, sampler.borrow_mut().next_2d());
+                if bsdf_sample_result.weight.rgb().is_zero() {
+                    break;
+                }
                 throughput *= &bsdf_sample_result.weight;
 
                 ray.origin = inter.position;

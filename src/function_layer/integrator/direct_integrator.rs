@@ -1,6 +1,8 @@
 use super::integrator::sample_interaction_illumination;
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{compute_ray_differentials, InfiniteLight, Ray, Sampler, Scene, RR, Integrator};
+use crate::function_layer::{
+    compute_ray_differentials, InfiniteLight, Integrator, Ray, Sampler, Scene, RR,
+};
 
 pub struct DirectIntegratorSampleLight;
 
@@ -19,11 +21,16 @@ impl Integrator for DirectIntegratorSampleLight {
         compute_ray_differentials(&mut inter, ray);
         let shape = inter.shape.as_ref().unwrap();
         if let Some(light) = shape.get_light() {
-            spectrum += light
-                .borrow()
-                .evaluate_emission(&inter, -ray.direction);
+            spectrum += light.borrow().evaluate_emission(&inter, -ray.direction);
         }
-        spectrum = sample_interaction_illumination(scene, -ray.direction, &inter, spectrum, sampler.clone(), SpectrumRGB::same(1.0));
+        spectrum = sample_interaction_illumination(
+            scene,
+            -ray.direction,
+            &inter,
+            spectrum,
+            sampler.clone(),
+            SpectrumRGB::same(1.0),
+        );
         spectrum
     }
 }
@@ -45,7 +52,8 @@ impl Integrator for DirectIntegratorSampleBSDF {
 
         let shape = intersection.shape.as_ref().unwrap();
         if let Some(light) = shape.get_light() {
-            spectrum += light.borrow()
+            spectrum += light
+                .borrow()
                 .evaluate_emission(&intersection, -ray.direction);
         }
         let material = shape.material();
@@ -64,8 +72,7 @@ impl Integrator for DirectIntegratorSampleBSDF {
                 let shape = fl.shape.as_ref().unwrap();
                 if let Some(light) = shape.get_light() {
                     spectrum += bsdf_sample_result.weight
-                        * light.borrow()
-                        .evaluate_emission(&fl, -shadow_ray.direction);
+                        * light.borrow().evaluate_emission(&fl, -shadow_ray.direction);
                 }
             }
         }

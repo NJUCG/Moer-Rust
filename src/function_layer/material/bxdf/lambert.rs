@@ -1,4 +1,4 @@
-use super::bsdf::{BSDFSampleResult, BSDFType, BSDF, BSDFBase};
+use super::bsdf::{BSDFBase, BSDFSampleResult, BSDFType, BSDF};
 use super::warp::{square_to_cosine_hemisphere, square_to_cosine_hemisphere_pdf};
 use crate::core_layer::{colorspace::SpectrumRGB, constants::INV_PI};
 use crate::function_layer::V3f;
@@ -11,11 +11,12 @@ pub struct LambertReflection {
 
 impl LambertReflection {
     pub fn new(albedo: SpectrumRGB, normal: V3f, tangent: V3f, bitangent: V3f) -> Self {
-        let bsdf = BSDFBase { normal, tangent, bitangent };
-        Self {
-            albedo,
-            bsdf,
-        }
+        let bsdf = BSDFBase {
+            normal,
+            tangent,
+            bitangent,
+        };
+        Self { albedo, bsdf }
     }
 }
 

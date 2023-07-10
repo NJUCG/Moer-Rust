@@ -1,11 +1,13 @@
-use std::rc::Rc;
-use cgmath::{InnerSpace, Vector2};
-use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{BSDF, NDF, V3f};
-use crate::function_layer::material::bxdf::bsdf::BSDFSampleResult;
-use crate::function_layer::material::bxdf::BSDFType;
-use crate::function_layer::material::bxdf::warp::{square_to_cosine_hemisphere, square_to_cosine_hemisphere_pdf};
 use super::bsdf::BSDFBase;
+use crate::core_layer::colorspace::SpectrumRGB;
+use crate::function_layer::material::bxdf::bsdf::BSDFSampleResult;
+use crate::function_layer::material::bxdf::warp::{
+    square_to_cosine_hemisphere, square_to_cosine_hemisphere_pdf,
+};
+use crate::function_layer::material::bxdf::BSDFType;
+use crate::function_layer::{V3f, BSDF, NDF};
+use cgmath::{InnerSpace, Vector2};
+use std::rc::Rc;
 
 pub struct RoughDielectricBSDF {
     bsdf: BSDFBase,
@@ -16,9 +18,13 @@ pub struct RoughDielectricBSDF {
 }
 
 impl RoughDielectricBSDF {
-    pub fn new(bsdf: BSDFBase,
-               albedo: SpectrumRGB, alpha: Vector2<f32>, eta: f32,
-               ndf: Option<Rc<dyn NDF>>) -> Self {
+    pub fn new(
+        bsdf: BSDFBase,
+        albedo: SpectrumRGB,
+        alpha: Vector2<f32>,
+        eta: f32,
+        ndf: Option<Rc<dyn NDF>>,
+    ) -> Self {
         Self {
             bsdf,
             albedo,
@@ -52,7 +58,11 @@ impl BSDF for RoughDielectricBSDF {
         };
 
         let d = self.ndf.as_ref().unwrap().get_d(wh_local, self.alpha);
-        let g = self.ndf.as_ref().unwrap().get_g(wo_local, wi_local, self.alpha);
+        let g = self
+            .ndf
+            .as_ref()
+            .unwrap()
+            .get_g(wo_local, wi_local, self.alpha);
 
         self.albedo * fr * d * g / (4.0 * wo_local.y)
     }

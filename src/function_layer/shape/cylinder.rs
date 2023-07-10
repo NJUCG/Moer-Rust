@@ -1,7 +1,7 @@
 use super::shape::ShapeBase;
 use crate::core_layer::function::solve_quadratic;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Bounds3, SurfaceInteraction, Ray, Shape, V3f, Medium};
+use crate::function_layer::{Bounds3, Medium, Ray, Shape, SurfaceInteraction, V3f};
 use cgmath::{Point3, Vector2};
 use serde_json::Value;
 use std::f64::consts::PI;

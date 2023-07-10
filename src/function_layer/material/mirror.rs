@@ -1,12 +1,11 @@
 use super::bxdf::{specular::SpecularReflection, BSDF};
 use super::material::fetch_normal_map;
+use crate::function_layer::material::bxdf::bsdf::BSDFBase;
 use crate::function_layer::texture::normal_texture::NormalTexture;
-use crate::function_layer::{SurfaceInteraction, Material, V3f};
+use crate::function_layer::{Material, SurfaceInteraction, V3f};
 use cgmath::Zero;
 use serde_json::Value;
 use std::rc::Rc;
-use crate::function_layer::material::bxdf::bsdf::BSDFBase;
-
 
 pub struct MirrorMaterial {
     pub normal_map: Option<Rc<NormalTexture>>,
@@ -35,7 +34,7 @@ impl Material for MirrorMaterial {
                 normal,
                 tangent,
                 bitangent,
-            }
+            },
         })
     }
 }

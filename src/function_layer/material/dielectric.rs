@@ -1,13 +1,12 @@
-use std::rc::Rc;
+use super::bxdf::{bsdf::BSDFBase, rough_dielectric::RoughDielectricBSDF};
+use crate::core_layer::colorspace::SpectrumRGB;
+use crate::function_layer::texture::normal_texture::NormalTexture;
+use crate::function_layer::{Material, SurfaceInteraction, Texture, V3f, BSDF, NDF};
 use cgmath::{Vector2, Zero};
 use serde_json::Value;
-use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{BSDF, SurfaceInteraction, Material, NDF, Texture, V3f};
-use crate::function_layer::texture::normal_texture::NormalTexture;
-use super::bxdf::{bsdf::BSDFBase, rough_dielectric::RoughDielectricBSDF};
+use std::rc::Rc;
 
-use super::material::{fetch_albedo, fetch_normal_map, fetch_ndf, fetch_roughness};
-
+use super::material::{fetch_albedo, fetch_ndf, fetch_normal_map, fetch_roughness};
 
 pub struct DielectricMaterial {
     normal_map: Option<Rc<NormalTexture>>,
@@ -52,6 +51,12 @@ impl Material for DielectricMaterial {
             tangent,
             bitangent,
         };
-        Box::new(RoughDielectricBSDF::new(bsdf, s, self.roughness, self.eta, Some(self.ndf.clone())))
+        Box::new(RoughDielectricBSDF::new(
+            bsdf,
+            s,
+            self.roughness,
+            self.eta,
+            Some(self.ndf.clone()),
+        ))
     }
 }

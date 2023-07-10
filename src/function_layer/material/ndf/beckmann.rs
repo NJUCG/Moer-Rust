@@ -1,7 +1,7 @@
-use cgmath::Vector2;
+use super::ndf::NDF;
 use crate::core_layer::constants::INV_PI;
 use crate::function_layer::V3f;
-use super::ndf::NDF;
+use cgmath::Vector2;
 
 pub struct BeckmannDistribution;
 
@@ -28,8 +28,8 @@ impl NDF for BeckmannDistribution {
     }
 
     fn get_g(&self, wo_local: V3f, wi_local: V3f, alpha: Vector2<f32>) -> f32 {
-        BeckmannDistribution::get_g1(wo_local, alpha.x) *
-            BeckmannDistribution::get_g1(wi_local, alpha.x)
+        BeckmannDistribution::get_g1(wo_local, alpha.x)
+            * BeckmannDistribution::get_g1(wi_local, alpha.x)
     }
 
     fn pdf(&self, _wo_local: V3f, wh_local: V3f, alpha: Vector2<f32>) -> f32 {

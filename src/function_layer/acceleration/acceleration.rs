@@ -1,5 +1,5 @@
 use super::{bvh::BVHAccel, linear::LinearAccel, octree::Octree};
-use crate::function_layer::{Bounds3, SurfaceInteraction, Ray, Shape, RR};
+use crate::function_layer::{Bounds3, Ray, Shape, SurfaceInteraction, RR};
 
 #[derive(Copy, Clone)]
 pub enum AccelerationType {

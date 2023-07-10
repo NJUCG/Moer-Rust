@@ -1,11 +1,13 @@
+use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::{MediumInterface, Ray, Shape, V3f};
 use cgmath::Vector2;
 use cgmath::{EuclideanSpace, InnerSpace, Point3, Zero};
 use std::rc::Rc;
-use crate::core_layer::colorspace::SpectrumRGB;
 
 pub trait Interaction {
-    fn is_medium_interaction(&self) -> bool { false }
+    fn is_medium_interaction(&self) -> bool {
+        false
+    }
     fn f(&self, wo: V3f, wi: V3f) -> SpectrumRGB;
     fn p(&self) -> Point3<f32>;
 }

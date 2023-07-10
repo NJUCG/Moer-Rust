@@ -1,16 +1,21 @@
 #![allow(dead_code)]
 
-use std::cell::RefCell;
-use std::f32::consts::PI;
-use std::rc::Rc;
-use cgmath::{InnerSpace, Point3, Vector2, Zero};
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::core_layer::function::{coordinate_system, spherical_direction};
 use crate::function_layer::{Interaction, Ray, Sampler, V3f};
+use cgmath::{InnerSpace, Point3, Vector2, Zero};
+use std::cell::RefCell;
+use std::f32::consts::PI;
+use std::rc::Rc;
 
 pub trait Medium {
     fn tr(&self, ray: &Ray, sampler: Rc<RefCell<dyn Sampler>>) -> SpectrumRGB;
-    fn sample(&self, ray: &Ray, sampler: Rc<RefCell<dyn Sampler>>, mi: &mut MediumInteraction) -> SpectrumRGB;
+    fn sample(
+        &self,
+        ray: &Ray,
+        sampler: Rc<RefCell<dyn Sampler>>,
+        mi: &mut MediumInteraction,
+    ) -> SpectrumRGB;
 }
 
 pub struct MediumInteraction {
@@ -53,8 +58,13 @@ impl Default for MediumInteraction {
 }
 
 impl MediumInteraction {
-    pub fn new(p: Point3<f32>, time: f32, wo: V3f,
-               medium_interface: Rc<dyn Medium>, phase: Option<Box<dyn PhaseFunction>>) -> Self {
+    pub fn new(
+        p: Point3<f32>,
+        time: f32,
+        wo: V3f,
+        medium_interface: Rc<dyn Medium>,
+        phase: Option<Box<dyn PhaseFunction>>,
+    ) -> Self {
         Self {
             position: p,
             time,
@@ -65,7 +75,9 @@ impl MediumInteraction {
             phase,
         }
     }
-    pub fn is_valid(&self) -> bool { self.phase.is_some() }
+    pub fn is_valid(&self) -> bool {
+        self.phase.is_some()
+    }
 }
 
 pub trait PhaseFunction {
@@ -121,19 +133,16 @@ impl MediumInterface {
     pub fn new(inside: Option<Rc<dyn Medium>>, outside: Option<Rc<dyn Medium>>) -> Self {
         let outside = match outside {
             None => inside.clone(),
-            o => o
+            o => o,
         };
-        Self {
-            inside,
-            outside,
-        }
+        Self { inside, outside }
     }
     pub fn is_medium_transition(&self) -> bool {
         // inside != outside
         !match (&self.inside, &self.outside) {
             (None, None) => true,
             (Some(m1), Some(m2)) => Rc::ptr_eq(m1, m2),
-            _ => false
+            _ => false,
         }
     }
 }

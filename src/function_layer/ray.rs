@@ -1,6 +1,6 @@
-use std::rc::Rc;
 use crate::function_layer::{Medium, V3f};
 use cgmath::{InnerSpace, Point3};
+use std::rc::Rc;
 
 #[derive(Debug, Clone)]
 pub struct RayDifferential {

@@ -21,11 +21,19 @@ pub trait BSDF {
     fn sample(&self, wo: V3f, sample: Vector2<f32>) -> BSDFSampleResult;
     fn bsdf(&self) -> &BSDFBase;
     fn to_local(&self, world: V3f) -> V3f {
-        let BSDFBase { normal, tangent, bitangent } = self.bsdf();
+        let BSDFBase {
+            normal,
+            tangent,
+            bitangent,
+        } = self.bsdf();
         V3f::new(tangent.dot(world), normal.dot(world), bitangent.dot(world))
     }
     fn to_world(&self, local: V3f) -> V3f {
-        let BSDFBase { normal, tangent, bitangent } = self.bsdf();
+        let BSDFBase {
+            normal,
+            tangent,
+            bitangent,
+        } = self.bsdf();
         local[0] * tangent + local[1] * normal + local[2] * bitangent
     }
 }

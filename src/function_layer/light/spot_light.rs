@@ -1,6 +1,6 @@
 use super::light::{LightSampleResult, LightType};
 use crate::core_layer::{colorspace::SpectrumRGB, constants::EPSILON};
-use crate::function_layer::{fetch_v3f, SurfaceInteraction, Light, V3f, Interaction};
+use crate::function_layer::{fetch_v3f, Interaction, Light, SurfaceInteraction, V3f};
 use cgmath::Point3;
 use cgmath::Vector2;
 use cgmath::{InnerSpace, Zero};

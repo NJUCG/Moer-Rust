@@ -1,12 +1,12 @@
-use std::rc::Rc;
-use cgmath::{Vector2, Zero};
-use serde_json::Value;
+use super::bxdf::bsdf::BSDFBase;
+use super::material::{fetch_albedo, fetch_ndf, fetch_normal_map, fetch_roughness};
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{BSDF, fetch_v3f, SurfaceInteraction, Material, NDF, Texture, V3f};
 use crate::function_layer::material::bxdf::rough_conductor::RoughConductorBSDF;
 use crate::function_layer::texture::normal_texture::NormalTexture;
-use super::bxdf::bsdf::BSDFBase;
-use super::material::{fetch_albedo, fetch_normal_map, fetch_roughness, fetch_ndf};
+use crate::function_layer::{fetch_v3f, Material, SurfaceInteraction, Texture, V3f, BSDF, NDF};
+use cgmath::{Vector2, Zero};
+use serde_json::Value;
+use std::rc::Rc;
 
 pub struct ConductorMaterial {
     normal_map: Option<Rc<NormalTexture>>,
@@ -55,6 +55,13 @@ impl Material for ConductorMaterial {
             tangent,
             bitangent,
         };
-        Box::new(RoughConductorBSDF::new(bsdf, s, self.roughness, self.eta, self.k, Some(self.ndf.clone())))
+        Box::new(RoughConductorBSDF::new(
+            bsdf,
+            s,
+            self.roughness,
+            self.eta,
+            self.k,
+            Some(self.ndf.clone()),
+        ))
     }
 }

@@ -3,7 +3,10 @@ use super::{
     sphere::Sphere, triangle::TriangleMesh,
 };
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{construct_material, material::matte::MatteMaterial, Bounds3, SurfaceInteraction, Light, Material, Ray, V3f, RR, MediumInterface, Medium};
+use crate::function_layer::{
+    construct_material, material::matte::MatteMaterial, Bounds3, Light, Material, Medium,
+    MediumInterface, Ray, SurfaceInteraction, V3f, RR,
+};
 use cgmath::{InnerSpace, Matrix4, SquareMatrix, Vector2, Zero};
 use serde_json::Value;
 use std::cell::RefCell;
@@ -40,11 +43,18 @@ pub trait Shape: Transformable {
         medium: Option<Rc<dyn Medium>>,
         intersection: &mut SurfaceInteraction,
     );
-    fn _fill_intersection(&self, distance: f32, medium: Option<Rc<dyn Medium>>, intersection: &mut SurfaceInteraction) {
+    fn _fill_intersection(
+        &self,
+        distance: f32,
+        medium: Option<Rc<dyn Medium>>,
+        intersection: &mut SurfaceInteraction,
+    ) {
         intersection.distance = distance;
         // 介质
         if let Some(mi) = &self.shape().medium_interface {
-            intersection.medium_interface = if mi.is_medium_transition() { mi.clone() } else {
+            intersection.medium_interface = if mi.is_medium_transition() {
+                mi.clone()
+            } else {
                 MediumInterface::new(medium.clone(), medium.clone())
             }
         }

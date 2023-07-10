@@ -1,6 +1,6 @@
 use super::shape::ShapeBase;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Bounds3, SurfaceInteraction, Ray, Shape, V3f, Medium};
+use crate::function_layer::{Bounds3, Medium, Ray, Shape, SurfaceInteraction, V3f};
 use cgmath::{EuclideanSpace, InnerSpace, Point3, Vector2};
 use serde_json::Value;
 use std::f64::consts::PI;
@@ -90,7 +90,8 @@ impl Shape for Disk {
         distance: f32,
         _prim_id: u64,
         u: f32,
-        v: f32, medium: Option<Rc<dyn Medium>>,
+        v: f32,
+        medium: Option<Rc<dyn Medium>>,
         intersection: &mut SurfaceInteraction,
     ) {
         let trans = self.transform();

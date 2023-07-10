@@ -1,7 +1,7 @@
 use super::shape::ShapeBase;
 use crate::core_layer::constants::INV_PI;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{fetch_v3f, Bounds3, SurfaceInteraction, Ray, Shape, V3f, Medium};
+use crate::function_layer::{fetch_v3f, Bounds3, Medium, Ray, Shape, SurfaceInteraction, V3f};
 use cgmath::{InnerSpace, Point3, Vector2, Zero};
 use serde_json::Value;
 use std::f32::consts::PI;
@@ -92,7 +92,8 @@ impl Shape for Sphere {
         distance: f32,
         _prim_id: u64,
         u: f32,
-        v: f32, medium: Option<Rc<dyn Medium>>,
+        v: f32,
+        medium: Option<Rc<dyn Medium>>,
         intersection: &mut SurfaceInteraction,
     ) {
         let normal = V3f::new(v.sin() * u.sin(), v.cos(), v.sin() * u.cos());

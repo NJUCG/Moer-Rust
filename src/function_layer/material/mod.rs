@@ -1,13 +1,13 @@
 pub mod bxdf;
+mod conductor;
+mod dielectric;
 pub mod material;
 pub mod matte;
 mod mirror;
-mod phong;
-mod oren_nayar;
 mod ndf;
-mod conductor;
-mod dielectric;
+mod oren_nayar;
+mod phong;
 
+pub use bxdf::BSDF;
 pub use material::Material;
 pub use ndf::NDF;
-pub use bxdf::BSDF;

@@ -1,14 +1,14 @@
-use std::rc::Rc;
-use cgmath::Zero;
-use serde_json::Value;
+use super::bxdf::BSDF;
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{SurfaceInteraction, Material, Texture, V3f};
 use crate::function_layer::material::bxdf::bsdf::BSDFBase;
 use crate::function_layer::material::bxdf::oren_nayar::OrenNayarBSDF;
 use crate::function_layer::material::material::{fetch_albedo, fetch_normal_map};
-use super::bxdf::BSDF;
 use crate::function_layer::texture::constant_texture::ConstantTexture;
 use crate::function_layer::texture::normal_texture::NormalTexture;
+use crate::function_layer::{Material, SurfaceInteraction, Texture, V3f};
+use cgmath::Zero;
+use serde_json::Value;
+use std::rc::Rc;
 
 pub struct OrenNayarMaterial {
     normal_map: Option<Rc<NormalTexture>>,

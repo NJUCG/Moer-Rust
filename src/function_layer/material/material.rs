@@ -1,14 +1,16 @@
-use cgmath::{InnerSpace, Vector2, Zero};
-use serde_json::Value;
-use std::rc::Rc;
-use super::{bxdf::bsdf::BSDF, matte::MatteMaterial, mirror::MirrorMaterial, phong::PhongMaterial,
-            dielectric::DielectricMaterial, oren_nayar::OrenNayarMaterial};
-use super::ndf::{ggx::GGXDistribution, beckmann::BeckmannDistribution};
-use crate::function_layer::texture::normal_texture::NormalTexture;
-use crate::function_layer::{construct_texture, fetch_v3f, SurfaceInteraction, NDF, Texture, V3f};
+use super::ndf::{beckmann::BeckmannDistribution, ggx::GGXDistribution};
+use super::{
+    bxdf::bsdf::BSDF, dielectric::DielectricMaterial, matte::MatteMaterial, mirror::MirrorMaterial,
+    oren_nayar::OrenNayarMaterial, phong::PhongMaterial,
+};
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::material::conductor::ConductorMaterial;
 use crate::function_layer::texture::constant_texture::ConstantTexture;
+use crate::function_layer::texture::normal_texture::NormalTexture;
+use crate::function_layer::{construct_texture, fetch_v3f, SurfaceInteraction, Texture, V3f, NDF};
+use cgmath::{InnerSpace, Vector2, Zero};
+use serde_json::Value;
+use std::rc::Rc;
 
 pub trait Material {
     fn normal_map(&self) -> Option<Rc<NormalTexture>>;

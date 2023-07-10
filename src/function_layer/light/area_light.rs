@@ -1,6 +1,8 @@
 use super::light::{Light, LightSampleResult, LightType};
 use crate::core_layer::{colorspace::SpectrumRGB, constants::EPSILON};
-use crate::function_layer::{construct_shape, fetch_v3f, SurfaceInteraction, Shape, V3f, RR, Interaction};
+use crate::function_layer::{
+    construct_shape, fetch_v3f, Interaction, Shape, SurfaceInteraction, V3f, RR,
+};
 use cgmath::Vector2;
 use cgmath::{InnerSpace, Zero};
 use serde_json::Value;
@@ -69,9 +71,9 @@ impl Light for AreaLight {
         let other = rhs.as_any().downcast_ref::<Self>().unwrap();
         self.energy == other.energy
             && match (&self.shape, &other.shape) {
-            (Some(l), Some(r)) => Rc::ptr_eq(l, r),
-            (None, None) => true,
-            (_, _) => false,
-        }
+                (Some(l), Some(r)) => Rc::ptr_eq(l, r),
+                (None, None) => true,
+                (_, _) => false,
+            }
     }
 }

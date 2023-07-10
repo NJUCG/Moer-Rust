@@ -4,8 +4,10 @@ use cgmath::Zero;
 use serde_json::Value;
 
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{compute_ray_differentials, InfiniteLight, Integrator,  Ray, RR, Sampler, Scene};
 use crate::function_layer::material::bxdf::BSDFType;
+use crate::function_layer::{
+    compute_ray_differentials, InfiniteLight, Integrator, Ray, Sampler, Scene, RR,
+};
 
 use super::integrator::sample_interaction_illumination;
 
@@ -43,15 +45,33 @@ impl Integrator for PathIntegrator {
                 }
             }
             depth += 1;
-            if depth >= self.max_depth { break; }
-            spectrum = sample_interaction_illumination(scene, -ray.direction, &inter, spectrum, sampler.clone(), throughput);
+            if depth >= self.max_depth {
+                break;
+            }
+            spectrum = sample_interaction_illumination(
+                scene,
+                -ray.direction,
+                &inter,
+                spectrum,
+                sampler.clone(),
+                throughput,
+            );
             if depth > 2 && sampler.borrow_mut().next_1d() > 0.95 {
                 break;
             }
             throughput /= 0.95;
-            let bsdf = inter.shape.as_ref().unwrap().material().as_ref().unwrap().compute_bsdf(&inter);
+            let bsdf = inter
+                .shape
+                .as_ref()
+                .unwrap()
+                .material()
+                .as_ref()
+                .unwrap()
+                .compute_bsdf(&inter);
             let bsdf_sample_result = bsdf.sample(-ray.direction, sampler.borrow_mut().next_2d());
-            if bsdf_sample_result.weight.rgb().is_zero() { break; }
+            if bsdf_sample_result.weight.rgb().is_zero() {
+                break;
+            }
             throughput *= &bsdf_sample_result.weight;
 
             ray.origin = inter.position;
@@ -62,4 +82,3 @@ impl Integrator for PathIntegrator {
         spectrum
     }
 }
-

@@ -1,5 +1,5 @@
-use cgmath::Vector2;
 use crate::function_layer::V3f;
+use cgmath::Vector2;
 
 pub trait NDF {
     fn get_d(&self, wh_local: V3f, alpha: Vector2<f32>) -> f32;

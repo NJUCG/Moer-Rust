@@ -1,4 +1,5 @@
 use super::bxdf::{lambert::LambertReflection, BSDF};
+use super::material::fetch_normal_map;
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::texture::{
     constant_texture::ConstantTexture, normal_texture::NormalTexture, texture::construct_texture,
@@ -7,7 +8,6 @@ use crate::function_layer::{fetch_v3f, SurfaceInteraction, Texture, V3f};
 use cgmath::Zero;
 use serde_json::Value;
 use std::rc::Rc;
-use super::material::fetch_normal_map;
 
 use super::Material;
 

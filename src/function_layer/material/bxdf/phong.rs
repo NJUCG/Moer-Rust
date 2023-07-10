@@ -1,11 +1,13 @@
-use cgmath::{InnerSpace, Vector2};
-use cgmath::num_traits::Pow;
-use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::material::bxdf::BSDFType;
-use crate::function_layer::material::bxdf::warp::{square_to_cosine_hemisphere, square_to_cosine_hemisphere_pdf};
-use crate::function_layer::V3f;
+use super::bsdf::{BSDFBase, BSDFSampleResult};
 use super::BSDF;
-use super::bsdf::{BSDFSampleResult, BSDFBase};
+use crate::core_layer::colorspace::SpectrumRGB;
+use crate::function_layer::material::bxdf::warp::{
+    square_to_cosine_hemisphere, square_to_cosine_hemisphere_pdf,
+};
+use crate::function_layer::material::bxdf::BSDFType;
+use crate::function_layer::V3f;
+use cgmath::num_traits::Pow;
+use cgmath::{InnerSpace, Vector2};
 
 pub struct PhongReflection {
     albedo: SpectrumRGB,
@@ -17,8 +19,13 @@ pub struct PhongReflection {
 }
 
 impl PhongReflection {
-    pub fn new(albedo: SpectrumRGB,
-               kd: SpectrumRGB, ks: SpectrumRGB, p: f32, bsdf: BSDFBase) -> Self {
+    pub fn new(
+        albedo: SpectrumRGB,
+        kd: SpectrumRGB,
+        ks: SpectrumRGB,
+        p: f32,
+        bsdf: BSDFBase,
+    ) -> Self {
         Self {
             albedo,
             specular_reflectance: SpectrumRGB::same(1.0),

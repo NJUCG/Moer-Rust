@@ -1,10 +1,10 @@
-use cgmath::Vector2;
+use super::bsdf::{BSDFBase, BSDFSampleResult};
+use super::warp::{square_to_cosine_hemisphere, square_to_cosine_hemisphere_pdf};
+use super::{BSDFType, BSDF};
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::core_layer::constants::INV_PI;
 use crate::function_layer::V3f;
-use super::{BSDF, BSDFType};
-use super::bsdf::{BSDFBase, BSDFSampleResult};
-use super::warp::{square_to_cosine_hemisphere, square_to_cosine_hemisphere_pdf};
+use cgmath::Vector2;
 
 pub struct OrenNayarBSDF {
     albedo: SpectrumRGB,
@@ -30,14 +30,16 @@ impl BSDF for OrenNayarBSDF {
         let a = 1.0 - 0.5 * s2 / (s2 + 0.33);
         let b = 0.45 * s2 / (s2 + 0.09);
 
-        let sin_alpha = (1.0 - wo_local.y * wo_local.y).sqrt().
-            max((1.0 - wi_local.y * wi_local.y).sqrt());
-        let tan_beta = (1.0 / (wo_local.y * wo_local.y) - 1.0).sqrt().
-            min((1.0 / (wi_local.y * wi_local.y) - 1.0).sqrt());
+        let sin_alpha = (1.0 - wo_local.y * wo_local.y)
+            .sqrt()
+            .max((1.0 - wi_local.y * wi_local.y).sqrt());
+        let tan_beta = (1.0 / (wo_local.y * wo_local.y) - 1.0)
+            .sqrt()
+            .min((1.0 / (wi_local.y * wi_local.y) - 1.0).sqrt());
 
-        let cos_dphi = (wo_local.x * wi_local.x + wo_local.z * wi_local.z) /
-            (wo_local.x * wo_local.x + wo_local.z * wo_local.z).sqrt() /
-            (wi_local.x * wi_local.x + wi_local.z * wi_local.z).sqrt();
+        let cos_dphi = (wo_local.x * wi_local.x + wo_local.z * wi_local.z)
+            / (wo_local.x * wo_local.x + wo_local.z * wo_local.z).sqrt()
+            / (wi_local.x * wi_local.x + wi_local.z * wi_local.z).sqrt();
 
         self.albedo * INV_PI * wi_local.y * (a + b * cos_dphi.max(0.0) * sin_alpha * tan_beta)
     }

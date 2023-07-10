@@ -13,7 +13,7 @@ impl SpectrumRGB {
     }
     pub fn exp(&self) -> SpectrumRGB {
         SpectrumRGB {
-            rgb: V3f::new(self.rgb.x.exp(), self.rgb.y.exp(), self.rgb.z.exp())
+            rgb: V3f::new(self.rgb.x.exp(), self.rgb.y.exp(), self.rgb.z.exp()),
         }
     }
 }
@@ -22,7 +22,9 @@ impl Add<SpectrumRGB> for SpectrumRGB {
     type Output = SpectrumRGB;
 
     fn add(self, rhs: SpectrumRGB) -> Self::Output {
-        SpectrumRGB { rgb: self.rgb + rhs.rgb }
+        SpectrumRGB {
+            rgb: self.rgb + rhs.rgb,
+        }
     }
 }
 

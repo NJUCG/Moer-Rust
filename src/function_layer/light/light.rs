@@ -1,6 +1,6 @@
 use super::{area_light::AreaLight, environment_light::EnvironmentLight, spot_light::SpotLight};
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{SurfaceInteraction, Ray, V3f, RR, Interaction};
+use crate::function_layer::{Interaction, Ray, SurfaceInteraction, V3f, RR};
 use cgmath::Vector2;
 use serde_json::Value;
 use std::any::Any;

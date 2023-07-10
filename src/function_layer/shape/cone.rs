@@ -1,7 +1,7 @@
 use super::shape::ShapeBase;
 use crate::core_layer::function::solve_quadratic;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Bounds3, SurfaceInteraction, Ray, Shape, V3f, Medium};
+use crate::function_layer::{Bounds3, Medium, Ray, Shape, SurfaceInteraction, V3f};
 use cgmath::{InnerSpace, Point3, Vector2};
 use serde_json::Value;
 use std::f64::consts::PI;
@@ -73,7 +73,7 @@ impl Shape for Cone {
         }
 
         let (t0, t1) = roots.unwrap(); // t0 <= t1
-        // check t0 first, if success, then skip t1
+                                       // check t0 first, if success, then skip t1
 
         for tt in [t0, t1] {
             if tt <= local_ray.t_min || tt >= local_ray.t_max {

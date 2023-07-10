@@ -3,8 +3,8 @@ use crate::function_layer::light::{
     area_light::AreaLight, environment_light::EnvironmentLight, light::LightType,
 };
 use crate::function_layer::{
-    construct_light, construct_shape, create_acceleration, set_acc_type, Acceleration,
-    SurfaceInteraction, Light, Ray, RR,
+    construct_light, construct_shape, create_acceleration, set_acc_type, Acceleration, Light, Ray,
+    SurfaceInteraction, RR,
 };
 use serde_json::Value;
 use std::rc::Rc;

@@ -25,9 +25,9 @@ impl Film {
 
     pub fn deposit(&mut self, xy: Vector2<usize>, spectrum: &SpectrumRGB) {
         let rgb = spectrum.rgb();
-        let x = if rgb.x.is_subnormal() {0.0} else {rgb.x};
-        let y = if rgb.y.is_subnormal() {0.0} else {rgb.y};
-        let z = if rgb.z.is_subnormal() {0.0} else {rgb.z};
+        let x = if rgb.x.is_subnormal() { 0.0 } else { rgb.x };
+        let y = if rgb.y.is_subnormal() { 0.0 } else { rgb.y };
+        let z = if rgb.z.is_subnormal() { 0.0 } else { rgb.z };
 
         self.image.as_ref().unwrap().borrow_mut().put_pixel(
             xy.x as u32,

@@ -1,6 +1,8 @@
 use super::shape::ShapeBase;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{fetch_v3f, SurfaceInteraction, Ray, Shape, V3f, Medium, MediumInterface};
+use crate::function_layer::{
+    fetch_v3f, Medium, MediumInterface, Ray, Shape, SurfaceInteraction, V3f,
+};
 use cgmath::{EuclideanSpace, InnerSpace, Point3, Vector2, Zero};
 use serde_json::Value;
 use std::rc::Rc;
@@ -102,7 +104,8 @@ impl Shape for Parallelogram {
         distance: f32,
         _prim_id: u64,
         u: f32,
-        v: f32, medium: Option<Rc<dyn Medium>>,
+        v: f32,
+        medium: Option<Rc<dyn Medium>>,
         intersection: &mut SurfaceInteraction,
     ) {
         intersection.shape = Some(Rc::new(self.clone()));
