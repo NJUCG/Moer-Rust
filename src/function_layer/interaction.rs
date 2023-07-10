@@ -1,4 +1,4 @@
-use crate::function_layer::{Ray, Shape, V3f};
+use crate::function_layer::{MediumInterface, Ray, Shape, V3f};
 use cgmath::Vector2;
 use cgmath::{EuclideanSpace, InnerSpace, Point3, Zero};
 use std::rc::Rc;
@@ -18,6 +18,7 @@ pub struct SurfaceInteraction {
     pub bitangent: V3f,
     pub tex_coord: Vector2<f32>,
     pub shape: Option<Rc<dyn Shape>>,
+    pub medium_interface: MediumInterface,
 
     pub dp_du: V3f,
     pub dp_dv: V3f,
@@ -53,6 +54,7 @@ impl Default for SurfaceInteraction {
             bitangent: V3f::zero(),
             tex_coord: Vector2::zero(),
             shape: None,
+            medium_interface: Default::default(),
             dp_du: V3f::zero(),
             dp_dv: V3f::zero(),
             du_dx: 0.0,

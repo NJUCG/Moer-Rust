@@ -2,9 +2,7 @@ use super::shape::ShapeBase;
 use crate::core_layer::function::solve_quadratic;
 use crate::core_layer::transform::{Transform, Transformable};
 use crate::function_layer::{Bounds3, SurfaceInteraction, Ray, Shape, V3f};
-use cgmath::InnerSpace;
-use cgmath::Point3;
-use cgmath::Vector2;
+use cgmath::{Point3, Vector2};
 use serde_json::Value;
 use std::f64::consts::PI;
 use std::rc::Rc;
@@ -117,19 +115,10 @@ impl Shape for Cylinder {
             v * self.height,
         );
         intersection.position = trans.to_world_point(&position);
+        intersection.tex_coord = Vector2::new(u, v);
 
         intersection.shape = Some(Rc::new(self.clone()));
-        intersection.distance = distance;
-        intersection.tex_coord = Vector2::new(u, v);
-        // 计算交点的切线和副切线
-        let mut tangent = V3f::new(1.0, 0.0, 0.0);
-        if tangent.dot(intersection.normal).abs() > 0.9 {
-            tangent = V3f::new(0.0, 1.0, 0.0);
-        }
-        let bitangent = tangent.cross(intersection.normal).normalize();
-        tangent = intersection.normal.cross(bitangent).normalize();
-        intersection.tangent = tangent;
-        intersection.bitangent = bitangent;
+        self._fill_intersection(distance, intersection);
     }
 
     fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (SurfaceInteraction, f32) {

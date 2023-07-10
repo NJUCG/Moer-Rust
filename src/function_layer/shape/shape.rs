@@ -3,11 +3,8 @@ use super::{
     sphere::Sphere, triangle::TriangleMesh,
 };
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{
-    construct_material, material::matte::MatteMaterial, Bounds3, SurfaceInteraction, Light, Material,
-    Ray, V3f, RR,
-};
-use cgmath::{Matrix4, SquareMatrix, Vector2, Zero};
+use crate::function_layer::{construct_material, material::matte::MatteMaterial, Bounds3, SurfaceInteraction, Light, Material, Ray, V3f, RR, MediumInterface};
+use cgmath::{InnerSpace, Matrix4, SquareMatrix, Vector2, Zero};
 use serde_json::Value;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -42,6 +39,23 @@ pub trait Shape: Transformable {
         v: f32,
         intersection: &mut SurfaceInteraction,
     );
+    fn _fill_intersection(&self, distance: f32, intersection: &mut SurfaceInteraction) {
+        intersection.distance = distance;
+        // 介质
+        if let Some(mi) = &self.shape().medium_interface {
+            intersection.medium_interface = mi.clone();
+        }
+
+        // 计算交点的切线和副切线
+        let mut tangent = V3f::new(1.0, 0.0, 0.0);
+        if tangent.dot(intersection.normal).abs() > 0.9 {
+            tangent = V3f::new(0.0, 1.0, 0.0);
+        }
+        let bitangent = tangent.cross(intersection.normal).normalize();
+        tangent = intersection.normal.cross(bitangent).normalize();
+        intersection.tangent = tangent;
+        intersection.bitangent = bitangent;
+    }
     fn uniform_sample_on_surface(&self, sample: Vector2<f32>) -> (SurfaceInteraction, f32);
     fn init_internal_acceleration(&mut self) {}
     fn shape_type(&self) -> String {
@@ -54,6 +68,7 @@ pub struct ShapeBase {
     pub geometry_id: u64,
     pub light: Option<RR<dyn Light>>,
     pub material: Option<Rc<dyn Material>>,
+    pub medium_interface: Option<MediumInterface>,
     pub transform: Transform,
     pub bounds3: Bounds3,
 }
@@ -101,6 +116,7 @@ impl ShapeBase {
             geometry_id: 0,
             light: None,
             material: Some(material),
+            medium_interface: None,
             transform,
             bounds3: Bounds3::default(),
         }

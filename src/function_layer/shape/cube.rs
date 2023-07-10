@@ -109,19 +109,10 @@ impl Shape for Cube {
         hit_point[axis] = self.box_min[axis] + v * (self.box_max[axis] - self.box_min[axis]);
         intersection.position =
             Point3::from_homogeneous(trans.translate * trans.rotate * hit_point.to_homogeneous());
+        intersection.tex_coord = Vector2::new(u, v);
 
         intersection.shape = Some(Rc::new(self.clone()));
-        intersection.distance = distance;
-        intersection.tex_coord = Vector2::new(u, v);
-        // 计算交点的切线和副切线
-        let mut tangent = V3f::new(1.0, 0.0, 0.0);
-        if tangent.dot(intersection.normal).abs() > 0.9 {
-            tangent = V3f::new(0.0, 1.0, 0.0);
-        }
-        let bitangent = tangent.cross(intersection.normal).normalize();
-        tangent = intersection.normal.cross(bitangent).normalize();
-        intersection.tangent = tangent;
-        intersection.bitangent = bitangent;
+        self._fill_intersection(distance, intersection);
     }
 
     fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (SurfaceInteraction, f32) {

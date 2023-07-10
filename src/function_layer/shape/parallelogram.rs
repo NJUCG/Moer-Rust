@@ -105,6 +105,7 @@ impl Shape for Parallelogram {
         v: f32,
         intersection: &mut SurfaceInteraction,
     ) {
+        intersection.shape = Some(Rc::new(self.clone()));
         intersection.distance = distance;
         intersection.shape = Some(Rc::new(self.clone()));
         intersection.normal = self.edge0.cross(self.edge1).normalize();
@@ -114,6 +115,9 @@ impl Shape for Parallelogram {
         intersection.dp_dv = self.edge1;
         intersection.tangent = self.edge0.normalize();
         intersection.bitangent = intersection.tangent.cross(intersection.normal).normalize();
+        if let Some(mi) = &self.shape.medium_interface {
+            intersection.medium_interface = mi.clone();
+        }
     }
 
     fn uniform_sample_on_surface(&self, sample: Vector2<f32>) -> (SurfaceInteraction, f32) {

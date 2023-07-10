@@ -111,7 +111,7 @@ impl PhaseFunction for HenyeyGreenstein {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct MediumInterface {
     inside: Option<Rc<dyn Medium>>,
     outside: Option<Rc<dyn Medium>>,

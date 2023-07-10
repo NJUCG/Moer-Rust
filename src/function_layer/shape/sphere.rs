@@ -95,8 +95,6 @@ impl Shape for Sphere {
         v: f32,
         intersection: &mut SurfaceInteraction,
     ) {
-        intersection.shape = Some(Rc::new(self.clone()));
-        intersection.distance = distance;
         let normal = V3f::new(v.sin() * u.sin(), v.cos(), v.sin() * u.cos());
         intersection.normal = normal;
 
@@ -105,14 +103,8 @@ impl Shape for Sphere {
         intersection.tex_coord = Vector2::new(u * INV_PI * 0.5, v * INV_PI);
 
         // TODO 计算交点的切线和副切线
-        let mut tangent = V3f::new(1.0, 0.0, 0.0);
-        if tangent.dot(intersection.normal).abs() > 0.9 {
-            tangent = V3f::new(0.0, 1.0, 0.0);
-        }
-        let bitangent = tangent.cross(intersection.normal).normalize();
-        tangent = intersection.normal.cross(bitangent).normalize();
-        intersection.tangent = tangent;
-        intersection.bitangent = bitangent;
+        intersection.shape = Some(Rc::new(self.clone()));
+        self._fill_intersection(distance, intersection);
     }
 
     fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (SurfaceInteraction, f32) {

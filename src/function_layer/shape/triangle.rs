@@ -73,8 +73,6 @@ impl Shape for TriangleMesh {
         v: f32,
         intersection: &mut SurfaceInteraction,
     ) {
-        intersection.distance = distance;
-        intersection.shape = Some(Rc::new(self.clone()));
         let face_info = &self.mesh.face_buffer[prim_id as usize];
         let w = 1.0 - u - v;
 
@@ -102,15 +100,9 @@ impl Shape for TriangleMesh {
             .collect();
         let (tw, tu, tv) = (twuv[0], twuv[1], twuv[2]);
         intersection.tex_coord = w * tw + u * tu + v * tv;
-        // TODO 计算交点的切线和副切线
-        let mut tangent = V3f::new(1.0, 0.0, 0.0);
-        if tangent.dot(intersection.normal).abs() > 0.9 {
-            tangent = V3f::new(0.0, 1.0, 0.0);
-        }
-        let bitangent = tangent.cross(intersection.normal).normalize();
-        tangent = intersection.normal.cross(bitangent).normalize();
-        intersection.tangent = tangent;
-        intersection.bitangent = bitangent;
+        intersection.shape = Some(Rc::new(self.clone()));
+
+        self._fill_intersection(distance, intersection);
     }
 
     fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (SurfaceInteraction, f32) {
