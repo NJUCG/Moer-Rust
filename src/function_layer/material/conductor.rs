@@ -2,7 +2,7 @@ use std::rc::Rc;
 use cgmath::{Vector2, Zero};
 use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{BSDF, fetch_v3f, Intersection, Material, NDF, Texture, V3f};
+use crate::function_layer::{BSDF, fetch_v3f, SurfaceInteraction, Material, NDF, Texture, V3f};
 use crate::function_layer::material::bxdf::rough_conductor::RoughConductorBSDF;
 use crate::function_layer::texture::normal_texture::NormalTexture;
 use super::bxdf::bsdf::BSDFBase;
@@ -42,7 +42,7 @@ impl Material for ConductorMaterial {
         self.normal_map.clone()
     }
 
-    fn compute_bsdf(&self, intersection: &Intersection) -> Box<dyn BSDF> {
+    fn compute_bsdf(&self, intersection: &SurfaceInteraction) -> Box<dyn BSDF> {
         let mut normal = V3f::zero();
         let mut tangent = V3f::zero();
         let mut bitangent = V3f::zero();

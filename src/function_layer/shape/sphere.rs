@@ -1,7 +1,7 @@
 use super::shape::ShapeBase;
 use crate::core_layer::constants::INV_PI;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{fetch_v3f, Bounds3, Intersection, Ray, Shape, V3f};
+use crate::function_layer::{fetch_v3f, Bounds3, SurfaceInteraction, Ray, Shape, V3f};
 use cgmath::{InnerSpace, Point3, Vector2, Zero};
 use serde_json::Value;
 use std::f32::consts::PI;
@@ -93,7 +93,7 @@ impl Shape for Sphere {
         _prim_id: u64,
         u: f32,
         v: f32,
-        intersection: &mut Intersection,
+        intersection: &mut SurfaceInteraction,
     ) {
         intersection.shape = Some(Rc::new(self.clone()));
         intersection.distance = distance;
@@ -115,7 +115,7 @@ impl Shape for Sphere {
         intersection.bitangent = bitangent;
     }
 
-    fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (Intersection, f32) {
+    fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (SurfaceInteraction, f32) {
         todo!()
     }
 }

@@ -1,6 +1,6 @@
 use super::shape::ShapeBase;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Bounds3, Intersection, Ray, Shape, V3f};
+use crate::function_layer::{Bounds3, SurfaceInteraction, Ray, Shape, V3f};
 use cgmath::{EuclideanSpace, InnerSpace, Point3, Vector2};
 use serde_json::Value;
 use std::f64::consts::PI;
@@ -91,7 +91,7 @@ impl Shape for Disk {
         _prim_id: u64,
         u: f32,
         v: f32,
-        intersection: &mut Intersection,
+        intersection: &mut SurfaceInteraction,
     ) {
         let trans = self.transform();
         let normal = V3f::new(0.0, 0.0, 1.0);
@@ -117,7 +117,7 @@ impl Shape for Disk {
         intersection.bitangent = bitangent;
     }
 
-    fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (Intersection, f32) {
+    fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (SurfaceInteraction, f32) {
         todo!()
     }
 }

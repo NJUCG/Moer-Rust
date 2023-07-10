@@ -1,6 +1,6 @@
 use super::light::{Light, LightSampleResult, LightType};
 use crate::core_layer::{colorspace::SpectrumRGB, constants::EPSILON};
-use crate::function_layer::{construct_shape, fetch_v3f, Intersection, Shape, V3f, RR};
+use crate::function_layer::{construct_shape, fetch_v3f, SurfaceInteraction, Shape, V3f, RR, Interaction};
 use cgmath::Vector2;
 use cgmath::{InnerSpace, Zero};
 use serde_json::Value;
@@ -27,18 +27,18 @@ impl AreaLight {
 }
 
 impl Light for AreaLight {
-    fn evaluate_emission(&self, _intersection: &Intersection, _wo: V3f) -> SpectrumRGB {
+    fn evaluate_emission(&self, _intersection: &SurfaceInteraction, _wo: V3f) -> SpectrumRGB {
         self.energy
     }
 
-    fn sample(&self, shading_point: &Intersection, sample: Vector2<f32>) -> LightSampleResult {
+    fn sample(&self, shading_point: &dyn Interaction, sample: Vector2<f32>) -> LightSampleResult {
         let (sample_result, pdf) = self
             .shape
             .as_ref()
             .unwrap()
             .borrow()
             .uniform_sample_on_surface(sample);
-        let shading_point2sample = sample_result.position - shading_point.position;
+        let shading_point2sample = sample_result.position - shading_point.p();
         LightSampleResult {
             energy: self.energy,
             direction: shading_point2sample.normalize(),
@@ -69,9 +69,9 @@ impl Light for AreaLight {
         let other = rhs.as_any().downcast_ref::<Self>().unwrap();
         self.energy == other.energy
             && match (&self.shape, &other.shape) {
-                (Some(l), Some(r)) => Rc::ptr_eq(l, r),
-                (None, None) => true,
-                (_, _) => false,
-            }
+            (Some(l), Some(r)) => Rc::ptr_eq(l, r),
+            (None, None) => true,
+            (_, _) => false,
+        }
     }
 }

@@ -1,6 +1,6 @@
 use super::shape::{Shape, ShapeBase};
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{create_acceleration, Acceleration, Intersection, Ray, V3f};
+use crate::function_layer::{create_acceleration, Acceleration, SurfaceInteraction, Ray, V3f};
 use crate::resource_layer::MeshData;
 use cgmath::{EuclideanSpace, InnerSpace, Point3, Vector2};
 use serde_json::Value;
@@ -71,7 +71,7 @@ impl Shape for TriangleMesh {
         prim_id: u64,
         u: f32,
         v: f32,
-        intersection: &mut Intersection,
+        intersection: &mut SurfaceInteraction,
     ) {
         intersection.distance = distance;
         intersection.shape = Some(Rc::new(self.clone()));
@@ -113,9 +113,9 @@ impl Shape for TriangleMesh {
         intersection.bitangent = bitangent;
     }
 
-    fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (Intersection, f32) {
+    fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (SurfaceInteraction, f32) {
         // TODO finish this
-        (Intersection::default(), 0.0)
+        (SurfaceInteraction::default(), 0.0)
     }
 
     fn init_internal_acceleration(&mut self) {
@@ -241,12 +241,12 @@ impl Shape for Triangle {
         _prim_id: u64,
         _u: f32,
         _v: f32,
-        _intersection: &mut Intersection,
+        _intersection: &mut SurfaceInteraction,
     ) {
         // 该函数实际上不会被调用
     }
 
-    fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (Intersection, f32) {
+    fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (SurfaceInteraction, f32) {
         todo!()
     }
     fn shape_type(&self) -> String {

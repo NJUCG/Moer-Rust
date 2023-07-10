@@ -29,7 +29,7 @@ impl Medium for HomogeneousMedium {
         let t = dist.min(ray.t_max);
         let sampled_medium = t < ray.t_max;
         if sampled_medium {
-            mi.p = ray.at(t);
+            mi.position = ray.at(t);
             mi.wo = -ray.direction;
             mi.time = ray.t;
             mi.medium_interface = MediumInterface::new(Some(Rc::new(self.clone())), None);

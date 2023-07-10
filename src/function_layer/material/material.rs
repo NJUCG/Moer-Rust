@@ -5,7 +5,7 @@ use super::{bxdf::bsdf::BSDF, matte::MatteMaterial, mirror::MirrorMaterial, phon
             dielectric::DielectricMaterial, oren_nayar::OrenNayarMaterial};
 use super::ndf::{ggx::GGXDistribution, beckmann::BeckmannDistribution};
 use crate::function_layer::texture::normal_texture::NormalTexture;
-use crate::function_layer::{construct_texture, fetch_v3f, Intersection, NDF, Texture, V3f};
+use crate::function_layer::{construct_texture, fetch_v3f, SurfaceInteraction, NDF, Texture, V3f};
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::material::conductor::ConductorMaterial;
 use crate::function_layer::texture::constant_texture::ConstantTexture;
@@ -13,10 +13,10 @@ use crate::function_layer::texture::constant_texture::ConstantTexture;
 pub trait Material {
     fn normal_map(&self) -> Option<Rc<NormalTexture>>;
     // self.normal_map.clone()
-    fn compute_bsdf(&self, intersection: &Intersection) -> Box<dyn BSDF>;
+    fn compute_bsdf(&self, intersection: &SurfaceInteraction) -> Box<dyn BSDF>;
     fn compute_shading_geometry(
         &self,
-        intersection: &Intersection,
+        intersection: &SurfaceInteraction,
         normal: &mut V3f,
         tangent: &mut V3f,
         bitangent: &mut V3f,

@@ -4,7 +4,7 @@ use crate::function_layer::light::{
 };
 use crate::function_layer::{
     construct_light, construct_shape, create_acceleration, set_acc_type, Acceleration,
-    Intersection, Light, Ray, RR,
+    SurfaceInteraction, Light, Ray, RR,
 };
 use serde_json::Value;
 use std::rc::Rc;
@@ -71,7 +71,7 @@ impl Scene {
         }
     }
 
-    pub fn ray_intersect(&self, ray: &mut Ray) -> Option<Intersection> {
+    pub fn ray_intersect(&self, ray: &mut Ray) -> Option<SurfaceInteraction> {
         self.acceleration.get_intersect(ray)
     }
 

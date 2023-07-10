@@ -1,7 +1,7 @@
 use super::shape::ShapeBase;
 use crate::core_layer::function::solve_quadratic;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Bounds3, Intersection, Ray, Shape, V3f};
+use crate::function_layer::{Bounds3, SurfaceInteraction, Ray, Shape, V3f};
 use cgmath::{InnerSpace, Point3, Vector2};
 use serde_json::Value;
 use std::f64::consts::PI;
@@ -110,7 +110,7 @@ impl Shape for Cone {
         _prim_id: u64,
         u: f32,
         v: f32,
-        intersection: &mut Intersection,
+        intersection: &mut SurfaceInteraction,
     ) {
         let trans = self.transform();
         let phi = u * self.phi_max;
@@ -147,7 +147,7 @@ impl Shape for Cone {
         intersection.bitangent = bitangent;
     }
 
-    fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (Intersection, f32) {
+    fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (SurfaceInteraction, f32) {
         todo!()
     }
 }

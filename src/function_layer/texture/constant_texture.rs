@@ -1,6 +1,6 @@
 use super::texture::{TextureCoord, TextureMapping, UVMapping};
 use super::Texture;
-use crate::function_layer::Intersection;
+use crate::function_layer::SurfaceInteraction;
 use cgmath::{Vector2, Zero};
 use std::rc::Rc;
 
@@ -29,7 +29,7 @@ impl<TReturn: Copy> Texture<TReturn> for ConstantTexture<TReturn> {
         self.mapping.clone()
     }
 
-    fn evaluate(&self, _intersection: &Intersection) -> TReturn {
+    fn evaluate(&self, _intersection: &SurfaceInteraction) -> TReturn {
         self.data
     }
 

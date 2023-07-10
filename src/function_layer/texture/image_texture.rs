@@ -2,7 +2,7 @@ use super::mipmap::MipMap;
 use super::texture::TextureMapping;
 use super::texture::{Texture, TextureCoord, UVMapping};
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::Intersection;
+use crate::function_layer::SurfaceInteraction;
 use crate::resource_layer::image_io::load_img;
 use cgmath::Vector2;
 use serde_json::Value;
@@ -38,7 +38,7 @@ impl Texture<SpectrumRGB> for ImageTexture {
         self.mapping.clone()
     }
 
-    fn evaluate(&self, intersection: &Intersection) -> SpectrumRGB {
+    fn evaluate(&self, intersection: &SurfaceInteraction) -> SpectrumRGB {
         let tex_coord = self.mapping.map(intersection);
         self.evaluate_coord(&tex_coord)
     }

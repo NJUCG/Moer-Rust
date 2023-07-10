@@ -1,6 +1,6 @@
 use super::image_texture::ImageTexture;
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::shape::intersection::Intersection;
+use crate::function_layer::SurfaceInteraction;
 use cgmath::{Vector2, Zero};
 use serde_json::Value;
 use std::rc::Rc;
@@ -22,13 +22,13 @@ impl Default for TextureCoord {
 }
 
 pub trait TextureMapping {
-    fn map(&self, intersection: &Intersection) -> TextureCoord;
+    fn map(&self, intersection: &SurfaceInteraction) -> TextureCoord;
 }
 
 pub struct UVMapping;
 
 impl TextureMapping for UVMapping {
-    fn map(&self, intersection: &Intersection) -> TextureCoord {
+    fn map(&self, intersection: &SurfaceInteraction) -> TextureCoord {
         TextureCoord {
             coord: intersection.tex_coord,
             duv_dx: Vector2::new(intersection.du_dx, intersection.dv_dx),
@@ -40,7 +40,7 @@ impl TextureMapping for UVMapping {
 pub trait Texture<TReturn> {
     fn size(&self) -> Vector2<usize>;
     fn mapping(&self) -> Rc<dyn TextureMapping>;
-    fn evaluate(&self, intersection: &Intersection) -> TReturn;
+    fn evaluate(&self, intersection: &SurfaceInteraction) -> TReturn;
     fn evaluate_coord(&self, tex_coord: &TextureCoord) -> TReturn;
 }
 

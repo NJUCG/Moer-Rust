@@ -4,7 +4,7 @@ use super::{
 };
 use crate::core_layer::transform::{Transform, Transformable};
 use crate::function_layer::{
-    construct_material, material::matte::MatteMaterial, Bounds3, Intersection, Light, Material,
+    construct_material, material::matte::MatteMaterial, Bounds3, SurfaceInteraction, Light, Material,
     Ray, V3f, RR,
 };
 use cgmath::{Matrix4, SquareMatrix, Vector2, Zero};
@@ -40,9 +40,9 @@ pub trait Shape: Transformable {
         prim_id: u64,
         u: f32,
         v: f32,
-        intersection: &mut Intersection,
+        intersection: &mut SurfaceInteraction,
     );
-    fn uniform_sample_on_surface(&self, sample: Vector2<f32>) -> (Intersection, f32);
+    fn uniform_sample_on_surface(&self, sample: Vector2<f32>) -> (SurfaceInteraction, f32);
     fn init_internal_acceleration(&mut self) {}
     fn shape_type(&self) -> String {
         "".to_owned()

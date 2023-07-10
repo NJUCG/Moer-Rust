@@ -2,8 +2,15 @@ use crate::function_layer::{Ray, Shape, V3f};
 use cgmath::Vector2;
 use cgmath::{EuclideanSpace, InnerSpace, Point3, Zero};
 use std::rc::Rc;
+use crate::core_layer::colorspace::SpectrumRGB;
 
-pub struct Intersection {
+pub trait Interaction {
+    fn is_medium_interaction(&self) -> bool { false }
+    fn f(&self, wo: V3f, wi: V3f) -> SpectrumRGB;
+    fn p(&self) -> Point3<f32>;
+}
+
+pub struct SurfaceInteraction {
     pub distance: f32,
     pub position: Point3<f32>,
     pub normal: V3f,
@@ -24,7 +31,19 @@ pub struct Intersection {
     pub dp_dy: V3f,
 }
 
-impl Default for Intersection {
+impl Interaction for SurfaceInteraction {
+    fn f(&self, wo: V3f, wi: V3f) -> SpectrumRGB {
+        let material = self.shape.as_ref().unwrap().material();
+        let bsdf = material.unwrap().compute_bsdf(self);
+        bsdf.f(wo, wi)
+    }
+
+    fn p(&self) -> Point3<f32> {
+        self.position
+    }
+}
+
+impl Default for SurfaceInteraction {
     fn default() -> Self {
         Self {
             distance: 0.0,
@@ -46,7 +65,7 @@ impl Default for Intersection {
     }
 }
 
-pub fn compute_ray_differentials(intersection: &mut Intersection, ray: &Ray) {
+pub fn compute_ray_differentials(intersection: &mut SurfaceInteraction, ray: &Ray) {
     loop {
         if ray.differential.is_none() {
             break;

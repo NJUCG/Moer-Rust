@@ -1,6 +1,6 @@
 use super::{area_light::AreaLight, environment_light::EnvironmentLight, spot_light::SpotLight};
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{Intersection, Ray, V3f, RR};
+use crate::function_layer::{SurfaceInteraction, Ray, V3f, RR, Interaction};
 use cgmath::Vector2;
 use serde_json::Value;
 use std::any::Any;
@@ -8,8 +8,8 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 pub trait Light {
-    fn evaluate_emission(&self, intersection: &Intersection, wo: V3f) -> SpectrumRGB;
-    fn sample(&self, shading_point: &Intersection, sample: Vector2<f32>) -> LightSampleResult;
+    fn evaluate_emission(&self, intersection: &SurfaceInteraction, wo: V3f) -> SpectrumRGB;
+    fn sample(&self, shading_point: &dyn Interaction, sample: Vector2<f32>) -> LightSampleResult;
     fn light_type(&self) -> LightType;
     fn as_any(&self) -> &dyn Any;
     fn as_any_mut(&mut self) -> &mut dyn Any;

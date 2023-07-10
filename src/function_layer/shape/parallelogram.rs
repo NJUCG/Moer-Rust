@@ -1,6 +1,6 @@
 use super::shape::ShapeBase;
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{fetch_v3f, Intersection, Ray, Shape, V3f};
+use crate::function_layer::{fetch_v3f, SurfaceInteraction, Ray, Shape, V3f};
 use cgmath::{EuclideanSpace, InnerSpace, Point3, Vector2, Zero};
 use serde_json::Value;
 use std::rc::Rc;
@@ -103,7 +103,7 @@ impl Shape for Parallelogram {
         _prim_id: u64,
         u: f32,
         v: f32,
-        intersection: &mut Intersection,
+        intersection: &mut SurfaceInteraction,
     ) {
         intersection.distance = distance;
         intersection.shape = Some(Rc::new(self.clone()));
@@ -116,8 +116,8 @@ impl Shape for Parallelogram {
         intersection.bitangent = intersection.tangent.cross(intersection.normal).normalize();
     }
 
-    fn uniform_sample_on_surface(&self, sample: Vector2<f32>) -> (Intersection, f32) {
-        let mut its = Intersection::default();
+    fn uniform_sample_on_surface(&self, sample: Vector2<f32>) -> (SurfaceInteraction, f32) {
+        let mut its = SurfaceInteraction::default();
         self.fill_intersection(0.0, 0, sample.x, sample.y, &mut its);
         (its, self.pdf)
     }

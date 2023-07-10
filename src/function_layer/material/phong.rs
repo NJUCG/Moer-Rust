@@ -2,7 +2,7 @@ use std::rc::Rc;
 use cgmath::Zero;
 use serde_json::Value;
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{Intersection, Material, Texture, V3f};
+use crate::function_layer::{SurfaceInteraction, Material, Texture, V3f};
 use crate::function_layer::material::material::fetch_spectrum;
 use crate::function_layer::texture::{constant_texture::ConstantTexture, normal_texture::NormalTexture};
 use super::material::{fetch_normal_map, fetch_albedo};
@@ -46,7 +46,7 @@ impl Material for PhongMaterial {
         self.normal_map.clone()
     }
 
-    fn compute_bsdf(&self, intersection: &Intersection) -> Box<dyn BSDF> {
+    fn compute_bsdf(&self, intersection: &SurfaceInteraction) -> Box<dyn BSDF> {
         let mut normal = V3f::zero();
         let mut tangent = V3f::zero();
         let mut bitangent = V3f::zero();

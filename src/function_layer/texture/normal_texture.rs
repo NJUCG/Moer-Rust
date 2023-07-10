@@ -1,5 +1,5 @@
 use super::texture::{Texture, TextureCoord, TextureMapping, UVMapping};
-use crate::function_layer::{Intersection, V3f};
+use crate::function_layer::{SurfaceInteraction, V3f};
 use cgmath::{num_traits::clamp, Vector2};
 use image::Rgb32FImage;
 use serde_json::Value;
@@ -38,7 +38,7 @@ impl Texture<V3f> for NormalTexture {
         self.mapping.clone()
     }
 
-    fn evaluate(&self, intersection: &Intersection) -> V3f {
+    fn evaluate(&self, intersection: &SurfaceInteraction) -> V3f {
         let tex_coord = self.mapping.map(intersection);
         self.evaluate_coord(&tex_coord)
     }

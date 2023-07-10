@@ -20,6 +20,7 @@ pub mod scene;
 mod shape;
 pub mod texture;
 mod medium;
+mod interaction;
 
 pub use acceleration::{
     acceleration::{create_acceleration, set_acc_type},
@@ -35,7 +36,8 @@ pub use ray::Ray;
 pub use sampler::{sampler::construct_sampler, Sampler};
 pub use scene::Scene;
 pub use shape::{
-    compute_ray_differentials, fetch_v3f, shape::construct_shape, Intersection, Shape,
+    fetch_v3f, shape::construct_shape, Shape,
 };
 pub use texture::{texture::construct_texture, Texture};
-pub use medium::medium::{Medium, MediumInterface};
+pub use medium::medium::{Medium, MediumInterface, MediumInteraction};
+pub use interaction::{Interaction, SurfaceInteraction, compute_ray_differentials};

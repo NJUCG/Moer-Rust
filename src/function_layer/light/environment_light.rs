@@ -1,7 +1,7 @@
 use super::light::{InfiniteLight, Light, LightSampleResult, LightType};
 use crate::core_layer::{colorspace::SpectrumRGB, constants::INV_PI, distribution::Distribution};
 use crate::function_layer::texture::TextureCoord;
-use crate::function_layer::{construct_texture, Intersection, Ray, Texture, V3f};
+use crate::function_layer::{construct_texture, SurfaceInteraction, Ray, Texture, V3f, Interaction};
 use cgmath::Vector2;
 use cgmath::{InnerSpace, Zero};
 use serde_json::Value;
@@ -81,11 +81,11 @@ impl EnvironmentLight {
 }
 
 impl Light for EnvironmentLight {
-    fn evaluate_emission(&self, _intersection: &Intersection, _wo: V3f) -> SpectrumRGB {
+    fn evaluate_emission(&self, _intersection: &SurfaceInteraction, _wo: V3f) -> SpectrumRGB {
         panic!("This shouldn't be invoked!\n");
     }
 
-    fn sample(&self, _shading_point: &Intersection, sample: Vector2<f32>) -> LightSampleResult {
+    fn sample(&self, _shading_point: &dyn Interaction, sample: Vector2<f32>) -> LightSampleResult {
         let sz = self.environment_map.size();
         let inv_width = 1.0 / sz.x as f32;
         let inv_height = 1.0 / sz.y as f32;

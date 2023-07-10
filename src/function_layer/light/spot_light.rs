@@ -1,6 +1,6 @@
 use super::light::{LightSampleResult, LightType};
 use crate::core_layer::{colorspace::SpectrumRGB, constants::EPSILON};
-use crate::function_layer::{fetch_v3f, Intersection, Light, V3f};
+use crate::function_layer::{fetch_v3f, SurfaceInteraction, Light, V3f, Interaction};
 use cgmath::Point3;
 use cgmath::Vector2;
 use cgmath::{InnerSpace, Zero};
@@ -25,12 +25,12 @@ impl SpotLight {
 
 impl Light for SpotLight {
     //! 由于点光源不会与光线发生相交，故该函数实际上不会被调用
-    fn evaluate_emission(&self, _intersection: &Intersection, _wo: V3f) -> SpectrumRGB {
+    fn evaluate_emission(&self, _intersection: &SurfaceInteraction, _wo: V3f) -> SpectrumRGB {
         SpectrumRGB::same(0.0)
     }
 
-    fn sample(&self, shading_point: &Intersection, _sample: Vector2<f32>) -> LightSampleResult {
-        let shading_point2sample = self.position - shading_point.position;
+    fn sample(&self, shading_point: &dyn Interaction, _sample: Vector2<f32>) -> LightSampleResult {
+        let shading_point2sample = self.position - shading_point.p();
         LightSampleResult {
             energy: self.energy,
             direction: shading_point2sample.normalize(),

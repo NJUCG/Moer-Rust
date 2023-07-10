@@ -3,10 +3,10 @@
 use std::cell::RefCell;
 use std::f32::consts::PI;
 use std::rc::Rc;
-use cgmath::{InnerSpace, Point2, Point3, Zero};
+use cgmath::{InnerSpace, Point3, Vector2, Zero};
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::core_layer::function::{coordinate_system, spherical_direction};
-use crate::function_layer::{Ray, Sampler, V3f};
+use crate::function_layer::{Interaction, Ray, Sampler, V3f};
 
 pub trait Medium {
     fn tr(&self, ray: &Ray, sampler: Rc<RefCell<dyn Sampler>>) -> SpectrumRGB;
@@ -14,7 +14,7 @@ pub trait Medium {
 }
 
 pub struct MediumInteraction {
-    pub p: Point3<f32>,
+    pub position: Point3<f32>,
     pub time: f32,
     pub p_error: V3f,
     pub wo: V3f,
@@ -23,10 +23,25 @@ pub struct MediumInteraction {
     pub phase: Option<Box<dyn PhaseFunction>>,
 }
 
+impl Interaction for MediumInteraction {
+    fn is_medium_interaction(&self) -> bool {
+        true
+    }
+
+    fn f(&self, wo: V3f, wi: V3f) -> SpectrumRGB {
+        let p = self.phase.as_ref().unwrap().p(wo, wi);
+        SpectrumRGB::same(p)
+    }
+
+    fn p(&self) -> Point3<f32> {
+        self.position
+    }
+}
+
 impl Default for MediumInteraction {
     fn default() -> Self {
         Self {
-            p: Point3::new(0.0, 0.0, 0.0),
+            position: Point3::new(0.0, 0.0, 0.0),
             time: 0.0,
             p_error: V3f::new(0.0, 0.0, 0.0),
             wo: V3f::new(0.0, 0.0, 0.0),
@@ -41,7 +56,7 @@ impl MediumInteraction {
     pub fn new(p: Point3<f32>, time: f32, wo: V3f,
                medium_interface: Rc<dyn Medium>, phase: Option<Box<dyn PhaseFunction>>) -> Self {
         Self {
-            p,
+            position: p,
             time,
             p_error: V3f::from([0.0; 3]),
             wo,
@@ -50,11 +65,12 @@ impl MediumInteraction {
             phase,
         }
     }
+    pub fn is_valid(&self) -> bool { self.phase.is_some() }
 }
 
 pub trait PhaseFunction {
     fn p(&self, wo: V3f, wi: V3f) -> f32;
-    fn sample_p(&self, wo: V3f, wi: &mut V3f, u: Point2<f32>) -> f32;
+    fn sample_p(&self, wo: V3f, wi: &mut V3f, u: Vector2<f32>) -> f32;
 }
 
 #[inline]
@@ -78,7 +94,7 @@ impl PhaseFunction for HenyeyGreenstein {
         phase_hg(wo.dot(wi), self.g)
     }
 
-    fn sample_p(&self, wo: V3f, wi: &mut V3f, u: Point2<f32>) -> f32 {
+    fn sample_p(&self, wo: V3f, wi: &mut V3f, u: Vector2<f32>) -> f32 {
         let g = self.g;
         let cos_theta = if g.abs() < 1e-3 {
             1.0 - 2.0 * u.x

@@ -3,7 +3,7 @@ use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::texture::{
     constant_texture::ConstantTexture, normal_texture::NormalTexture, texture::construct_texture,
 };
-use crate::function_layer::{fetch_v3f, Intersection, Texture, V3f};
+use crate::function_layer::{fetch_v3f, SurfaceInteraction, Texture, V3f};
 use cgmath::Zero;
 use serde_json::Value;
 use std::rc::Rc;
@@ -45,7 +45,7 @@ impl Material for MatteMaterial {
         self.normal_map.clone()
     }
 
-    fn compute_bsdf(&self, intersection: &Intersection) -> Box<dyn BSDF> {
+    fn compute_bsdf(&self, intersection: &SurfaceInteraction) -> Box<dyn BSDF> {
         let [mut normal, mut tangent, mut bitangent] = [V3f::zero(); 3];
         self.compute_shading_geometry(intersection, &mut normal, &mut tangent, &mut bitangent);
         let s = self.albedo.evaluate(intersection);

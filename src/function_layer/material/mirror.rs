@@ -1,7 +1,7 @@
 use super::bxdf::{specular::SpecularReflection, BSDF};
 use super::material::fetch_normal_map;
 use crate::function_layer::texture::normal_texture::NormalTexture;
-use crate::function_layer::{Intersection, Material, V3f};
+use crate::function_layer::{SurfaceInteraction, Material, V3f};
 use cgmath::Zero;
 use serde_json::Value;
 use std::rc::Rc;
@@ -24,7 +24,7 @@ impl Material for MirrorMaterial {
         self.normal_map.clone()
     }
 
-    fn compute_bsdf(&self, intersection: &Intersection) -> Box<dyn BSDF> {
+    fn compute_bsdf(&self, intersection: &SurfaceInteraction) -> Box<dyn BSDF> {
         let mut normal = V3f::zero();
         let mut tangent = V3f::zero();
         let mut bitangent = V3f::zero();
