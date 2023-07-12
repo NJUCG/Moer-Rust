@@ -16,6 +16,7 @@ pub struct MatteMaterial {
     albedo: Rc<dyn Texture<SpectrumRGB>>,
 }
 
+// totally diffused reflection
 impl MatteMaterial {
     pub fn new() -> Self {
         let albedo = Rc::new(ConstantTexture::new(&SpectrumRGB::same(0.5)));

@@ -79,7 +79,7 @@ pub fn fetch_spectrum(json: &Value, field: &str) -> Rc<dyn Texture<SpectrumRGB>>
     if json[field].is_object() {
         construct_texture::<SpectrumRGB>(&json[field])
     } else {
-        let s = fetch_v3f(json, field, V3f::zero()).unwrap();
+        let s = fetch_v3f(json, field, V3f::zero()).expect(&format!("fetch {} failed", field));
         Rc::new(ConstantTexture::new(&SpectrumRGB::from_rgb(s)))
     }
 }

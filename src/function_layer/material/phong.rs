@@ -1,5 +1,5 @@
 use super::bxdf::{bsdf::BSDFBase, phong::PhongReflection, BSDF};
-use super::material::{fetch_albedo, fetch_normal_map};
+use super::material::fetch_normal_map;
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::material::material::fetch_spectrum;
 use crate::function_layer::texture::{
@@ -12,7 +12,7 @@ use std::rc::Rc;
 
 pub struct PhongMaterial {
     normal_map: Option<Rc<NormalTexture>>,
-    albedo: Rc<dyn Texture<SpectrumRGB>>,
+    // albedo: Rc<dyn Texture<SpectrumRGB>>,
     kd: Rc<dyn Texture<SpectrumRGB>>,
     ks: Rc<dyn Texture<SpectrumRGB>>,
     p: f32,
@@ -20,14 +20,14 @@ pub struct PhongMaterial {
 
 impl PhongMaterial {
     pub fn from_json(json: &Value) -> Self {
-        let albedo = fetch_albedo(json);
+        // let albedo = fetch_albedo(json);
         let normal_map = fetch_normal_map(json);
         let kd = fetch_spectrum(json, "kd");
         let ks = fetch_spectrum(json, "ks");
         let p = json["p"].as_f64().unwrap() as f32;
 
         Self {
-            albedo,
+            // albedo,
             normal_map,
             kd,
             ks,
@@ -40,7 +40,7 @@ impl Default for PhongMaterial {
     fn default() -> Self {
         Self {
             normal_map: None,
-            albedo: Rc::new(ConstantTexture::new(&SpectrumRGB::same(0.5))),
+            // albedo: Rc::new(ConstantTexture::new(&SpectrumRGB::same(0.5))),
             kd: Rc::new(ConstantTexture::new(&SpectrumRGB::same(0.0))),
             ks: Rc::new(ConstantTexture::new(&SpectrumRGB::same(0.0))),
             p: 0.0,
@@ -60,7 +60,7 @@ impl Material for PhongMaterial {
 
         self.compute_shading_geometry(intersection, &mut normal, &mut tangent, &mut bitangent);
 
-        let s = self.albedo.evaluate(intersection);
+        // let s = self.albedo.evaluate(intersection);
         let bsdf = BSDFBase {
             normal,
             tangent,
@@ -68,6 +68,6 @@ impl Material for PhongMaterial {
         };
         let kd = self.kd.evaluate(intersection);
         let ks = self.ks.evaluate(intersection);
-        Box::new(PhongReflection::new(s, kd, ks, self.p, bsdf))
+        Box::new(PhongReflection::new(kd, ks, self.p, bsdf))
     }
 }

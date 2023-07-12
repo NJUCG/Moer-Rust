@@ -10,7 +10,7 @@ use cgmath::num_traits::Pow;
 use cgmath::{InnerSpace, Vector2};
 
 pub struct PhongReflection {
-    albedo: SpectrumRGB,
+    // albedo: SpectrumRGB,
     specular_reflectance: SpectrumRGB,
     kd: SpectrumRGB,
     ks: SpectrumRGB,
@@ -20,14 +20,14 @@ pub struct PhongReflection {
 
 impl PhongReflection {
     pub fn new(
-        albedo: SpectrumRGB,
+        // albedo: SpectrumRGB,
         kd: SpectrumRGB,
         ks: SpectrumRGB,
         p: f32,
         bsdf: BSDFBase,
     ) -> Self {
         Self {
-            albedo,
+            // albedo,
             specular_reflectance: SpectrumRGB::same(1.0),
             kd,
             ks,
@@ -50,9 +50,9 @@ impl BSDF for PhongReflection {
         let l_r = wi_local - V3f::new(0.0, 2.0 * wi_local.y, 0.0); //wi - 2.0 * wi.dot(n) * n
 
         let diffuse = self.kd * wi_local.y; // self.kd * n.dot(wi_local)
-        let specular = self.ks * wo_local.dot(l_r).min(0.0).pow(self.p);
+        let specular = self.ks * wo_local.dot(l_r).max(0.0).pow(self.p);
 
-        self.specular_reflectance * specular + self.albedo * diffuse
+        self.specular_reflectance * specular + diffuse
     }
 
     fn sample(&self, wo: V3f, sample: Vector2<f32>) -> BSDFSampleResult {
