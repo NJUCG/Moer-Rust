@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use super::medium::{Medium, MediumInteraction};
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::medium::medium::HenyeyGreenstein;
@@ -12,7 +10,7 @@ use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct HomogeneousMedium {
-    sigma_a: SpectrumRGB,
+    // sigma_a: SpectrumRGB,
     sigma_s: SpectrumRGB,
     sigma_t: SpectrumRGB,
     g: f32,
@@ -62,10 +60,13 @@ impl HomogeneousMedium {
     pub fn new(sigma_a: SpectrumRGB, sigma_s: SpectrumRGB, g: f32) -> Self {
         let sigma_t = sigma_s + sigma_a;
         Self {
-            sigma_a,
+            // sigma_a,
             sigma_s,
             sigma_t,
             g,
         }
     }
+    // pub fn from_json(json: &Value) -> Self {
+    //     let sigma_a = fetch_spectrum(json, "sigma_a");
+    // }
 }

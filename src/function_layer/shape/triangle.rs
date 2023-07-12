@@ -82,7 +82,7 @@ impl Shape for TriangleMesh {
         let pwuv: Vec<Point3<f32>> = (0..3)
             .map(|i: usize| {
                 self.transform()
-                    .to_world_point(&self.mesh.vertex_buffer[face_info[i].vertex_index])
+                    .to_world_point(self.mesh.vertex_buffer[face_info[i].vertex_index])
             })
             .collect();
         let (pw, pu, pv) = (pwuv[0], pwuv[1], pwuv[2]);
@@ -92,7 +92,7 @@ impl Shape for TriangleMesh {
         let nwuv: Vec<V3f> = (0..3)
             .map(|i: usize| {
                 self.transform()
-                    .to_world_vec(&self.mesh.normal_buffer[face_info[i].normal_index])
+                    .to_world_vec(self.mesh.normal_buffer[face_info[i].normal_index])
             })
             .collect();
         let (nw, nu, nv) = (nwuv[0], nwuv[1], nwuv[2]);
@@ -169,9 +169,9 @@ impl Triangle {
     ) -> Self {
         let mut shape = ShapeBase::default();
         shape.geometry_id = gid;
-        let v0 = t.to_world_point(&v0);
-        let v1 = t.to_world_point(&v1);
-        let v2 = t.to_world_point(&v2);
+        let v0 = t.to_world_point(v0);
+        let v1 = t.to_world_point(v1);
+        let v2 = t.to_world_point(v2);
         let e0 = v1 - v0;
         let e1 = v2 - v0;
 

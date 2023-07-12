@@ -96,12 +96,12 @@ impl Shape for Disk {
     ) {
         let trans = self.transform();
         let normal = V3f::new(0.0, 0.0, 1.0);
-        intersection.normal = trans.to_world_vec(&normal);
+        intersection.normal = trans.to_world_vec(normal);
 
         let r = v * (self.radius - self.inner_radius) + self.inner_radius;
         let phi = u * self.phi_max;
         let position = Point3::new(r * phi.cos(), r * phi.sin(), 0.0);
-        intersection.position = trans.to_world_point(&position);
+        intersection.position = trans.to_world_point(position);
 
         intersection.tex_coord = Vector2::new(u, v);
 

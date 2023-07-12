@@ -72,7 +72,7 @@ impl PerspectiveCamera {
         let right = forward.cross(up).normalize();
         let up = right.cross(forward).normalize();
 
-        let translation = Transform::translation(&position.to_vec());
+        let translation = Transform::translation(position.to_vec());
         let mut rotation = Matrix4::identity();
         rotation[0][0] = right[0];
         rotation[0][1] = right[1];
@@ -95,7 +95,7 @@ impl PerspectiveCamera {
 }
 
 fn fetch_point(json: &Value, field: &str) -> Point3<f32> {
-    let arr = fetch_v3f(json, field, V3f::zero()).unwrap();
+    let arr = fetch_v3f(json, field, V3f::zero());
     let res = Point3::from([arr.x, arr.y, arr.z]);
     res
 }
@@ -125,8 +125,8 @@ impl Camera for PinholeCamera {
         let tan_half_fov = (self.c.vertical_fov * 0.5).tan();
         let z = film.size[1] as f32 * -0.5 / tan_half_fov;
         let direction = V3f::new(x, y, z);
-        let direction = self.transform().to_world_vec(&direction);
-        let origin = self.transform().to_world_point(&Point3::origin());
+        let direction = self.transform().to_world_vec(direction);
+        let origin = self.transform().to_world_point(Point3::origin());
         let mut ray = Ray::new(origin, direction);
         let c = &self.c.c;
         ray.t_min = c.t_min;
@@ -145,17 +145,17 @@ impl Camera for PinholeCamera {
         let z = film.size[1] as f32 * -0.5 / tan_half_fov;
         let direction = self
             .transform()
-            .to_world_vec(&V3f::new(x, y, z))
+            .to_world_vec(V3f::new(x, y, z))
             .normalize();
         let direction_x = self
             .transform()
-            .to_world_vec(&V3f::new(x + 1.0, y, z))
+            .to_world_vec(V3f::new(x + 1.0, y, z))
             .normalize();
         let direction_y = self
             .transform()
-            .to_world_vec(&V3f::new(x, y + 1.0, z))
+            .to_world_vec(V3f::new(x, y + 1.0, z))
             .normalize();
-        let origin = self.transform().to_world_point(&Point3::origin());
+        let origin = self.transform().to_world_point(Point3::origin());
 
         let mut ray = Ray::new(origin, direction);
         let c = &self.c.c;

@@ -124,7 +124,7 @@ impl Shape for Cone {
             self.radius * (1.0 - v) * phi.sin(),
             z,
         );
-        intersection.position = trans.to_world_point(&position);
+        intersection.position = trans.to_world_point(position);
 
         let position = cgmath::Point3::new(
             self.radius * (1.0 - v) * phi.cos(),
@@ -132,7 +132,7 @@ impl Shape for Cone {
             z,
         );
         let normal: V3f = (position - k).normalize();
-        intersection.normal = trans.to_world_vec(&normal);
+        intersection.normal = trans.to_world_vec(normal);
 
         intersection.tex_coord = Vector2::new(u, v);
 

@@ -96,7 +96,7 @@ impl Shape for Cube {
         let trans = self.transform();
         let mut normal = V3f::zero();
         normal[p_id / 2] = if prim_id % 2 == 1 { 1.0 } else { -1.0 };
-        intersection.normal = trans.to_world_vec(&normal).normalize();
+        intersection.normal = trans.to_world_vec(normal).normalize();
 
         let mut hit_point = Point3::from([0.0; 3]);
         hit_point[p_id / 2] = if prim_id % 2 == 1 {

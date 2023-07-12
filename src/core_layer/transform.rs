@@ -54,7 +54,7 @@ impl Transform {
         }
     }
 
-    pub fn translation(offset: &V3f) -> M4f {
+    pub fn translation(offset: V3f) -> M4f {
         let mut mat = M4f::identity();
         for i in 0..3 {
             mat[3][i] = offset[i];
@@ -62,7 +62,7 @@ impl Transform {
         mat
     }
 
-    pub fn rotation(axis: &V3f, radian: f32) -> M4f {
+    pub fn rotation(axis: V3f, radian: f32) -> M4f {
         let mut mat = M4f::identity();
         let a = axis.normalize();
         let sin_theta = radian.sin();
@@ -82,7 +82,7 @@ impl Transform {
         mat
     }
 
-    pub fn scalation(scale: &V3f) -> M4f {
+    pub fn scalation(scale: V3f) -> M4f {
         let mut mat = M4f::identity();
         for i in 0..3 {
             mat[i][i] = scale[i];
@@ -90,13 +90,13 @@ impl Transform {
         mat
     }
 
-    pub fn to_world_vec(&self, v: &V3f) -> V3f {
+    pub fn to_world_vec(&self, v: V3f) -> V3f {
         let v4 = Vector4::new(v[0], v[1], v[2], 0.0);
         let v4 = self.t * v4;
         v4.xyz()
     }
 
-    pub fn to_world_point(&self, v: &Point3<f32>) -> Point3<f32> {
+    pub fn to_world_point(&self, v: Point3<f32>) -> Point3<f32> {
         let v4 = v.to_homogeneous();
         let v4 = self.t * v4;
         Point3::from_homogeneous(v4)
@@ -109,7 +109,7 @@ impl Transform {
             for j in 0..2 {
                 for k in 0..2 {
                     let p = Point3::new(ps[i].x, ps[j].y, ps[k].z);
-                    res.expand(self.to_world_point(&p).to_vec());
+                    res.expand(self.to_world_point(p).to_vec());
                 }
             }
         }

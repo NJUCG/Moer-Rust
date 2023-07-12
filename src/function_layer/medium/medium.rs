@@ -1,12 +1,14 @@
-#![allow(dead_code)]
-
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::core_layer::function::{coordinate_system, spherical_direction};
-use crate::function_layer::{Interaction, Ray, Sampler, V3f};
-use cgmath::{InnerSpace, Point3, Vector2, Zero};
+use crate::function_layer::{fetch_v3f, Interaction, Ray, Sampler, V3f};
+use cgmath::{InnerSpace, Matrix4, Point3, SquareMatrix, Vector2, Zero};
 use std::cell::RefCell;
 use std::f32::consts::PI;
 use std::rc::Rc;
+use serde_json::Value;
+use crate::core_layer::transform::Transform;
+use super::{grid_density::GridDensityMedium, homogeneous::HomogeneousMedium};
+
 
 pub trait Medium {
     fn tr(&self, ray: &Ray, sampler: Rc<RefCell<dyn Sampler>>) -> SpectrumRGB;
@@ -146,3 +148,51 @@ impl MediumInterface {
         }
     }
 }
+
+pub fn construct_medium(json: &Value) -> Option<Rc<dyn Medium>> {
+    let g = json["g"].as_f64().unwrap_or(0.0) as f32;
+    let medium = json["medium"].as_str().unwrap();
+    let (sig_a, sig_s) = match SUBSURFACE_PARAMETER_TABLE.iter().position(|&x| x.0 == medium) {
+        Some(pos) => {
+            let r = SUBSURFACE_PARAMETER_TABLE[pos];
+            (r.1, r.2)
+        }
+        None => (V3f::new(0.0011, 0.0024, 0.014),
+                 V3f::new(2.55, 3.21, 3.77))
+    };
+    let (sig_a, sig_s) = (SpectrumRGB::from_rgb(sig_a), SpectrumRGB::from_rgb(sig_s));
+    match json["type"].as_str().unwrap() {
+        "homogeneous" => Some(Rc::new(HomogeneousMedium::new(sig_a, sig_s, g))),
+        "gridDensity" => {
+            let density = match json.get("density") {
+                Some(val) => serde_json::from_value::<Vec<f32>>(val.clone()).unwrap(),
+                None => {
+                    eprintln!("No density given for grid density medium");
+                    return None;
+                }
+            };
+            let nx = json["nx"].as_u64().unwrap_or(1) as usize;
+            let ny = json["ny"].as_u64().unwrap_or(1) as usize;
+            let nz = json["nz"].as_u64().unwrap_or(1) as usize;
+            if density.len() != nx * ny * nz {
+                eprintln!("GridDensityMedium has {} density values; expected nx*ny*nz = {}",
+                          density.len(), nx * ny * nz);
+                return None;
+            }
+            let p0 = fetch_v3f(json, "p0", V3f::zero());
+            let p1 = fetch_v3f(json, "p1", V3f::zero());
+            let translate = Transform::translation(p0);
+            let rotate = Matrix4::identity();
+            let scale = Transform::scalation(p1 - p0);
+            let medium2world = Transform::new(translate, rotate, scale);
+            Some(Rc::new(GridDensityMedium::new(
+                sig_a, sig_s, g,
+                nx, ny, nz, medium2world, density, )))
+        }
+        tp => panic!("Invalid medium type: {}!", tp)
+    }
+}
+
+static SUBSURFACE_PARAMETER_TABLE: &[(&'static str, V3f, V3f)] = &[
+    ("Salt Powder", V3f::new(0.027333, 0.032451, 0.031979), V3f::new(0.28415, 0.3257, 0.34148))
+];

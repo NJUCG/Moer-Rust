@@ -14,8 +14,8 @@ pub struct SpotLight {
 
 impl SpotLight {
     pub fn from_json(json: &Value) -> Self {
-        let position = fetch_v3f(json, "position", V3f::zero()).unwrap();
-        let energy = fetch_v3f(json, "energy", V3f::zero()).unwrap();
+        let position = fetch_v3f(json, "position", V3f::zero());
+        let energy = fetch_v3f(json, "energy", V3f::zero());
         Self {
             position: Point3::from([position.x, position.y, position.z]),
             energy: SpectrumRGB::from_rgb(energy),

@@ -32,7 +32,7 @@ impl MatteMaterial {
             construct_texture::<SpectrumRGB>(json)
         } else if json["albedo"].is_array() {
             let rgb = fetch_v3f(json, "albedo", V3f::zero());
-            let s = SpectrumRGB::from_rgb(rgb.unwrap());
+            let s = SpectrumRGB::from_rgb(rgb);
             Rc::new(ConstantTexture::new(&s))
         } else {
             panic!("Error in albedo format!");

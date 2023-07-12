@@ -108,14 +108,14 @@ impl Shape for Cylinder {
         let trans = self.transform();
         let phi = u * self.phi_max;
         let normal = V3f::new(phi.cos(), phi.sin(), 0.0);
-        intersection.normal = trans.to_world_vec(&normal);
+        intersection.normal = trans.to_world_vec(normal);
 
         let position = Point3::new(
             self.radius * phi.cos(),
             self.radius * phi.sin(),
             v * self.height,
         );
-        intersection.position = trans.to_world_point(&position);
+        intersection.position = trans.to_world_point(position);
         intersection.tex_coord = Vector2::new(u, v);
 
         intersection.shape = Some(Rc::new(self.clone()));

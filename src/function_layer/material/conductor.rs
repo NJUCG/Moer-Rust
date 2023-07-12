@@ -22,8 +22,8 @@ impl ConductorMaterial {
         let albedo = fetch_albedo(json);
         let normal_map = fetch_normal_map(json);
         let dft = V3f::zero();
-        let eta = fetch_v3f(json, "eta", dft).unwrap();
-        let k = fetch_v3f(json, "k", dft).unwrap();
+        let eta = fetch_v3f(json, "eta", dft);
+        let k = fetch_v3f(json, "k", dft);
         let roughness = fetch_roughness(json);
         let ndf = fetch_ndf(json);
         Self {

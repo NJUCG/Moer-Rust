@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use cgmath::Zero;
 use serde_json::Value;
 

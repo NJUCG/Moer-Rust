@@ -17,10 +17,7 @@ pub struct AreaLight {
 impl AreaLight {
     pub fn from_json(json: &Value) -> Self {
         let shape = construct_shape(&json["shape"]);
-        let energy = fetch_v3f(json, "energy", V3f::zero());
-        let energy = SpectrumRGB::from_rgb(match energy {
-            Ok(i) | Err(i) => i,
-        });
+        let energy = SpectrumRGB::from_rgb(fetch_v3f(json, "energy", V3f::zero()));
         Self {
             shape: Some(shape),
             energy,
@@ -71,9 +68,9 @@ impl Light for AreaLight {
         let other = rhs.as_any().downcast_ref::<Self>().unwrap();
         self.energy == other.energy
             && match (&self.shape, &other.shape) {
-                (Some(l), Some(r)) => Rc::ptr_eq(l, r),
-                (None, None) => true,
-                (_, _) => false,
-            }
+            (Some(l), Some(r)) => Rc::ptr_eq(l, r),
+            (None, None) => true,
+            (_, _) => false,
+        }
     }
 }

@@ -18,17 +18,17 @@ pub struct Parallelogram {
 
 impl Parallelogram {
     pub fn from_json(json: &Value) -> Self {
-        let base = fetch_v3f(json, "base", V3f::zero()).unwrap();
-        let edge0 = fetch_v3f(json, "edge0", V3f::zero()).unwrap();
-        let edge1 = fetch_v3f(json, "edge1", V3f::zero()).unwrap();
+        let base = fetch_v3f(json, "base", V3f::zero());
+        let edge0 = fetch_v3f(json, "edge0", V3f::zero());
+        let edge1 = fetch_v3f(json, "edge1", V3f::zero());
         let base = Point3::from([base.x, base.y, base.z]);
 
         let mut shape = ShapeBase::from_json(json);
         let trans = &shape.transform;
-        let base = trans.to_world_point(&base);
+        let base = trans.to_world_point(base);
         let b = base.to_vec();
-        let edge0 = trans.to_world_vec(&edge0);
-        let edge1 = trans.to_world_vec(&edge1);
+        let edge0 = trans.to_world_vec(edge0);
+        let edge1 = trans.to_world_vec(edge1);
 
         shape.bounds3.expand(b);
         shape.bounds3.expand(b + edge0);

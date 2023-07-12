@@ -17,7 +17,7 @@ pub struct Sphere {
 impl Sphere {
     pub fn from_json(json: &Value) -> Self {
         let mut shape = ShapeBase::from_json(json);
-        let center = fetch_v3f(json, "center", V3f::zero()).unwrap();
+        let center = fetch_v3f(json, "center", V3f::zero());
         let radius = json["radius"].as_f64().unwrap() as f32;
         shape.bounds3 = Bounds3::new(
             center - V3f::from([radius; 3]),

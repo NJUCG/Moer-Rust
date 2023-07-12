@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::core_layer::function::lerp;
 use crate::core_layer::transform::Transform;
@@ -11,7 +9,7 @@ use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct GridDensityMedium {
-    sigma_a: SpectrumRGB,
+    // sigma_a: SpectrumRGB,
     sigma_s: SpectrumRGB,
     g: f32,
     nx: usize,
@@ -39,7 +37,7 @@ impl GridDensityMedium {
         density.resize(nx * ny * nz, 0.0);
         let inv_max_density = 1.0 / density.iter().max_by(|&a, &b| a.total_cmp(b)).unwrap();
         Self {
-            sigma_a,
+            // sigma_a,
             sigma_s,
             g,
             nx,
