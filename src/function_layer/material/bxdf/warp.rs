@@ -28,7 +28,7 @@ pub fn square_to_cosine_hemisphere(sample: Vector2<f32>) -> V3f {
     let phi = 2.0 * PI * sample[0];
     let theta = sample[1].sqrt().acos();
     V3f::new(
-        theta.sin() * phi.sqrt(),
+        theta.sin() * phi.sin(),
         theta.cos(),
         theta.sin() * phi.cos(),
     )
