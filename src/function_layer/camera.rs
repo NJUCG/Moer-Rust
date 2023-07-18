@@ -1,10 +1,11 @@
 use crate::core_layer::transform::Transform;
-use crate::function_layer::{fetch_v3f, ray::RayDifferential, Film, Medium, Ray, V3f, RR};
+use crate::function_layer::{fetch_v3f, construct_medium, ray::RayDifferential, Film, Medium, Ray, V3f, RR};
 use cgmath::{EuclideanSpace, InnerSpace, Matrix4, Point3, SquareMatrix, Vector2, Zero};
 use serde_json::Value;
 use std::cell::RefCell;
 use std::f32::consts::PI;
 use std::rc::Rc;
+
 
 type V2f = Vector2<f32>;
 
@@ -40,6 +41,10 @@ impl CameraBase {
         let time_end = json["timeEnd"].as_f64().unwrap_or(0.0) as f32;
         let film = Some(Rc::new(RefCell::new(Film::from_json(&json["film"]))));
         let transform = Transform::identity();
+        let medium = match json.get("medium") {
+            Some(val) => construct_medium(val),
+            None => None
+        };
         Self {
             t_min,
             t_max,
@@ -47,7 +52,7 @@ impl CameraBase {
             time_end,
             film,
             transform,
-            medium: None,
+            medium,
         }
     }
 }

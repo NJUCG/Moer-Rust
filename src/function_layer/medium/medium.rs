@@ -194,5 +194,10 @@ pub fn construct_medium(json: &Value) -> Option<Rc<dyn Medium>> {
 }
 
 static SUBSURFACE_PARAMETER_TABLE: &[(&'static str, V3f, V3f)] = &[
-    ("Salt Powder", V3f::new(0.027333, 0.032451, 0.031979), V3f::new(0.28415, 0.3257, 0.34148))
+    ("Salt Powder", V3f::new(0.027333, 0.032451, 0.031979), V3f::new(0.28415, 0.3257, 0.34148)),
+    ("Orange Powder", V3f::new(0.00015617, 0.00017482, 0.0001762), V3f::new(0.001449, 0.003441, 0.007863)),
+    ("Sugar Powder", V3f::new(0.00022272, 0.00025513, 0.000271), V3f::new(0.012638, 0.031051, 0.050124)),
+    ("Head & Shoulders Shampoo", V3f::new(0.023805, 0.028804, 0.034306), V3f::new(0.084621, 0.15688, 0.20365)),
+    ("Lemon Tea Powder", V3f::new(0.040224, 0.045264, 0.051081), V3f::new(2.4288, 4.5757, 7.2127)),
+    ("Grape Juice", V3f::new(5.382e-05, 0.0, 0.0), V3f::new(0.10404, 0.23958, 0.29325)),
 ];

@@ -77,7 +77,7 @@ impl Integrator for VolPathIntegrator {
                         spectrum += light.borrow().evaluate_emission(&inter, -ray.direction);
                     }
                 }
-                depth += 1;
+
                 if depth >= self.max_depth {
                     break;
                 }
@@ -116,6 +116,7 @@ impl Integrator for VolPathIntegrator {
                 break;
             }
             throughput /= 0.95;
+            depth += 1;
         }
         spectrum
     }

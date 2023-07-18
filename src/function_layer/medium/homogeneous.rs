@@ -66,7 +66,4 @@ impl HomogeneousMedium {
             g,
         }
     }
-    // pub fn from_json(json: &Value) -> Self {
-    //     let sigma_a = fetch_spectrum(json, "sigma_a");
-    // }
 }

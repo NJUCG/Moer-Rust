@@ -33,7 +33,7 @@ pub use integrator::{integrator::construct_integrator, Integrator};
 pub use interaction::{compute_ray_differentials, Interaction, SurfaceInteraction};
 pub use light::{light::construct_light, InfiniteLight, Light};
 pub use material::{material::construct_material, Material, BSDF, NDF};
-pub use medium::medium::{Medium, MediumInteraction, MediumInterface};
+pub use medium::medium::{construct_medium, Medium, MediumInteraction, MediumInterface};
 pub use ray::Ray;
 pub use sampler::{sampler::construct_sampler, Sampler};
 pub use scene::Scene;
