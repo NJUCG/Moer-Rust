@@ -5,6 +5,7 @@ pub mod phong;
 pub mod rough_conductor;
 pub mod rough_dielectric;
 pub mod specular;
+pub mod transparent;
 mod warp;
 
 pub use bsdf::{BSDFType, BSDF};

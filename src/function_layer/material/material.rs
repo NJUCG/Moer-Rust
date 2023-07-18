@@ -11,6 +11,7 @@ use crate::function_layer::{construct_texture, fetch_v3f, SurfaceInteraction, Te
 use cgmath::{InnerSpace, Vector2, Zero};
 use serde_json::Value;
 use std::rc::Rc;
+use crate::function_layer::material::transparent::TransparentMaterial;
 
 pub trait Material {
     fn normal_map(&self) -> Option<Rc<NormalTexture>>;
@@ -92,6 +93,7 @@ pub fn construct_material(json: &Value) -> Rc<dyn Material> {
         "oren-nayar" => Rc::new(OrenNayarMaterial::from_json(json)),
         "dielectric" => Rc::new(DielectricMaterial::from_json(json)),
         "conductor" => Rc::new(ConductorMaterial::from_json(json)),
+        "transparent" => Rc::new(TransparentMaterial::from_json(json)),
         tp => panic!("Invalid type: {}", tp),
     }
 }

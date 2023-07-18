@@ -7,6 +7,7 @@ mod mirror;
 mod ndf;
 mod oren_nayar;
 mod phong;
+mod transparent;
 
 pub use bxdf::BSDF;
 pub use material::Material;

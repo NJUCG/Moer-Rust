@@ -33,8 +33,8 @@ impl MipMap {
 
     pub fn texel(&self, level: u32, x: i64, y: i64) -> V3f {
         let image = &self.pyramid[level as usize];
-        let x = clamp(x, 0, image.dimensions().0 as i64);
-        let y = clamp(y, 0, image.dimensions().1 as i64);
+        let x = clamp(x, 0, image.dimensions().0 as i64 - 1);
+        let y = clamp(y, 0, image.dimensions().1 as i64 - 1);
         let rbg = image.get_pixel(x as u32, y as u32).0;
         V3f::from(rbg)
     }
