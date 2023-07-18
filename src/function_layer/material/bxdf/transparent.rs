@@ -18,10 +18,10 @@ impl BSDF for TransparentBSDF {
         let wo_local = self.to_local(wo);
         let fr = fresnel(wo_local, self.ior);
 
-        if sample.x > sample.y {
+        if sample.x < fr {
             let wi_local = V3f::new(-wo_local.x, wo_local.y, -wo_local.z);
             BSDFSampleResult {
-                weight: SpectrumRGB::same(fr * 2.0),
+                weight: SpectrumRGB::same(1.0),
                 wi: self.to_world(wi_local),
                 pdf: 1.0,
                 tp: BSDFType::Specular,
@@ -29,7 +29,7 @@ impl BSDF for TransparentBSDF {
         } else {
             let wi_local = refract(wo_local, self.ior).normalize();
             BSDFSampleResult {
-                weight: SpectrumRGB::same(2.0 - fr * 2.0),
+                weight: SpectrumRGB::same(1.0),
                 wi: self.to_world(wi_local),
                 pdf: 1.0,
                 tp: BSDFType::Diffuse,
