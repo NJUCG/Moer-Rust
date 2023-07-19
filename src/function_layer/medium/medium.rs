@@ -18,7 +18,6 @@ pub trait Medium {
         sampler: Rc<RefCell<dyn Sampler>>,
         mi: &mut MediumInteraction,
     ) -> SpectrumRGB;
-    fn sigma_s(&self) -> SpectrumRGB;
 }
 
 pub struct MediumInteraction {
