@@ -3,10 +3,7 @@ use super::{
     sphere::Sphere, triangle::TriangleMesh,
 };
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{
-    construct_material, material::matte::MatteMaterial, Bounds3, Light, Material, Medium,
-    MediumInterface, Ray, SurfaceInteraction, V3f, RR,
-};
+use crate::function_layer::{construct_material, material::matte::MatteMaterial, Bounds3, Light, Material, Medium, MediumInterface, Ray, SurfaceInteraction, V3f, RR, construct_medium};
 use cgmath::{InnerSpace, Matrix4, SquareMatrix, Vector2, Zero};
 use serde_json::Value;
 use std::cell::RefCell;
@@ -51,13 +48,12 @@ pub trait Shape: Transformable {
     ) {
         intersection.distance = distance;
         // 介质
-        if let Some(mi) = &self.shape().medium_interface {
-            intersection.medium_interface = if mi.is_medium_transition() {
-                mi.clone()
-            } else {
-                MediumInterface::new(medium.clone(), medium.clone())
-            }
-        }
+        let mi = &self.shape().medium_interface;
+        intersection.medium_interface = if mi.is_medium_transition() {
+            mi.clone()
+        } else {
+            MediumInterface::new(medium.clone(), medium.clone())
+        };
 
         // 计算交点的切线和副切线
         let mut tangent = V3f::new(1.0, 0.0, 0.0);
@@ -81,7 +77,7 @@ pub struct ShapeBase {
     pub geometry_id: u64,
     pub light: Option<RR<dyn Light>>,
     pub material: Option<Rc<dyn Material>>,
-    pub medium_interface: Option<MediumInterface>,
+    pub medium_interface: MediumInterface,
     pub transform: Transform,
     pub bounds3: Bounds3,
 }
@@ -121,11 +117,20 @@ impl ShapeBase {
         } else {
             Transform::identity()
         };
+        let medium_interface = if let Some(itf) = json.get("interface") {
+            let inside = if let Some(inner) = itf.get("inside") {
+                construct_medium(inner)
+            } else { None };
+            let outside = if let Some(outer) = itf.get("outside") {
+                construct_medium(outer)
+            } else { None };
+            MediumInterface::new(inside, outside)
+        } else {MediumInterface::default()};
         Self {
             geometry_id: 0,
             light: None,
             material: Some(material),
-            medium_interface: None,
+            medium_interface,
             transform,
             bounds3: Bounds3::default(),
         }

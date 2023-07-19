@@ -18,6 +18,7 @@ pub trait Medium {
         sampler: Rc<RefCell<dyn Sampler>>,
         mi: &mut MediumInteraction,
     ) -> SpectrumRGB;
+    fn sigma_s(&self) -> SpectrumRGB;
 }
 
 pub struct MediumInteraction {
@@ -133,10 +134,6 @@ pub struct MediumInterface {
 
 impl MediumInterface {
     pub fn new(inside: Option<Rc<dyn Medium>>, outside: Option<Rc<dyn Medium>>) -> Self {
-        let outside = match outside {
-            None => inside.clone(),
-            o => o,
-        };
         Self { inside, outside }
     }
     pub fn is_medium_transition(&self) -> bool {
@@ -147,6 +144,13 @@ impl MediumInterface {
             _ => false,
         }
     }
+
+    pub fn inside(&self) -> Option<Rc<dyn Medium>> {
+        self.inside.clone()
+    }
+    pub fn outside(&self) -> Option<Rc<dyn Medium>> {
+        self.outside.clone()
+    }
 }
 
 pub fn construct_medium(json: &Value) -> Option<Rc<dyn Medium>> {
@@ -155,7 +159,7 @@ pub fn construct_medium(json: &Value) -> Option<Rc<dyn Medium>> {
     let (sig_a, sig_s) = match SUBSURFACE_PARAMETER_TABLE.iter().position(|&x| x.0 == medium) {
         Some(pos) => {
             let r = SUBSURFACE_PARAMETER_TABLE[pos];
-            (r.1, r.2)
+            (r.2, r.1)
         }
         None => (V3f::new(0.0011, 0.0024, 0.014),
                  V3f::new(2.55, 3.21, 3.77))
@@ -193,6 +197,7 @@ pub fn construct_medium(json: &Value) -> Option<Rc<dyn Medium>> {
     }
 }
 
+// (Medium name, sigma_s, sigma_a)
 static SUBSURFACE_PARAMETER_TABLE: &[(&'static str, V3f, V3f)] = &[
     ("Salt Powder", V3f::new(0.027333, 0.032451, 0.031979), V3f::new(0.28415, 0.3257, 0.34148)),
     ("Orange Powder", V3f::new(0.00015617, 0.00017482, 0.0001762), V3f::new(0.001449, 0.003441, 0.007863)),
@@ -200,4 +205,11 @@ static SUBSURFACE_PARAMETER_TABLE: &[(&'static str, V3f, V3f)] = &[
     ("Head & Shoulders Shampoo", V3f::new(0.023805, 0.028804, 0.034306), V3f::new(0.084621, 0.15688, 0.20365)),
     ("Lemon Tea Powder", V3f::new(0.040224, 0.045264, 0.051081), V3f::new(2.4288, 4.5757, 7.2127)),
     ("Grape Juice", V3f::new(5.382e-05, 0.0, 0.0), V3f::new(0.10404, 0.23958, 0.29325)),
+    ("Lowfat Milk", V3f::new(0.89187, 1.5136, 2.532), V3f::new(0.002875, 0.00575, 0.0115)),
+    ("Coke", V3f::new(8.9053e-05, 8.372e-05, 0.0), V3f::new(0.10014, 0.16503, 0.2468)),
+    ("Mint Mocha Coffee", V3f::new(0.31602, 0.38538, 0.48131), V3f::new(3.772, 5.8228, 7.82)),
+    ("Cream", V3f::new(7.38, 5.47, 3.15), V3f::new(0.0002, 0.0028, 0.0163)),
+    ("Reduced Milk", V3f::new(2.4858, 3.1669, 4.5214), V3f::new(0.0025556, 0.0051111, 0.012778)),
+    ("Fog", V3f::new(0.01, 0.01, 0.01), V3f::new(0.001, 0.001, 0.001)),
+    // (, V3f::new(), V3f::new()),
 ];

@@ -5,7 +5,7 @@ use crate::function_layer::{
     compute_ray_differentials, InfiniteLight, Integrator, MediumInteraction, Ray, Sampler, Scene,
     V3f, RR,
 };
-use cgmath::Zero;
+use cgmath::{InnerSpace, Zero};
 use serde_json::Value;
 
 pub struct VolPathIntegrator {
@@ -108,6 +108,10 @@ impl Integrator for VolPathIntegrator {
 
                 ray.origin = inter.position;
                 ray.change_dir(bsdf_sample_result.wi);
+                // change the medium
+                ray.medium = if inter.normal.dot(ray.direction) > 0.0 {
+                    inter.medium_interface.outside()
+                } else {inter.medium_interface.inside()};
                 ray.reset();
                 specular_bounce = bsdf_sample_result.tp == BSDFType::Specular;
             }
