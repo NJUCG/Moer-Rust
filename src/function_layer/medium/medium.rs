@@ -6,6 +6,7 @@ use std::cell::RefCell;
 use std::f32::consts::PI;
 use std::rc::Rc;
 use serde_json::Value;
+use crate::core_layer::constants::INV_PI;
 use crate::core_layer::transform::Transform;
 use super::{grid_density::GridDensityMedium, homogeneous::HomogeneousMedium};
 
@@ -86,7 +87,22 @@ pub trait PhaseFunction {
     fn p(&self, wo: V3f, wi: V3f) -> f32;
     fn sample_p(&self, wo: V3f, wi: &mut V3f, u: Vector2<f32>) -> f32;
 }
+pub struct IsotropicPhaseFunc;
+impl PhaseFunction for IsotropicPhaseFunc {
+    fn p(&self, _wo: V3f, _wi: V3f) -> f32 {
+        INV_PI / 4
+    }
 
+    fn sample_p(&self, _wo: V3f, wi: &mut V3f, u: Vector2<f32>) -> f32 {
+        // uniform sampling on sphere
+        let phi = 2.0 * PI * u.x;
+        let theta = (2.0 * u.y - 1.0).acos();
+        wi.x = theta.sin() * phi.cos();
+        wi.y = theta.cos();
+        wi.z = theta.sin() * phi.sin();
+        INV_PI / 4
+    }
+}
 #[inline]
 fn phase_hg(cos_theta: f32, g: f32) -> f32 {
     let denom = 1.0 + g * g + 2.0 * g * cos_theta;
