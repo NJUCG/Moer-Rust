@@ -1,6 +1,6 @@
 use crate::core_layer::constants::INV_PI;
 use crate::function_layer::V3f;
-use cgmath::{InnerSpace, Vector2};
+use cgmath::Vector2;
 use std::f32::consts::PI;
 
 #[inline]

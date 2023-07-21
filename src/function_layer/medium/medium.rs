@@ -90,7 +90,7 @@ pub trait PhaseFunction {
 pub struct IsotropicPhaseFunc;
 impl PhaseFunction for IsotropicPhaseFunc {
     fn p(&self, _wo: V3f, _wi: V3f) -> f32 {
-        INV_PI / 4
+        INV_PI / 4.0
     }
 
     fn sample_p(&self, _wo: V3f, wi: &mut V3f, u: Vector2<f32>) -> f32 {
@@ -100,7 +100,7 @@ impl PhaseFunction for IsotropicPhaseFunc {
         wi.x = theta.sin() * phi.cos();
         wi.y = theta.cos();
         wi.z = theta.sin() * phi.sin();
-        INV_PI / 4
+        INV_PI / 4.0
     }
 }
 #[inline]
