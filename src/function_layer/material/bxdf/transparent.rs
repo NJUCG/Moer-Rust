@@ -1,8 +1,8 @@
-use cgmath::{InnerSpace, Vector2, Zero};
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{BSDF, V3f};
 use crate::function_layer::material::bxdf::bsdf::{BSDFBase, BSDFSampleResult};
 use crate::function_layer::material::bxdf::BSDFType;
+use crate::function_layer::{V3f, BSDF};
+use cgmath::{InnerSpace, Vector2, Zero};
 
 pub struct TransparentBSDF {
     pub bsdf: BSDFBase,
@@ -44,7 +44,11 @@ impl BSDF for TransparentBSDF {
 
 fn refract(i: V3f, ior: f32) -> V3f {
     let cosi = i.y.abs();
-    let (eta, n0) = if i.y > 0.0 { (1.0 / ior, 1.0) } else { (ior, -1.0) };
+    let (eta, n0) = if i.y > 0.0 {
+        (1.0 / ior, 1.0)
+    } else {
+        (ior, -1.0)
+    };
     let k = 1.0 - eta * eta * (1.0 - cosi * cosi);
     if k < 0.0 {
         V3f::zero()

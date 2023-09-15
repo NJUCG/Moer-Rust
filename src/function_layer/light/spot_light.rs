@@ -40,10 +40,11 @@ impl Light for SpotLight {
     fn sample(&self, shading_point: &dyn Interaction, _sample: Vector2<f32>) -> LightSampleResult {
         let shading_point2sample = self.position - shading_point.p();
         let direction = shading_point2sample.normalize();
-        let energy =
-            if -direction.dot(self.direction) >= self.cos_theta {
-                self.energy
-            } else { SpectrumRGB::same(0.0) };
+        let energy = if -direction.dot(self.direction) >= self.cos_theta {
+            self.energy
+        } else {
+            SpectrumRGB::same(0.0)
+        };
         LightSampleResult {
             energy,
             direction,

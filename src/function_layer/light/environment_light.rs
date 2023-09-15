@@ -1,15 +1,18 @@
-use super::light::{InfiniteLight, Light, LightSampleResult, LightType};
-use crate::core_layer::{colorspace::SpectrumRGB, constants::INV_PI, distribution::Distribution};
-use crate::function_layer::texture::TextureCoord;
-use crate::function_layer::{
-    construct_texture, Interaction, Ray, SurfaceInteraction, Texture, V3f,
-};
-use cgmath::Vector2;
-use cgmath::{InnerSpace, Zero};
-use serde_json::Value;
 use std::any::Any;
 use std::f32::consts::PI;
 use std::rc::Rc;
+
+use cgmath::{InnerSpace, Zero};
+use cgmath::Vector2;
+use serde_json::Value;
+
+use crate::core_layer::{colorspace::SpectrumRGB, constants::INV_PI, distribution::Distribution};
+use crate::function_layer::{
+    construct_texture, Interaction, Ray, SurfaceInteraction, Texture, V3f,
+};
+use crate::function_layer::texture::TextureCoord;
+
+use super::light::{InfiniteLight, Light, LightSampleResult, LightType};
 
 #[derive(Clone)]
 pub struct EnvironmentLight {
@@ -40,7 +43,7 @@ fn direction2uv(direction: V3f) -> Vector2<f32> {
     }
     u *= 0.5 * INV_PI;
     v *= INV_PI;
-    Vector2::new(u, v)
+    Vector2::new(1.0 - u, v)
 }
 
 impl EnvironmentLight {

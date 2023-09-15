@@ -5,8 +5,7 @@ use crate::function_layer::material::bxdf::oren_nayar::OrenNayarBSDF;
 use crate::function_layer::material::material::{fetch_albedo, fetch_normal_map};
 use crate::function_layer::texture::constant_texture::ConstantTexture;
 use crate::function_layer::texture::normal_texture::NormalTexture;
-use crate::function_layer::{Material, SurfaceInteraction, Texture, V3f};
-use cgmath::Zero;
+use crate::function_layer::{Material, SurfaceInteraction, Texture};
 use serde_json::Value;
 use std::rc::Rc;
 
@@ -45,12 +44,7 @@ impl Material for OrenNayarMaterial {
     }
 
     fn compute_bsdf(&self, intersection: &SurfaceInteraction) -> Box<dyn BSDF> {
-        let mut normal = V3f::zero();
-        let mut tangent = V3f::zero();
-        let mut bitangent = V3f::zero();
-
-        self.compute_shading_geometry(intersection, &mut normal, &mut tangent, &mut bitangent);
-
+        let (normal, tangent, bitangent) = self.compute_shading_geometry(intersection);
         let s = self.albedo.evaluate(intersection);
         let bsdf = BSDFBase {
             normal,

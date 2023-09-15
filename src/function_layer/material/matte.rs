@@ -47,8 +47,7 @@ impl Material for MatteMaterial {
     }
 
     fn compute_bsdf(&self, intersection: &SurfaceInteraction) -> Box<dyn BSDF> {
-        let [mut normal, mut tangent, mut bitangent] = [V3f::zero(); 3];
-        self.compute_shading_geometry(intersection, &mut normal, &mut tangent, &mut bitangent);
+        let (normal, tangent, bitangent) = self.compute_shading_geometry(intersection);
         let s = self.albedo.evaluate(intersection);
         Box::new(LambertReflection::new(s, normal, tangent, bitangent))
     }

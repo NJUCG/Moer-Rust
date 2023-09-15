@@ -3,7 +3,10 @@ use super::{
     sphere::Sphere, triangle::TriangleMesh,
 };
 use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{construct_material, material::matte::MatteMaterial, Bounds3, Light, Material, Medium, MediumInterface, Ray, SurfaceInteraction, V3f, RR, construct_medium};
+use crate::function_layer::{
+    construct_material, construct_medium, material::matte::MatteMaterial, Bounds3, Light, Material,
+    Medium, MediumInterface, Ray, SurfaceInteraction, V3f, RR,
+};
 use cgmath::{InnerSpace, Matrix4, SquareMatrix, Vector2, Zero};
 use serde_json::Value;
 use std::cell::RefCell;
@@ -88,9 +91,7 @@ pub fn fetch_v3f(json: &Value, field: &str, dft: V3f) -> V3f {
             eprintln!("{} not found, use default value", field);
             dft
         }
-        Some(val) => V3f::from(
-            serde_json::from_value::<[f32; 3]>(val.clone()).unwrap(),
-        ),
+        Some(val) => V3f::from(serde_json::from_value::<[f32; 3]>(val.clone()).unwrap()),
     }
 }
 
@@ -104,8 +105,10 @@ impl ShapeBase {
             Some(mat) => construct_material(mat),
         };
         let transform = if let Some(transform) = json.get("transform") {
-            let translate_mat = Transform::translation(fetch_v3f(transform, "translate", V3f::zero()));
-            let scale_mat = Transform::scalation(fetch_v3f(transform, "scale", V3f::from([1.0; 3])));
+            let translate_mat =
+                Transform::translation(fetch_v3f(transform, "translate", V3f::zero()));
+            let scale_mat =
+                Transform::scalation(fetch_v3f(transform, "scale", V3f::from([1.0; 3])));
             let rotate_mat = if !transform["rotate"].is_null() {
                 let axis = fetch_v3f(&transform["rotate"], "axis", V3f::from([1.0; 3]));
                 let radian = transform["rotate"]["radian"].as_f64().unwrap_or(0.0);
@@ -120,12 +123,18 @@ impl ShapeBase {
         let medium_interface = if let Some(itf) = json.get("interface") {
             let inside = if let Some(inner) = itf.get("inside") {
                 construct_medium(inner)
-            } else { None };
+            } else {
+                None
+            };
             let outside = if let Some(outer) = itf.get("outside") {
                 construct_medium(outer)
-            } else { None };
+            } else {
+                None
+            };
             MediumInterface::new(inside, outside)
-        } else {MediumInterface::default()};
+        } else {
+            MediumInterface::default()
+        };
         Self {
             geometry_id: 0,
             light: None,

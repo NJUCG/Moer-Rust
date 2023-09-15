@@ -1,11 +1,12 @@
 use crate::core_layer::transform::Transform;
-use crate::function_layer::{fetch_v3f, construct_medium, ray::RayDifferential, Film, Medium, Ray, V3f, RR};
+use crate::function_layer::{
+    construct_medium, fetch_v3f, ray::RayDifferential, Film, Medium, Ray, V3f, RR,
+};
 use cgmath::{EuclideanSpace, InnerSpace, Matrix4, Point3, SquareMatrix, Vector2, Zero};
 use serde_json::Value;
 use std::cell::RefCell;
 use std::f32::consts::PI;
 use std::rc::Rc;
-
 
 type V2f = Vector2<f32>;
 
@@ -43,7 +44,7 @@ impl CameraBase {
         let transform = Transform::identity();
         let medium = match json.get("medium") {
             Some(val) => construct_medium(val),
-            None => None
+            None => None,
         };
         Self {
             t_min,
@@ -148,10 +149,7 @@ impl Camera for PinholeCamera {
         let y = (0.5 - ndc[1]) * film.size[1] as f32 + sample.xy[1];
         let tan_half_fov = (self.c.vertical_fov * 0.5).tan();
         let z = film.size[1] as f32 * -0.5 / tan_half_fov;
-        let direction = self
-            .transform()
-            .to_world_vec(V3f::new(x, y, z))
-            .normalize();
+        let direction = self.transform().to_world_vec(V3f::new(x, y, z)).normalize();
         let direction_x = self
             .transform()
             .to_world_vec(V3f::new(x + 1.0, y, z))

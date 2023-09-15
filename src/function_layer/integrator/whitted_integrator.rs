@@ -9,7 +9,6 @@ pub struct WhittedIntegrator;
 
 impl Integrator for WhittedIntegrator {
     fn li(&self, ray: &mut Ray, scene: &Scene, sampler: RR<dyn Sampler>) -> SpectrumRGB {
-        let mut ray = ray;
         let mut spectrum = SpectrumRGB::same(0.0);
         let mut beta = SpectrumRGB::same(1.0);
         loop {

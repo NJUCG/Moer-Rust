@@ -35,7 +35,8 @@ impl Medium for HomogeneousMedium {
             mi.position = ray.at(t);
             mi.wo = -ray.direction;
             mi.time = ray.t;
-            mi.medium_interface = MediumInterface::new(Some(Rc::new(self.clone())), Some(Rc::new(self.clone())));
+            mi.medium_interface =
+                MediumInterface::new(Some(Rc::new(self.clone())), Some(Rc::new(self.clone())));
             mi.phase = Some(Box::new(HenyeyGreenstein::new(self.g)));
         }
         let tr = (self.sigma_t * -f32::MAX.min(t)).exp();

@@ -1,17 +1,20 @@
-use super::ndf::{beckmann::BeckmannDistribution, ggx::GGXDistribution};
+use std::rc::Rc;
+
+use cgmath::{InnerSpace, Vector2, Zero};
+use serde_json::Value;
+
+use crate::core_layer::colorspace::SpectrumRGB;
+use crate::function_layer::{construct_texture, fetch_v3f, NDF, SurfaceInteraction, Texture, V3f};
+use crate::function_layer::material::conductor::ConductorMaterial;
+use crate::function_layer::material::transparent::TransparentMaterial;
+use crate::function_layer::texture::constant_texture::ConstantTexture;
+use crate::function_layer::texture::normal_texture::NormalTexture;
+
 use super::{
     bxdf::bsdf::BSDF, dielectric::DielectricMaterial, matte::MatteMaterial, mirror::MirrorMaterial,
     oren_nayar::OrenNayarMaterial, phong::PhongMaterial,
 };
-use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::material::conductor::ConductorMaterial;
-use crate::function_layer::texture::constant_texture::ConstantTexture;
-use crate::function_layer::texture::normal_texture::NormalTexture;
-use crate::function_layer::{construct_texture, fetch_v3f, SurfaceInteraction, Texture, V3f, NDF};
-use cgmath::{InnerSpace, Vector2, Zero};
-use serde_json::Value;
-use std::rc::Rc;
-use crate::function_layer::material::transparent::TransparentMaterial;
+use super::ndf::{beckmann::BeckmannDistribution, ggx::GGXDistribution};
 
 pub trait Material {
     fn normal_map(&self) -> Option<Rc<NormalTexture>>;
@@ -20,24 +23,17 @@ pub trait Material {
     fn compute_shading_geometry(
         &self,
         intersection: &SurfaceInteraction,
-        normal: &mut V3f,
-        tangent: &mut V3f,
-        bitangent: &mut V3f,
-    ) {
+    ) -> (V3f, V3f, V3f) {
         match self.normal_map() {
-            None => {
-                *normal = intersection.normal;
-                *tangent = intersection.tangent;
-                *bitangent = intersection.bitangent;
-            }
+            None => (intersection.normal, intersection.tangent, intersection.bitangent),
             Some(normal_map) => {
                 let local_normal = normal_map.evaluate(intersection);
-                *normal = (local_normal.x * intersection.tangent
+                let normal = (local_normal.x * intersection.tangent
                     + local_normal.y * intersection.bitangent
                     + local_normal.z * intersection.normal)
                     .normalize();
-                *tangent = intersection.tangent;
-                *bitangent = tangent.cross(*normal).normalize();
+                let tangent = intersection.tangent;
+                (normal, tangent, tangent.cross(normal).normalize())
             }
         }
     }

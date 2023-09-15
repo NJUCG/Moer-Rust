@@ -111,7 +111,9 @@ impl Integrator for VolPathIntegrator {
                 // change the medium
                 ray.medium = if inter.normal.dot(ray.direction) > 0.0 {
                     inter.medium_interface.outside()
-                } else {inter.medium_interface.inside()};
+                } else {
+                    inter.medium_interface.inside()
+                };
                 ray.reset();
                 specular_bounce = bsdf_sample_result.tp == BSDFType::Specular;
             }

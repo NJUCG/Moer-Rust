@@ -2,8 +2,7 @@ use super::bxdf::{specular::SpecularReflection, BSDF};
 use super::material::fetch_normal_map;
 use crate::function_layer::material::bxdf::bsdf::BSDFBase;
 use crate::function_layer::texture::normal_texture::NormalTexture;
-use crate::function_layer::{Material, SurfaceInteraction, V3f};
-use cgmath::Zero;
+use crate::function_layer::{Material, SurfaceInteraction};
 use serde_json::Value;
 use std::rc::Rc;
 
@@ -24,11 +23,7 @@ impl Material for MirrorMaterial {
     }
 
     fn compute_bsdf(&self, intersection: &SurfaceInteraction) -> Box<dyn BSDF> {
-        let mut normal = V3f::zero();
-        let mut tangent = V3f::zero();
-        let mut bitangent = V3f::zero();
-
-        self.compute_shading_geometry(intersection, &mut normal, &mut tangent, &mut bitangent);
+        let (normal, tangent, bitangent) = self.compute_shading_geometry(intersection);
         Box::new(SpecularReflection {
             bsdf: BSDFBase {
                 normal,

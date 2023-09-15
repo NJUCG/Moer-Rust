@@ -68,9 +68,9 @@ impl Light for AreaLight {
         let other = rhs.as_any().downcast_ref::<Self>().unwrap();
         self.energy == other.energy
             && match (&self.shape, &other.shape) {
-            (Some(l), Some(r)) => Rc::ptr_eq(l, r),
-            (None, None) => true,
-            (_, _) => false,
-        }
+                (Some(l), Some(r)) => Rc::ptr_eq(l, r),
+                (None, None) => true,
+                (_, _) => false,
+            }
     }
 }

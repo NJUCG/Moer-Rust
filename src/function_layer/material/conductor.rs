@@ -1,12 +1,15 @@
-use super::bxdf::bsdf::BSDFBase;
-use super::material::{fetch_albedo, fetch_ndf, fetch_normal_map, fetch_roughness};
-use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::material::bxdf::rough_conductor::RoughConductorBSDF;
-use crate::function_layer::texture::normal_texture::NormalTexture;
-use crate::function_layer::{fetch_v3f, Material, SurfaceInteraction, Texture, V3f, BSDF, NDF};
+use std::rc::Rc;
+
 use cgmath::{Vector2, Zero};
 use serde_json::Value;
-use std::rc::Rc;
+
+use crate::core_layer::colorspace::SpectrumRGB;
+use crate::function_layer::{BSDF, fetch_v3f, Material, NDF, SurfaceInteraction, Texture, V3f};
+use crate::function_layer::material::bxdf::rough_conductor::RoughConductorBSDF;
+use crate::function_layer::texture::normal_texture::NormalTexture;
+
+use super::bxdf::bsdf::BSDFBase;
+use super::material::{fetch_albedo, fetch_ndf, fetch_normal_map, fetch_roughness};
 
 pub struct ConductorMaterial {
     normal_map: Option<Rc<NormalTexture>>,
@@ -43,11 +46,7 @@ impl Material for ConductorMaterial {
     }
 
     fn compute_bsdf(&self, intersection: &SurfaceInteraction) -> Box<dyn BSDF> {
-        let mut normal = V3f::zero();
-        let mut tangent = V3f::zero();
-        let mut bitangent = V3f::zero();
-
-        self.compute_shading_geometry(intersection, &mut normal, &mut tangent, &mut bitangent);
+        let (normal, tangent, bitangent) = self.compute_shading_geometry(intersection);
 
         let s = self.albedo.evaluate(intersection);
         let bsdf = BSDFBase {

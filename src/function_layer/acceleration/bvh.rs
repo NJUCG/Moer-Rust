@@ -1,5 +1,6 @@
+use crate::function_layer::{Acceleration, Bounds3, bounds3::Axis, Ray, RR, Shape};
+
 use super::acceleration::{AccelerationBase, AccelerationType};
-use crate::function_layer::{bounds3::Axis, Acceleration, Bounds3, Ray, Shape, RR};
 
 pub enum BVHNode {
     Node {
@@ -71,7 +72,9 @@ impl Acceleration for BVHAccel {
         }
         recursively_build(&mut self.acc.shapes, 0, &mut self.nodes);
         // TODO: 单纯的SAH构建的树可能不平衡
-        self.acc.bounds = self.nodes[0].get_bounds().clone();
+        if let Some(n) = self.nodes.get(0) {
+            self.acc.bounds = n.get_bounds().clone();
+        }
     }
 
     fn atp(&self) -> AccelerationType {
@@ -90,6 +93,7 @@ fn get_bounds_arr(shapes: &[RR<dyn Shape>]) -> Bounds3 {
 fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize, nodes: &mut Vec<BVHNode>) -> usize {
     let bounds = get_bounds_arr(shapes);
     let idx = nodes.len();
+    if shapes.len() == 0 { return nodes.len(); }
     if shapes.len() == 1 {
         nodes.push(BVHNode::Leaf {
             bounds,

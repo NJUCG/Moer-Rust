@@ -1,8 +1,8 @@
 use super::bxdf::{bsdf::BSDFBase, rough_dielectric::RoughDielectricBSDF};
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::texture::normal_texture::NormalTexture;
-use crate::function_layer::{Material, SurfaceInteraction, Texture, V3f, BSDF, NDF};
-use cgmath::{Vector2, Zero};
+use crate::function_layer::{Material, SurfaceInteraction, Texture, BSDF, NDF};
+use cgmath::{Vector2};
 use serde_json::Value;
 use std::rc::Rc;
 
@@ -39,12 +39,7 @@ impl Material for DielectricMaterial {
     }
 
     fn compute_bsdf(&self, intersection: &SurfaceInteraction) -> Box<dyn BSDF> {
-        let mut normal = V3f::zero();
-        let mut tangent = V3f::zero();
-        let mut bitangent = V3f::zero();
-
-        self.compute_shading_geometry(intersection, &mut normal, &mut tangent, &mut bitangent);
-
+        let (normal, tangent, bitangent) = self.compute_shading_geometry(intersection);
         let s = self.albedo.evaluate(intersection);
         let bsdf = BSDFBase {
             normal,
