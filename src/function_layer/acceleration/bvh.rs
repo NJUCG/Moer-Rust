@@ -1,4 +1,4 @@
-use crate::function_layer::{Acceleration, Bounds3, bounds3::Axis, Ray, RR, Shape};
+use crate::function_layer::{bounds3::Axis, Acceleration, Bounds3, Ray, Shape, RR};
 
 use super::acceleration::{AccelerationBase, AccelerationType};
 
@@ -93,7 +93,9 @@ fn get_bounds_arr(shapes: &[RR<dyn Shape>]) -> Bounds3 {
 fn recursively_build(shapes: &mut [RR<dyn Shape>], b: usize, nodes: &mut Vec<BVHNode>) -> usize {
     let bounds = get_bounds_arr(shapes);
     let idx = nodes.len();
-    if shapes.len() == 0 { return nodes.len(); }
+    if shapes.len() == 0 {
+        return nodes.len();
+    }
     if shapes.len() == 1 {
         nodes.push(BVHNode::Leaf {
             bounds,

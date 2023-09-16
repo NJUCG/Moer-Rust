@@ -2,8 +2,7 @@ use std::any::Any;
 use std::f32::consts::PI;
 use std::rc::Rc;
 
-use cgmath::{InnerSpace, Zero};
-use cgmath::Vector2;
+use cgmath::{InnerSpace, Vector2, Zero};
 use serde_json::Value;
 
 use crate::core_layer::{colorspace::SpectrumRGB, constants::INV_PI, distribution::Distribution};

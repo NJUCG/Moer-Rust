@@ -4,9 +4,9 @@ use cgmath::{Vector2, Zero};
 use serde_json::Value;
 
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{BSDF, fetch_v3f, Material, NDF, SurfaceInteraction, Texture, V3f};
 use crate::function_layer::material::bxdf::rough_conductor::RoughConductorBSDF;
 use crate::function_layer::texture::normal_texture::NormalTexture;
+use crate::function_layer::{fetch_v3f, Material, SurfaceInteraction, Texture, V3f, BSDF, NDF};
 
 use super::bxdf::bsdf::BSDFBase;
 use super::material::{fetch_albedo, fetch_ndf, fetch_normal_map, fetch_roughness};

@@ -41,7 +41,6 @@ impl Integrator for DirectIntegratorSampleBSDF {
     fn li(&self, ray: &mut Ray, scene: &Scene, sampler: RR<dyn Sampler>) -> SpectrumRGB {
         let mut spectrum = SpectrumRGB::same(0.0);
         let intersection_opt = scene.ray_intersect(ray);
-        println!("{:?}", ray.direction);
         if intersection_opt.is_none() {
             for inf_light in &scene.infinite_lights {
                 spectrum += inf_light.evaluate_emission_ray(ray);

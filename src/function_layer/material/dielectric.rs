@@ -2,7 +2,7 @@ use super::bxdf::{bsdf::BSDFBase, rough_dielectric::RoughDielectricBSDF};
 use crate::core_layer::colorspace::SpectrumRGB;
 use crate::function_layer::texture::normal_texture::NormalTexture;
 use crate::function_layer::{Material, SurfaceInteraction, Texture, BSDF, NDF};
-use cgmath::{Vector2};
+use cgmath::Vector2;
 use serde_json::Value;
 use std::rc::Rc;
 
