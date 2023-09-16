@@ -75,6 +75,7 @@ impl Ray {
     }
 
     pub fn change_dir(&mut self, dir: V3f) {
+        let dir = dir.normalize();
         let inv_dir = V3f::new(1.0 / dir.x, 1.0 / dir.y, 1.0 / dir.z);
         self.neg_dir = [inv_dir.x < 0.0, inv_dir.y < 0.0, inv_dir.z < 0.0];
         self.inv_dir = inv_dir;

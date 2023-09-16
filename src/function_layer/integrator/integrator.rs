@@ -10,6 +10,7 @@ use crate::function_layer::light::light::{LightSampleResult, LightType};
 use crate::function_layer::{Interaction, Light, Ray, Sampler, Scene, V3f, RR};
 use cgmath::InnerSpace;
 use serde_json::Value;
+use crate::function_layer::integrator::black_hole_integrator::BlackHoleIntegrator;
 
 pub trait Integrator {
     fn li(&self, ray: &mut Ray, scene: &Scene, sampler: RR<dyn Sampler>) -> SpectrumRGB;
@@ -78,6 +79,7 @@ pub fn construct_integrator(json: &Value) -> Box<dyn Integrator> {
         "whitted" => Box::new(WhittedIntegrator {}),
         "path" => Box::new(PathIntegrator::from_json(json)),
         "volpath" => Box::new(VolPathIntegrator::from_json(json)),
+        "blackhole" => Box::new(BlackHoleIntegrator::from_json(json)),
         tp => panic!("Invalid integrator type: {}!", tp),
     }
 }
