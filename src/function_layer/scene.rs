@@ -1,18 +1,23 @@
+use std::rc::Rc;
+
+use cgmath::{EuclideanSpace, Point3};
+use serde_json::Value;
+
 use crate::core_layer::distribution::Distribution;
+use crate::function_layer::{
+    Acceleration, construct_light, construct_shape, create_acceleration, Light, Ray, RR,
+    set_acc_type, SurfaceInteraction,
+};
 use crate::function_layer::light::{
     area_light::AreaLight, environment_light::EnvironmentLight, light::LightType,
 };
-use crate::function_layer::{
-    construct_light, construct_shape, create_acceleration, set_acc_type, Acceleration, Light, Ray,
-    SurfaceInteraction, RR,
-};
-use serde_json::Value;
-use std::rc::Rc;
+use crate::function_layer::material::MaterialType;
 
 pub struct Scene {
     pub infinite_lights: Vec<Rc<EnvironmentLight>>,
     acceleration: Box<dyn Acceleration>,
     light_distribution: Distribution<RR<dyn Light>>,
+    black_hole_centers: Vec<Point3<f32>>,
 }
 
 impl Scene {
@@ -22,8 +27,14 @@ impl Scene {
         set_acc_type(acc);
         let mut acceleration = create_acceleration();
         let shapes = json["shapes"].as_array().unwrap();
+        let mut black_hole_centers = vec![];
         for shape in shapes {
             let shape = construct_shape(shape);
+            if let Some(mat) = shape.borrow().material().as_ref() {
+                if mat.mat_type() == MaterialType::BlackHole {
+                    black_hole_centers.push(Point3::from_vec(shape.borrow().get_bounds().centroid()));
+                }
+            }
             shape.borrow_mut().set_geometry_id(geom_id);
             geom_id += 1;
             acceleration.attach_shape(shape);
@@ -68,6 +79,7 @@ impl Scene {
             infinite_lights,
             acceleration,
             light_distribution,
+            black_hole_centers,
         }
     }
 
@@ -77,5 +89,9 @@ impl Scene {
 
     pub fn sample_light(&self, sample: f32, pdf: &mut f32) -> Option<RR<dyn Light>> {
         self.light_distribution.sample(sample, pdf)
+    }
+
+    pub fn black_hole_centers(&self) -> &Vec<Point3<f32>> {
+        &self.black_hole_centers
     }
 }

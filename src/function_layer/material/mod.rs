@@ -1,3 +1,4 @@
+mod black_hole;
 pub mod bxdf;
 mod conductor;
 mod dielectric;
@@ -8,8 +9,8 @@ mod ndf;
 mod oren_nayar;
 mod phong;
 mod transparent;
-mod black_hole;
 
 pub use bxdf::BSDF;
 pub use material::Material;
+pub use material::MaterialType;
 pub use ndf::NDF;

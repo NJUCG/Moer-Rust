@@ -4,28 +4,30 @@ use cgmath::{InnerSpace, Vector2, Zero};
 use serde_json::Value;
 
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{construct_texture, fetch_v3f, NDF, SurfaceInteraction, Texture, V3f};
+use crate::function_layer::material::black_hole::BlackHole;
 use crate::function_layer::material::conductor::ConductorMaterial;
 use crate::function_layer::material::transparent::TransparentMaterial;
 use crate::function_layer::texture::constant_texture::ConstantTexture;
 use crate::function_layer::texture::normal_texture::NormalTexture;
+use crate::function_layer::{construct_texture, fetch_v3f, SurfaceInteraction, Texture, V3f, NDF};
 
+use super::ndf::{beckmann::BeckmannDistribution, ggx::GGXDistribution};
 use super::{
     bxdf::bsdf::BSDF, dielectric::DielectricMaterial, matte::MatteMaterial, mirror::MirrorMaterial,
     oren_nayar::OrenNayarMaterial, phong::PhongMaterial,
 };
-use super::ndf::{beckmann::BeckmannDistribution, ggx::GGXDistribution};
 
 pub trait Material {
     fn normal_map(&self) -> Option<Rc<NormalTexture>>;
     // self.normal_map.clone()
     fn compute_bsdf(&self, intersection: &SurfaceInteraction) -> Box<dyn BSDF>;
-    fn compute_shading_geometry(
-        &self,
-        intersection: &SurfaceInteraction,
-    ) -> (V3f, V3f, V3f) {
+    fn compute_shading_geometry(&self, intersection: &SurfaceInteraction) -> (V3f, V3f, V3f) {
         match self.normal_map() {
-            None => (intersection.normal, intersection.tangent, intersection.bitangent),
+            None => (
+                intersection.normal,
+                intersection.tangent,
+                intersection.bitangent,
+            ),
             Some(normal_map) => {
                 let local_normal = normal_map.evaluate(intersection);
                 let normal = (local_normal.x * intersection.tangent
@@ -37,8 +39,15 @@ pub trait Material {
             }
         }
     }
+    fn mat_type(&self) -> MaterialType {
+        MaterialType::Others
+    }
 }
-
+#[derive(Eq, PartialEq)]
+pub enum MaterialType {
+    BlackHole,
+    Others,
+}
 pub fn fetch_normal_map(json: &Value) -> Option<Rc<NormalTexture>> {
     if json["normalmap"].is_null() {
         None
@@ -90,6 +99,7 @@ pub fn construct_material(json: &Value) -> Rc<dyn Material> {
         "dielectric" => Rc::new(DielectricMaterial::from_json(json)),
         "conductor" => Rc::new(ConductorMaterial::from_json(json)),
         "transparent" => Rc::new(TransparentMaterial::from_json(json)),
+        "black-hole" => Rc::new(BlackHole {}),
         tp => panic!("Invalid type: {}", tp),
     }
 }
