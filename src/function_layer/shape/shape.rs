@@ -1,16 +1,17 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
+use cgmath::{InnerSpace, Matrix4, SquareMatrix, Vector2, Zero};
+use serde_json::Value;
+
+use crate::core_layer::transform::{Transform, Transformable};
+use crate::function_layer::{Bounds3, construct_material, construct_medium, Light, Material, material::matte::MatteMaterial, Medium, MediumInterface, Ray, RR, SurfaceInteraction, V3f};
+use crate::function_layer::texture::image_texture::ImageTexture;
+
 use super::{
     cone::Cone, cube::Cube, cylinder::Cylinder, disk::Disk, parallelogram::Parallelogram,
     sphere::Sphere, triangle::TriangleMesh,
 };
-use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{
-    construct_material, construct_medium, material::matte::MatteMaterial, Bounds3, Light, Material,
-    Medium, MediumInterface, Ray, SurfaceInteraction, V3f, RR,
-};
-use cgmath::{InnerSpace, Matrix4, SquareMatrix, Vector2, Zero};
-use serde_json::Value;
-use std::cell::RefCell;
-use std::rc::Rc;
 
 pub trait Shape: Transformable {
     fn shape(&self) -> &ShapeBase;
@@ -30,6 +31,7 @@ pub trait Shape: Transformable {
     fn geometry_id(&self) -> u64 {
         self.shape().geometry_id
     }
+    fn texture(&self) -> Option<Rc<ImageTexture>> { self.shape().texture.clone() }
     fn set_geometry_id(&mut self, id: u64) {
         self.shape_mut().geometry_id = id;
     }
@@ -83,6 +85,7 @@ pub struct ShapeBase {
     pub medium_interface: MediumInterface,
     pub transform: Transform,
     pub bounds3: Bounds3,
+    pub texture: Option<Rc<ImageTexture>>,
 }
 
 pub fn fetch_v3f(json: &Value, field: &str, dft: V3f) -> V3f {
@@ -135,6 +138,12 @@ impl ShapeBase {
         } else {
             MediumInterface::default()
         };
+        let texture = if let Some(js) = &json.get("texture") {
+            Some(Rc::new(ImageTexture::from_json(js)))
+        } else {
+            None
+        };
+
         Self {
             geometry_id: 0,
             light: None,
@@ -142,6 +151,7 @@ impl ShapeBase {
             medium_interface,
             transform,
             bounds3: Bounds3::default(),
+            texture,
         }
     }
 

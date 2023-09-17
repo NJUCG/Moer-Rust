@@ -15,6 +15,7 @@ impl<T: Clone + PartialEq> Distribution<T> {
             let w = weight_function(data[i].clone());
             cdf.push(w + cdf.last().unwrap());
         }
+        *cdf.last_mut().unwrap() = 1.0;
         let inv_total = 1.0 / cdf.last().unwrap();
         for e in cdf.iter_mut() {
             *e *= inv_total;

@@ -1,10 +1,11 @@
-use cgmath::InnerSpace;
+use cgmath::{InnerSpace, Vector2, Zero};
 use serde_json::Value;
 
 use crate::core_layer::colorspace::SpectrumRGB;
-use crate::function_layer::{compute_ray_differentials, InfiniteLight, Integrator, Ray, RR, Sampler, Scene, V3f};
+use crate::function_layer::{compute_ray_differentials, InfiniteLight, Integrator, Ray, RR, Sampler, Scene, Texture, V3f};
 use crate::function_layer::integrator::integrator::sample_interaction_illumination;
 use crate::function_layer::material::MaterialType;
+use crate::function_layer::texture::TextureCoord;
 
 pub struct BlackHoleIntegrator {
     max_iter: u32,
@@ -64,6 +65,14 @@ impl Integrator for BlackHoleIntegrator {
         let shape = inter.shape.as_ref().unwrap();
         if let Some(light) = shape.get_light() {
             spectrum += light.borrow().evaluate_emission(&inter, -ray.direction);
+        }
+        if let Some(tex) = shape.texture() {
+            let tex_coord = TextureCoord {
+                coord: inter.tex_coord,
+                duv_dx: Vector2::zero(),
+                duv_dy: Vector2::zero(),
+            };
+            spectrum += tex.evaluate_coord(&tex_coord);
         }
         spectrum = sample_interaction_illumination(
             scene,

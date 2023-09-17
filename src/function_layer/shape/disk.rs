@@ -68,7 +68,7 @@ impl Shape for Disk {
 
         let p = local_ray.at(t0);
         let r = p.to_vec().magnitude();
-        if r < self.inner_radius || r > self.radius {
+        if r < self.inner_radius || r >= self.radius {
             return None;
         }
 
