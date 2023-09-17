@@ -21,25 +21,14 @@ pub struct EnvironmentLight {
 
 fn direction2uv(direction: V3f) -> Vector2<f32> {
     let (mut u, mut v): (f32, f32);
-    let cos_theta = direction[1];
-    v = cos_theta.acos();
-    if direction[2].abs() < 1e-8 {
-        u = if direction[0] > 0.0 {
-            PI * 0.5
-        } else {
-            PI * 1.5
-        }
-    } else {
-        let tan_phi = direction[0] / (direction[2] + 1e-8);
-        u = tan_phi.atan();
-        if direction[0] < 0.0 && direction[2] < 0.0 {
-            u += PI;
-        } else if direction[0] < 0.0 && direction[2] > 0.0 {
-            u += 2.0 * PI;
-        } else if direction[0] > 0.0 && direction[2] < 0.0 {
-            u += PI; // TODO ????
-        }
-    }
+
+    v = direction.y.acos();
+    u = direction.x.atan2(direction.z) + 2.0 * PI;
+    u %= 2.0 * PI;
+    // let v_phi = direction.x.atan2(direction.z);
+    // let v_theta = direction.y.atan2(direction.xz().magnitude());
+    // u = (v_phi + 4.5) % (2.0 * PI);
+    // v = v_theta + 0.5 * PI;
     u *= 0.5 * INV_PI;
     v *= INV_PI;
     Vector2::new(1.0 - u, v)

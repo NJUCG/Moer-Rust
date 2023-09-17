@@ -1,10 +1,13 @@
-use super::shape::ShapeBase;
-use crate::core_layer::transform::{Transform, Transformable};
-use crate::function_layer::{Bounds3, Medium, Ray, Shape, SurfaceInteraction, V3f};
-use cgmath::{EuclideanSpace, InnerSpace, Point3, Vector2};
-use serde_json::Value;
 use std::f64::consts::PI;
 use std::rc::Rc;
+
+use cgmath::{EuclideanSpace, InnerSpace, Point3, Vector2};
+use serde_json::Value;
+
+use crate::core_layer::transform::{Transform, Transformable};
+use crate::function_layer::{Bounds3, Medium, Ray, Shape, SurfaceInteraction, V3f};
+
+use super::shape::ShapeBase;
 
 #[derive(Clone)]
 pub struct Disk {
@@ -12,6 +15,7 @@ pub struct Disk {
     radius: f32,
     inner_radius: f32,
     phi_max: f32,
+    pdf: f32,
 }
 
 impl Disk {
@@ -25,12 +29,13 @@ impl Disk {
             V3f::new(radius, radius, 0.0),
         );
         shape.bounds3 = shape.transform.to_world_bounds3(bounds3);
-
+        let area = phi_max * 0.5 * (radius * radius - inner_radius * inner_radius);
         Self {
             shape,
             radius,
             inner_radius,
             phi_max,
+            pdf: 1.0 / area
         }
     }
 }
@@ -98,6 +103,7 @@ impl Shape for Disk {
         let normal = V3f::new(0.0, 0.0, 1.0);
         intersection.normal = trans.to_world_vec(normal);
 
+        // TODO: uniformly sampling
         let r = v * (self.radius - self.inner_radius) + self.inner_radius;
         let phi = u * self.phi_max;
         let position = Point3::new(r * phi.cos(), r * phi.sin(), 0.0);
@@ -109,7 +115,9 @@ impl Shape for Disk {
         self._fill_intersection(distance, medium, intersection);
     }
 
-    fn uniform_sample_on_surface(&self, _sample: Vector2<f32>) -> (SurfaceInteraction, f32) {
-        todo!()
+    fn uniform_sample_on_surface(&self, sample: Vector2<f32>) -> (SurfaceInteraction, f32) {
+        let mut its = SurfaceInteraction::default();
+        self.fill_intersection(0.0, 0, sample.x, sample.y, None, &mut its);
+        (its, self.pdf)
     }
 }

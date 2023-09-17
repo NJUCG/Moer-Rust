@@ -8,21 +8,25 @@ use crate::function_layer::material::MaterialType;
 
 pub struct BlackHoleIntegrator {
     max_iter: u32,
+    step: f32,
 }
 
 impl BlackHoleIntegrator {
     pub fn from_json(json: &Value) -> Self {
         let max_iter = json["maxIter"].as_u64().unwrap() as u32;
-        Self { max_iter }
+        let step = json["step"].as_f64().unwrap() as f32;
+
+        Self { max_iter, step }
     }
 }
 
 impl Integrator for BlackHoleIntegrator {
     fn li(&self, ray: &mut Ray, scene: &Scene, sampler: RR<dyn Sampler>) -> SpectrumRGB {
-        // println!("{:?}", ray.direction);
+        // println!("{:?}", ray.direction.normalize());
         let mut spectrum = SpectrumRGB::same(0.0);
         let t_max = ray.t_max;
         let bh_centers = scene.black_hole_centers();
+        ray.t_max = 0.05;
 
         for _ in 0..self.max_iter {
             let intersection_opt = scene.ray_intersect(ray);
@@ -32,22 +36,22 @@ impl Integrator for BlackHoleIntegrator {
                     if mat.mat_type() == MaterialType::BlackHole {
                         return spectrum;
                     }
-                } else {
-                    break;
                 }
+                // hit light source or other shapes
+                break;
             }
-            let acc = bh_centers.iter().map(|c| {
+            let accel = bh_centers.iter().map(|c| {
                 let a = ray.origin - c;
-                -a.normalize() / a.magnitude2().powi(2)
-            }).sum::<V3f>() * 0.3;
-            if acc.magnitude2() < 1e-8 { break; }
-            let dir = ray.direction + 0.05 * acc;
+                let h_sqr = a.cross(ray.direction).magnitude2();
+                -1.5 * a * h_sqr / a.magnitude().powi(5)
+            }).sum::<V3f>();
+            // if accel.magnitude2() < 1e-8 { break; }
+            let dir = ray.direction + self.step * accel;
             ray.change_dir(dir);
-            ray.origin += 0.05 * &ray.direction;
-            ray.t_max = 0.1;
+            ray.origin += self.step * &ray.direction;
+            ray.t_max = 1.5 * self.step;
         }
         ray.t_max = t_max;
-        // println!("{:?}, {:?}", ray.direction, ray.origin);
         let intersection_opt = scene.ray_intersect(ray);
         if intersection_opt.is_none() {
             for inf_light in &scene.infinite_lights {
